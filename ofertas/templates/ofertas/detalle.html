@@ -14,6 +14,7 @@
     <p>Guardada el: {{ oferta.fecha_guardada }}</p>
 
     <a href="{{ oferta.url_original }}" target="_blank">Ver oferta original</a>
+    <a href="{% url 'analizar_cv' oferta.pk %}">Analizar mi CV para esta oferta</a>
 
 </body>
 </html>
