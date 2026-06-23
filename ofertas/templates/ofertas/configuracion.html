@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuración - JobTracker</title>
+</head>
+<body>
+    <h1>JobTracker</h1>
+    <h2>Configuración</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <label>Qué buscas:</label>
+        <input type="text" name="keywords" placeholder="devops, cloud, python..." value="{{ request.session.keywords|default:'devops' }}">
+        
+        <br><br>
+        
+        <label>Ubicación:</label>
+        <input type="text" name="ubicacion" placeholder="Valencia" value="{{ request.session.ubicacion|default:'Valencia' }}">
+        
+        <br><br>
+        
+        <label>Sube tu CV en PDF:</label>
+        <input type="file" name="cv_pdf" accept=".pdf">
+        
+        <br><br>
+        
+        <button type="submit">Buscar ofertas</button>
+    </form>
+
+</body>
+</html>

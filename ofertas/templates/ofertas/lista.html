@@ -2,21 +2,33 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Ofertas de empleo</title>
+    <title>Ofertas - JobTracker</title>
 </head>
 <body>
-    <h1>Ofertas guardadas</h1>
+    <nav>
+        <a href="{% url 'configuracion' %}">⚙️ Configuración</a> |
+        <a href="{% url 'lista_ofertas' %}">🆕 Nuevas</a> |
+        <a href="{% url 'ofertas_guardadas' %}">⭐ Guardadas</a> |
+        <a href="{% url 'ofertas_descartadas' %}">🗑️ Descartadas</a>
+    </nav>
+
+    <hr>
+
+    <h1>Ofertas</h1>
 
     {% for oferta in ofertas %}
         <div>
             <h2><a href="{% url 'detalle_oferta' oferta.pk %}">{{ oferta.titulo }}</a></h2>
-            <p>{{ oferta.empresa }}</p>
-            <p>{{ oferta.ubicacion }}</p>
-            <a href="{{ oferta.url_original }}" target="_blank">Ver oferta</a>
+            <p>{{ oferta.empresa }} — {{ oferta.ubicacion }}</p>
+            <p>{{ oferta.fuente }} | {{ oferta.fecha_publicacion }}</p>
+
+            <a href="{% url 'cambiar_estado' oferta.pk 'guardada' %}">⭐ Guardar</a>
+            <a href="{% url 'cambiar_estado' oferta.pk 'descartada' %}">🗑️ Descartar</a>
+            <a href="{% url 'cambiar_estado' oferta.pk 'nueva' %}">↩️ Nueva</a>
         </div>
         <hr>
     {% empty %}
-        <p>No hay ofertas guardadas todavía.</p>
+        <p>No hay ofertas aquí.</p>
     {% endfor %}
 
 </body>
