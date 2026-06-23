@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Análisis CV - {{ oferta.titulo }}</title>
+</head>
+<body>
+    <a href="{% url 'detalle_oferta' oferta.pk %}">← Volver</a>
+
+    <h1>Análisis para: {{ oferta.titulo }}</h1>
+    <h2>{{ oferta.empresa }}</h2>
+
+    {% if analisis %}
+        <h3>Recomendaciones de la IA:</h3>
+        <pre>{{ analisis }}</pre>
+    {% else %}
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit">Analizar mi CV para esta oferta</button>
+        </form>
+    {% endif %}
+
+</body>
+</html>

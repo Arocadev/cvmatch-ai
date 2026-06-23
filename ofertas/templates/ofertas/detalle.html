@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ oferta.titulo }}</title>
+</head>
+<body>
+    <a href="{% url 'lista_ofertas' %}">← Volver</a>
+
+    <h1>{{ oferta.titulo }}</h1>
+    <h2>{{ oferta.empresa }}</h2>
+    <p>{{ oferta.ubicacion }}</p>
+    <p>{{ oferta.descripcion }}</p>
+    <p>Guardada el: {{ oferta.fecha_guardada }}</p>
+
+    <a href="{{ oferta.url_original }}" target="_blank">Ver oferta original</a>
+
+</body>
+</html>

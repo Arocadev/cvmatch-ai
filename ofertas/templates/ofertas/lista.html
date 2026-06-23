@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Ofertas de empleo</title>
+</head>
+<body>
+    <h1>Ofertas guardadas</h1>
+
+    {% for oferta in ofertas %}
+        <div>
+            <h2><a href="{% url 'detalle_oferta' oferta.pk %}">{{ oferta.titulo }}</a></h2>
+            <p>{{ oferta.empresa }}</p>
+            <p>{{ oferta.ubicacion }}</p>
+            <a href="{{ oferta.url_original }}" target="_blank">Ver oferta</a>
+        </div>
+        <hr>
+    {% empty %}
+        <p>No hay ofertas guardadas todavía.</p>
+    {% endfor %}
+
+</body>
+</html>
