@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.core.paginator import Paginator
 from .models import Oferta
 from .api import buscar_ofertas
 from pypdf import PdfReader
@@ -32,15 +33,24 @@ def lista_ofertas(request):
         
         request.session['buscar_ahora'] = False
     
-    ofertas = Oferta.objects.filter(estado='nueva').order_by('-fecha_guardada')
+    todas = Oferta.objects.filter(estado='nueva').order_by('-fecha_guardada')
+    paginator = Paginator(todas, 10)
+    pagina = request.GET.get('page', 1)
+    ofertas = paginator.get_page(pagina)
     return render(request, 'ofertas/lista.html', {'ofertas': ofertas})
 
 def ofertas_guardadas(request):
-    ofertas = Oferta.objects.filter(estado='guardada').order_by('-fecha_guardada')
+    todas = Oferta.objects.filter(estado='guardada').order_by('-fecha_guardada')
+    paginator = Paginator(todas, 10)
+    pagina = request.GET.get('page', 1)
+    ofertas = paginator.get_page(pagina)
     return render(request, 'ofertas/lista.html', {'ofertas': ofertas})
 
 def ofertas_descartadas(request):
-    ofertas = Oferta.objects.filter(estado='descartada').order_by('-fecha_guardada')
+    todas = Oferta.objects.filter(estado='descartada').order_by('-fecha_guardada')
+    paginator = Paginator(todas, 10)
+    pagina = request.GET.get('page', 1)
+    ofertas = paginator.get_page(pagina)
     return render(request, 'ofertas/lista.html', {'ofertas': ofertas})
 
 def cambiar_estado(request, pk, estado):
