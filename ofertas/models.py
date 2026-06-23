@@ -3,6 +3,7 @@ from django.db import models
 class Oferta(models.Model):
     ESTADOS = [
         ('nueva', 'Nueva'),
+        ('vista', 'Vista'),
         ('guardada', 'Guardada'),
         ('descartada', 'Descartada'),
     ]

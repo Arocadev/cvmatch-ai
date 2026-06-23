@@ -1,4 +1,5 @@
 import os
+import fitz
 from groq import Groq
 from dotenv import load_dotenv
 
@@ -6,20 +7,38 @@ load_dotenv()
 
 cliente = Groq(api_key=os.getenv('GROQ_API_KEY'))
 
+def extraer_texto_pdf(pdf_bytes):
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    texto = ''
+    for page in doc:
+        texto += page.get_text()
+    return texto
+
 def analizar_oferta_para_cv(descripcion_oferta, cv_texto):
     prompt = f"""Eres un experto en selección de personal y optimización de CVs para sistemas ATS.
-    
+
 Tengo esta oferta de trabajo:
 {descripcion_oferta}
 
 Este es mi CV actual:
 {cv_texto}
 
-Dame recomendaciones concretas y específicas para adaptar mi CV a esta oferta:
-1. Palabras clave que debo incluir
-2. Qué experiencias o habilidades destacar más
-3. Qué cambios concretos hacer en el CV
-4. Cómo mejorar mi CV para pasar los filtros ATS de esta oferta
+Responde en este formato exacto:
+
+COMPATIBILIDAD: X%
+(donde X es un número del 0 al 100 indicando cuánto encaja mi CV con esta oferta)
+
+RESUMEN:
+(2-3 frases explicando por qué ese porcentaje)
+
+PALABRAS CLAVE QUE FALTAN:
+(lista de palabras clave de la oferta que no aparecen en mi CV)
+
+QUÉ DESTACAR:
+(qué experiencias o habilidades de mi CV son más relevantes para esta oferta)
+
+CAMBIOS CONCRETOS:
+(cambios específicos que debo hacer en mi CV para esta oferta)
 
 Sé directo y específico, no genérico."""
 
@@ -30,4 +49,3 @@ Sé directo y específico, no genérico."""
     )
     
     return respuesta.choices[0].message.content
-

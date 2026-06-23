@@ -1,24 +1,101 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Análisis CV - {{ oferta.titulo }}</title>
+    <title>Analizar CV — JobTracker</title>
+    <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 </head>
 <body>
-    <a href="{% url 'detalle_oferta' oferta.pk %}">← Volver</a>
 
-    <h1>Análisis para: {{ oferta.titulo }}</h1>
-    <h2>{{ oferta.empresa }}</h2>
+<nav class="navbar">
+    <a href="{% url 'configuracion' %}" class="navbar-brand">JobTracker</a>
+    <div class="navbar-nav">
+        <a href="{% url 'configuracion' %}" class="nav-link">
+            <i class="ti ti-settings"></i> Configuración
+        </a>
+        <div class="navbar-divider"></div>
+        <a href="{% url 'lista_ofertas' %}" class="nav-link">Nuevas</a>
+        <a href="{% url 'ofertas_vistas' %}" class="nav-link">Vistas</a>
+        <a href="{% url 'ofertas_guardadas' %}" class="nav-link">Guardadas</a>
+        <a href="{% url 'ofertas_descartadas' %}" class="nav-link">Descartadas</a>
+    </div>
+</nav>
 
-    {% if analisis %}
-        <h3>Recomendaciones de la IA:</h3>
-        <pre>{{ analisis }}</pre>
-    {% else %}
-        <form method="POST">
-            {% csrf_token %}
-            <button type="submit">Analizar mi CV para esta oferta</button>
-        </form>
-    {% endif %}
+<div class="container" style="max-width: 700px; margin-top: 32px;">
+
+    <a href="{% url 'lista_ofertas' %}" class="btn btn-outline" style="margin-bottom: 24px; display: inline-flex;">
+        <i class="ti ti-arrow-left"></i> Volver a nuevas
+    </a>
+
+    <div class="form-card">
+        <h1 class="form-title">Analizar CV</h1>
+        <p style="font-size: 13px; color: #6b7280; margin-bottom: 20px;">{{ oferta.titulo }} — {{ oferta.empresa }}</p>
+
+        {% if error %}
+            <p style="color: #dc2626; font-size: 13px; margin-bottom: 16px;">
+                <i class="ti ti-alert-circle"></i> {{ error }}
+            </p>
+        {% endif %}
+
+        {% if analisis %}
+            <div style="background: #f4f5f7; border-radius: 6px; padding: 16px; font-size: 13px; line-height: 1.7; white-space: pre-wrap;">{{ analisis }}</div>
+            <div style="margin-top: 16px; display: flex; gap: 8px;">
+                <a href="{% url 'analizar_cv' oferta.pk %}" class="btn btn-outline">Volver a analizar</a>
+                <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-primary">
+                    <i class="ti ti-external-link"></i> Ver oferta original
+                </a>
+            </div>
+
+        {% elif cv_subido %}
+            <p style="font-size: 13px; color: #1D9E75; margin-bottom: 20px;">
+                <i class="ti ti-check"></i> CV cargado en sesión.
+            </p>
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 14px;">
+                    <i class="ti ti-file-text"></i> Analizar CV para esta oferta
+                </button>
+            </form>
+
+            <div style="margin-top: 20px; border-top: 0.5px solid #e5e7eb; padding-top: 16px;">
+                <p style="font-size: 12px; color: #9ca3af; margin-bottom: 10px;">¿Quieres usar un CV diferente?</p>
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="form-label">Sube otro PDF</label>
+                        <input type="file" name="cv_pdf" accept=".pdf" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">O pega el texto</label>
+                        <textarea name="cv_texto_manual" class="form-control" rows="6" placeholder="Copia y pega el contenido de tu CV aquí..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-outline" style="width: 100%; padding: 10px; font-size: 14px;">
+                        Usar este CV y analizar
+                    </button>
+                </form>
+            </div>
+
+        {% else %}
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label">Sube tu CV en PDF</label>
+                    <input type="file" name="cv_pdf" accept=".pdf" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">O pega el texto de tu CV</label>
+                    <textarea name="cv_texto_manual" class="form-control" rows="10" placeholder="Copia y pega el contenido de tu CV aquí..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 14px; margin-top: 8px;">
+                    <i class="ti ti-file-text"></i> Analizar CV para esta oferta
+                </button>
+            </form>
+        {% endif %}
+    </div>
+</div>
 
 </body>
 </html>

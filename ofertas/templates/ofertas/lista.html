@@ -16,9 +16,10 @@
             <i class="ti ti-settings"></i> Configuración
         </a>
         <div class="navbar-divider"></div>
-        <a href="{% url 'lista_ofertas' %}" class="nav-link {% if request.resolver_match.url_name == 'lista_ofertas' %}active{% endif %}">Nuevas</a>
-        <a href="{% url 'ofertas_guardadas' %}" class="nav-link {% if request.resolver_match.url_name == 'ofertas_guardadas' %}active{% endif %}">Guardadas</a>
-        <a href="{% url 'ofertas_descartadas' %}" class="nav-link {% if request.resolver_match.url_name == 'ofertas_descartadas' %}active{% endif %}">Descartadas</a>
+        <a href="{% url 'lista_ofertas' %}" class="nav-link {% if seccion == 'nuevas' %}active{% endif %}">Nuevas</a>
+        <a href="{% url 'ofertas_vistas' %}" class="nav-link {% if seccion == 'vistas' %}active{% endif %}">Vistas</a>
+        <a href="{% url 'ofertas_guardadas' %}" class="nav-link {% if seccion == 'guardadas' %}active{% endif %}">Guardadas</a>
+        <a href="{% url 'ofertas_descartadas' %}" class="nav-link {% if seccion == 'descartadas' %}active{% endif %}">Descartadas</a>
     </div>
 </nav>
 
@@ -65,7 +66,6 @@
         {% endif %}
     </div>
     {% endif %}
-
 </div>
 
 </body>
