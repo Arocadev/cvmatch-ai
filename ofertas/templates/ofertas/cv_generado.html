@@ -43,7 +43,7 @@
         <div id="cv-contenido" style="background: #f4f5f7; border-radius: 6px; padding: 20px; font-size: 13px; line-height: 1.8; white-space: pre-wrap;">{{ cv_generado }}</div>
 
         <div style="margin-top: 16px; display: flex; gap: 8px;">
-            <a href="{% url 'generar_cv' oferta.pk %}" class="btn btn-outline">
+            <a href="{% url 'generar_cv' oferta.pk %}" class="btn btn-outline" id="btn-regenerar">
                 <i class="ti ti-refresh"></i> Regenerar
             </a>
             <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-primary">
@@ -60,6 +60,15 @@ function copiarCV() {
         alert('CV copiado al portapapeles');
     });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const btnRegenerar = document.getElementById('btn-regenerar');
+    if (btnRegenerar) {
+        btnRegenerar.addEventListener('click', function() {
+            this.innerHTML = '<i class="ti ti-loader"></i> Generando...';
+        });
+    }
+});
 </script>
 
 </body>

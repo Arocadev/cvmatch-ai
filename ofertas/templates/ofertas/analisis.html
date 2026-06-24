@@ -46,7 +46,7 @@
                 <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-primary">
                     <i class="ti ti-external-link"></i> Ver oferta original
                 </a>
-                <a href="{% url 'generar_cv' oferta.pk %}" class="btn btn-primary">
+                <a href="{% url 'generar_cv' oferta.pk %}" class="btn btn-primary" id="btn-generar">
                     <i class="ti ti-sparkles"></i> Generar CV adaptado
                 </a>
             </div>
@@ -56,7 +56,7 @@
                 <i class="ti ti-check"></i> CV cargado en sesión.
             </p>
 
-            <form method="POST" enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data" id="form-analizar">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 14px;">
                     <i class="ti ti-file-text"></i> Analizar CV para esta oferta
@@ -99,6 +99,28 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function() {
+            const btn = form.querySelector('button[type="submit"]');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="ti ti-loader"></i> Analizando...';
+            }
+        });
+    });
+
+    const btnGenerar = document.getElementById('btn-generar');
+    if (btnGenerar) {
+        btnGenerar.addEventListener('click', function() {
+            this.innerHTML = '<i class="ti ti-loader"></i> Generando...';
+        });
+    }
+});
+</script>
 
 </body>
 </html>
