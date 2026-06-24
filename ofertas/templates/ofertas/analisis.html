@@ -10,10 +10,10 @@
 <body>
 
 <nav class="navbar">
-    <a href="{% url 'configuracion' %}" class="navbar-brand">JobTracker</a>
+    <a href="{% url 'inicio' %}" class="navbar-brand">JobTracker</a>
     <div class="navbar-nav">
-        <a href="{% url 'configuracion' %}" class="nav-link">
-            <i class="ti ti-settings"></i> Configuración
+        <a href="{% url 'buscador' %}" class="nav-link">
+            <i class="ti ti-search"></i> Buscador
         </a>
         <div class="navbar-divider"></div>
         <a href="{% url 'lista_ofertas' %}" class="nav-link">Nuevas</a>
@@ -41,10 +41,13 @@
 
         {% if analisis %}
             <div style="background: #f4f5f7; border-radius: 6px; padding: 16px; font-size: 13px; line-height: 1.7; white-space: pre-wrap;">{{ analisis }}</div>
-            <div style="margin-top: 16px; display: flex; gap: 8px;">
+            <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
                 <a href="{% url 'analizar_cv' oferta.pk %}" class="btn btn-outline">Volver a analizar</a>
                 <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-primary">
                     <i class="ti ti-external-link"></i> Ver oferta original
+                </a>
+                <a href="{% url 'generar_cv' oferta.pk %}" class="btn btn-primary">
+                    <i class="ti ti-sparkles"></i> Generar CV adaptado
                 </a>
             </div>
 

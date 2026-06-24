@@ -49,3 +49,29 @@ Sé directo y específico, no genérico."""
     )
     
     return respuesta.choices[0].message.content
+
+def generar_cv_adaptado(descripcion_oferta, cv_texto):
+    prompt = f"""Eres un experto en redacción de CVs y optimización ATS.
+
+Tengo esta oferta de trabajo:
+{descripcion_oferta}
+
+Este es mi CV actual:
+{cv_texto}
+
+Reescribe mi CV completo adaptado a esta oferta. Reglas:
+- Mantén TODA la información real que hay en mi CV, no inventes nada
+- Reorganiza, reformula y destaca lo más relevante para esta oferta
+- Añade las palabras clave de la oferta donde encajen de forma natural
+- Mejora la redacción de cada sección para que suene más profesional
+- Mantén el mismo formato de secciones (Estudios, Experiencia, Proyectos, Habilidades, Idiomas)
+
+Devuelve SOLO el CV reescrito, sin explicaciones ni comentarios."""
+
+    respuesta = cliente.chat.completions.create(
+        model='llama-3.3-70b-versatile',
+        messages=[{'role': 'user', 'content': prompt}],
+        max_tokens=2000,
+    )
+    
+    return respuesta.choices[0].message.content

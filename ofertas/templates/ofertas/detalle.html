@@ -10,10 +10,10 @@
 <body>
 
 <nav class="navbar">
-    <a href="{% url 'configuracion' %}" class="navbar-brand">JobTracker</a>
+    <a href="{% url 'inicio' %}" class="navbar-brand">JobTracker</a>
     <div class="navbar-nav">
-        <a href="{% url 'configuracion' %}" class="nav-link">
-            <i class="ti ti-settings"></i> Configuración
+        <a href="{% url 'buscador' %}" class="nav-link">
+            <i class="ti ti-search"></i> Buscador
         </a>
         <div class="navbar-divider"></div>
         <a href="{% url 'lista_ofertas' %}" class="nav-link">Nuevas</a>
@@ -25,8 +25,8 @@
 
 <div class="container" style="max-width: 700px; margin-top: 32px;">
 
-    <a href="javascript:history.back()" class="btn btn-outline" style="margin-bottom: 24px; display: inline-flex;">
-        <i class="ti ti-arrow-left"></i> Volver
+    <a href="{% url 'lista_ofertas' %}" class="btn btn-outline" style="margin-bottom: 24px; display: inline-flex;">
+        <i class="ti ti-arrow-left"></i> Volver a nuevas
     </a>
 
     <div class="form-card">

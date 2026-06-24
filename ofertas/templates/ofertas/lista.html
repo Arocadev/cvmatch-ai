@@ -10,10 +10,10 @@
 <body>
 
 <nav class="navbar">
-    <a href="{% url 'configuracion' %}" class="navbar-brand">JobTracker</a>
+    <a href="{% url 'inicio' %}" class="navbar-brand">JobTracker</a>
     <div class="navbar-nav">
-        <a href="{% url 'configuracion' %}" class="nav-link">
-            <i class="ti ti-settings"></i> Configuración
+        <a href="{% url 'buscador' %}" class="nav-link">
+            <i class="ti ti-search"></i> Buscador
         </a>
         <div class="navbar-divider"></div>
         <a href="{% url 'lista_ofertas' %}" class="nav-link {% if seccion == 'nuevas' %}active{% endif %}">Nuevas</a>
@@ -24,12 +24,28 @@
 </nav>
 
 <div class="container">
+    {% if seccion == 'descartadas' %}
+    <form method="POST" action="{% url 'eliminar_ofertas' %}" id="form-eliminar">
+        {% csrf_token %}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="display: flex; gap: 8px;">
+                <button type="button" onclick="seleccionarTodas()" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px;">Seleccionar todas</button>
+                <button type="submit" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px; color: #dc2626; border-color: #dc2626;">Eliminar seleccionadas</button>
+            </div>
+        </div>
+    {% endif %}
+
     {% for oferta in ofertas %}
     <div class="card">
         <div class="card-header">
-            <div>
-                <p class="card-title">{{ oferta.titulo }} — {{ oferta.empresa }}</p>
-                <p class="card-meta">{{ oferta.ubicacion }} · {{ oferta.fuente }} · {{ oferta.fecha_publicacion }}</p>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                {% if seccion == 'descartadas' %}
+                <input type="checkbox" name="ofertas_ids" value="{{ oferta.pk }}" style="width: 16px; height: 16px; cursor: pointer;">
+                {% endif %}
+                <div>
+                    <p class="card-title">{{ oferta.titulo }} — {{ oferta.empresa }}</p>
+                    <p class="card-meta">{{ oferta.ubicacion }} · {{ oferta.fuente }} · {{ oferta.fecha_publicacion }}</p>
+                </div>
             </div>
             <div class="card-actions">
                 <a href="{% url 'cambiar_estado' oferta.pk 'guardada' %}" class="btn-save">Guardar</a>
@@ -52,6 +68,10 @@
         <p style="color: #6b7280; text-align: center; margin-top: 40px;">No hay ofertas aquí.</p>
     {% endfor %}
 
+    {% if seccion == 'descartadas' %}
+    </form>
+    {% endif %}
+
     {% if ofertas.has_other_pages %}
     <div class="pagination">
         <span class="page-info">{{ ofertas.paginator.count }} ofertas</span>
@@ -67,6 +87,14 @@
     </div>
     {% endif %}
 </div>
+
+<script>
+function seleccionarTodas() {
+    const checkboxes = document.querySelectorAll('input[name="ofertas_ids"]');
+    const todasMarcadas = Array.from(checkboxes).every(cb => cb.checked);
+    checkboxes.forEach(cb => cb.checked = !todasMarcadas);
+}
+</script>
 
 </body>
 </html>

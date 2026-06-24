@@ -3,9 +3,12 @@ from django.core.paginator import Paginator
 from .models import Oferta
 from .api import buscar_ofertas
 from datetime import datetime
-import pdfplumber
+import fitz
 import os
 import io
+
+def inicio(request):
+    return render(request, 'ofertas/inicio.html')
 
 def lista_ofertas(request):
     if request.session.get('buscar_ahora'):
@@ -68,6 +71,13 @@ def cambiar_estado(request, pk, estado):
     oferta.save()
     return redirect(request.META.get('HTTP_REFERER', 'lista_ofertas'))
 
+def eliminar_ofertas(request):
+    if request.method == 'POST':
+        ids = request.POST.getlist('ofertas_ids')
+        if ids:
+            Oferta.objects.filter(id__in=ids).delete()
+    return redirect('ofertas_descartadas')
+
 def detalle_oferta(request, pk):
     oferta = get_object_or_404(Oferta, pk=pk)
     if oferta.estado == 'nueva':
@@ -123,7 +133,7 @@ def analizar_cv(request, pk):
         'cv_texto_guardado': cv_texto_guardado
     })
 
-def configuracion(request):
+def buscador(request):
     if request.method == 'POST':
         keywords = request.POST.get('keywords', '').strip()
         ubicacion = request.POST.get('ubicacion', '').strip()
@@ -135,4 +145,20 @@ def configuracion(request):
         
         return redirect('lista_ofertas')
     
-    return render(request, 'ofertas/configuracion.html')
+    return render(request, 'ofertas/buscador.html')
+
+def generar_cv(request, pk):
+    oferta = get_object_or_404(Oferta, pk=pk)
+    
+    cv_texto = request.session.get('cv_texto', None)
+    
+    if not cv_texto:
+        return redirect('analizar_cv', pk=pk)
+    
+    from .cv import generar_cv_adaptado
+    cv_generado = generar_cv_adaptado(oferta.descripcion, cv_texto)
+    
+    return render(request, 'ofertas/cv_generado.html', {
+        'oferta': oferta,
+        'cv_generado': cv_generado
+    })

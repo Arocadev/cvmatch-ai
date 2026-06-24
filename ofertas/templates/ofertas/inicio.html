@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>JobTracker</title>
+    <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="{% url 'inicio' %}" class="navbar-brand">JobTracker</a>
+    <div class="navbar-nav">
+        <a href="{% url 'buscador' %}" class="nav-link">
+            <i class="ti ti-search"></i> Buscador
+        </a>
+        <div class="navbar-divider"></div>
+        <a href="{% url 'lista_ofertas' %}" class="nav-link">Nuevas</a>
+        <a href="{% url 'ofertas_vistas' %}" class="nav-link">Vistas</a>
+        <a href="{% url 'ofertas_guardadas' %}" class="nav-link">Guardadas</a>
+        <a href="{% url 'ofertas_descartadas' %}" class="nav-link">Descartadas</a>
+    </div>
+</nav>
+
+<div class="container" style="max-width: 700px; margin-top: 64px; text-align: center;">
+
+    <h1 style="font-size: 32px; font-weight: 500; color: #1a1a2e; margin-bottom: 12px;">JobTracker</h1>
+    <p style="font-size: 16px; color: #6b7280; margin-bottom: 48px;">Tu herramienta personal de búsqueda de empleo.</p>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 48px; text-align: left;">
+
+        <div style="background: #fff; border: 0.5px solid #d0d5dd; border-left: 3px solid #185FA5; border-radius: 6px; padding: 20px;">
+            <i class="ti ti-search" style="font-size: 20px; color: #185FA5; margin-bottom: 10px; display: block;"></i>
+            <h3 style="font-size: 14px; font-weight: 500; margin-bottom: 6px;">Busca ofertas</h3>
+            <p style="font-size: 13px; color: #6b7280;">Configura tus filtros y busca ofertas de empleo de múltiples fuentes en un solo clic.</p>
+        </div>
+
+        <div style="background: #fff; border: 0.5px solid #d0d5dd; border-left: 3px solid #185FA5; border-radius: 6px; padding: 20px;">
+            <i class="ti ti-star" style="font-size: 20px; color: #185FA5; margin-bottom: 10px; display: block;"></i>
+            <h3 style="font-size: 14px; font-weight: 500; margin-bottom: 6px;">Gestiona tus favoritas</h3>
+            <p style="font-size: 13px; color: #6b7280;">Guarda las que te interesan, descarta las que no y mantén un seguimiento de las que has visto.</p>
+        </div>
+
+        <div style="background: #fff; border: 0.5px solid #d0d5dd; border-left: 3px solid #185FA5; border-radius: 6px; padding: 20px;">
+            <i class="ti ti-file-text" style="font-size: 20px; color: #185FA5; margin-bottom: 10px; display: block;"></i>
+            <h3 style="font-size: 14px; font-weight: 500; margin-bottom: 6px;">Analiza tu CV</h3>
+            <p style="font-size: 13px; color: #6b7280;">La IA analiza tu CV contra cada oferta y te dice qué mejorar para pasar los filtros ATS.</p>
+        </div>
+
+        <div style="background: #fff; border: 0.5px solid #d0d5dd; border-left: 3px solid #185FA5; border-radius: 6px; padding: 20px;">
+            <i class="ti ti-chart-bar" style="font-size: 20px; color: #185FA5; margin-bottom: 10px; display: block;"></i>
+            <h3 style="font-size: 14px; font-weight: 500; margin-bottom: 6px;">Compatibilidad</h3>
+            <p style="font-size: 13px; color: #6b7280;">Obtén un porcentaje de compatibilidad entre tu perfil y cada oferta para priorizar dónde aplicar.</p>
+        </div>
+
+    </div>
+
+    <a href="{% url 'buscador' %}" class="btn btn-primary" style="padding: 12px 32px; font-size: 15px;">
+        <i class="ti ti-search"></i> Empezar a buscar
+    </a>
+
+</div>
+
+</body>
+</html>
