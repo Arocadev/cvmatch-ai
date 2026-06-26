@@ -1,9 +1,9 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ idioma }}">
 <head>
     <meta charset="UTF-8">
-    <title>CV Adaptado — CVMatch AI</title>
+    <title>{% if idioma == 'en' %}Adapted CV{% else %}CV Adaptado{% endif %} — CVMatch AI</title>
     <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 </head>
@@ -13,30 +13,34 @@
     <a href="{% url 'inicio' %}" class="navbar-brand">CVMatch AI</a>
     <div class="navbar-nav">
         <a href="{% url 'buscador' %}" class="nav-link">
-            <i class="ti ti-search"></i> Buscador
+            <i class="ti ti-search"></i> {% if idioma == 'en' %}Search{% else %}Buscador{% endif %}
         </a>
         <div class="navbar-divider"></div>
-        <a href="{% url 'lista_ofertas' %}" class="nav-link">Nuevas</a>
-        <a href="{% url 'ofertas_vistas' %}" class="nav-link">Vistas</a>
-        <a href="{% url 'ofertas_guardadas' %}" class="nav-link">Guardadas</a>
-        <a href="{% url 'ofertas_descartadas' %}" class="nav-link">Descartadas</a>
+        <a href="{% url 'lista_ofertas' %}" class="nav-link">{% if idioma == 'en' %}New{% else %}Nuevas{% endif %}</a>
+        <a href="{% url 'ofertas_vistas' %}" class="nav-link">{% if idioma == 'en' %}Viewed{% else %}Vistas{% endif %}</a>
+        <a href="{% url 'ofertas_guardadas' %}" class="nav-link">{% if idioma == 'en' %}Saved{% else %}Guardadas{% endif %}</a>
+        <a href="{% url 'ofertas_descartadas' %}" class="nav-link">{% if idioma == 'en' %}Discarded{% else %}Descartadas{% endif %}</a>
+        <div class="navbar-divider"></div>
+        <a href="{% url 'cambiar_idioma' 'es' %}" class="{% if idioma != 'en' %}lang-active{% else %}lang-inactive{% endif %}">ES</a>
+        <span style="color:rgba(255,255,255,0.3); font-size:11px;">|</span>
+        <a href="{% url 'cambiar_idioma' 'en' %}" class="{% if idioma == 'en' %}lang-active{% else %}lang-inactive{% endif %}">EN</a>
     </div>
 </nav>
 
 <div class="container" style="max-width: 700px; margin-top: 32px;">
 
     <a href="{% url 'analizar_cv' oferta.pk %}" class="btn btn-outline" style="margin-bottom: 24px; display: inline-flex;">
-        <i class="ti ti-arrow-left"></i> Volver al análisis
+        <i class="ti ti-arrow-left"></i> {% if idioma == 'en' %}Back to analysis{% else %}Volver al análisis{% endif %}
     </a>
 
     <div class="form-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <div>
-                <h1 class="form-title" style="margin-bottom: 4px;">CV Adaptado</h1>
+                <h1 class="form-title" style="margin-bottom: 4px;">{% if idioma == 'en' %}Adapted CV{% else %}CV Adaptado{% endif %}</h1>
                 <p style="font-size: 13px; color: #6b7280;">{{ oferta.titulo }} — {{ oferta.empresa }}</p>
             </div>
             <button onclick="copiarCV()" class="btn btn-outline">
-                <i class="ti ti-copy"></i> Copiar
+                <i class="ti ti-copy"></i> {% if idioma == 'en' %}Copy{% else %}Copiar{% endif %}
             </button>
         </div>
 
@@ -44,10 +48,10 @@
 
         <div style="margin-top: 16px; display: flex; gap: 8px;">
             <a href="{% url 'generar_cv' oferta.pk %}" class="btn btn-outline" id="btn-regenerar">
-                <i class="ti ti-refresh"></i> Regenerar
+                <i class="ti ti-refresh"></i> {% if idioma == 'en' %}Regenerate{% else %}Regenerar{% endif %}
             </a>
             <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-primary">
-                <i class="ti ti-external-link"></i> Ver oferta original
+                <i class="ti ti-external-link"></i> {% if idioma == 'en' %}View original offer{% else %}Ver oferta original{% endif %}
             </a>
         </div>
     </div>
@@ -57,7 +61,7 @@
 function copiarCV() {
     const texto = document.getElementById('cv-contenido').innerText;
     navigator.clipboard.writeText(texto).then(() => {
-        alert('CV copiado al portapapeles');
+        alert('{% if idioma == "en" %}CV copied to clipboard{% else %}CV copiado al portapapeles{% endif %}');
     });
 }
 
@@ -65,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnRegenerar = document.getElementById('btn-regenerar');
     if (btnRegenerar) {
         btnRegenerar.addEventListener('click', function() {
-            this.innerHTML = '<i class="ti ti-loader"></i> Generando...';
+            this.innerHTML = '<i class="ti ti-loader"></i> {% if idioma == "en" %}Generating...{% else %}Generando...{% endif %}';
         });
     }
 });

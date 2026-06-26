@@ -14,4 +14,5 @@ urlpatterns = [
     path('ofertas/<int:pk>/estado/<str:estado>/', views.cambiar_estado, name='cambiar_estado'),
     path('ofertas/<int:pk>/generar-cv/', views.generar_cv, name='generar_cv'),
     path('acceso/', views.acceso, name='acceso'),
+    path('idioma/<str:idioma>/', views.cambiar_idioma, name='cambiar_idioma'),
 ]

@@ -8,6 +8,8 @@ import fitz
 import os
 import io
 
+def get_idioma(request):
+    return request.session.get('idioma', 'es')
 
 def acceso(request):
     if request.method == 'POST':
@@ -20,7 +22,7 @@ def acceso(request):
     return render(request, 'ofertas/acceso.html')
 
 def inicio(request):
-    return render(request, 'ofertas/inicio.html')
+    return render(request, 'ofertas/inicio.html', {'idioma': get_idioma(request)})
 
 def lista_ofertas(request):
     if request.session.get('buscar_ahora'):
@@ -139,6 +141,7 @@ def lista_ofertas(request):
         'seccion': 'nuevas',
         'contadores': contadores,
         'busqueda_activa': busqueda_activa,
+        'idioma': get_idioma(request),
     })
 
 def ofertas_vistas(request):
@@ -152,7 +155,7 @@ def ofertas_vistas(request):
         'guardadas': Oferta.objects.filter(estado='guardada').count(),
         'descartadas': Oferta.objects.filter(estado='descartada').count(),
     }
-    return render(request, 'ofertas/lista.html', {'ofertas': ofertas, 'seccion': 'vistas', 'contadores': contadores})
+    return render(request, 'ofertas/lista.html', {'ofertas': ofertas, 'seccion': 'vistas', 'contadores': contadores, 'idioma': get_idioma(request)})
 
 def ofertas_guardadas(request):
     todas = Oferta.objects.filter(estado='guardada').order_by('-fecha_guardada')
@@ -165,7 +168,7 @@ def ofertas_guardadas(request):
         'guardadas': Oferta.objects.filter(estado='guardada').count(),
         'descartadas': Oferta.objects.filter(estado='descartada').count(),
     }
-    return render(request, 'ofertas/lista.html', {'ofertas': ofertas, 'seccion': 'guardadas', 'contadores': contadores})
+    return render(request, 'ofertas/lista.html', {'ofertas': ofertas, 'seccion': 'guardadas', 'contadores': contadores, 'idioma': get_idioma(request)})
 
 def ofertas_descartadas(request):
     todas = Oferta.objects.filter(estado='descartada').order_by('-fecha_guardada')
@@ -178,7 +181,7 @@ def ofertas_descartadas(request):
         'guardadas': Oferta.objects.filter(estado='guardada').count(),
         'descartadas': Oferta.objects.filter(estado='descartada').count(),
     }
-    return render(request, 'ofertas/lista.html', {'ofertas': ofertas, 'seccion': 'descartadas', 'contadores': contadores})
+    return render(request, 'ofertas/lista.html', {'ofertas': ofertas, 'seccion': 'descartadas', 'contadores': contadores, 'idioma': get_idioma(request)})
 
 def cambiar_estado(request, pk, estado):
     oferta = get_object_or_404(Oferta, pk=pk)
@@ -200,11 +203,12 @@ def detalle_oferta(request, pk):
         oferta.save()
     
     from .cv import resumir_oferta
-    resumen = resumir_oferta(oferta.descripcion)
+    resumen = resumir_oferta(oferta.descripcion, get_idioma(request))
     
     return render(request, 'ofertas/detalle.html', {
         'oferta': oferta,
-        'resumen': resumen
+        'resumen': resumen,
+        'idioma': get_idioma(request),
     })
 
 def analizar_cv(request, pk):
@@ -232,19 +236,21 @@ def analizar_cv(request, pk):
         if not cv_texto:
             return render(request, 'ofertas/analisis.html', {
                 'oferta': oferta,
-                'error': 'Necesitas introducir tu CV primero.',
+                'error': 'Necesitas introducir tu CV primero.' if get_idioma(request) == 'es' else 'You need to upload your CV first.',
                 'cv_subido': False,
-                'cv_texto_guardado': ''
+                'cv_texto_guardado': '',
+                'idioma': get_idioma(request),
             })
         
         from .cv import analizar_oferta_para_cv
-        analisis = analizar_oferta_para_cv(oferta.descripcion, cv_texto)
+        analisis = analizar_oferta_para_cv(oferta.descripcion, cv_texto, get_idioma(request))
         
         return render(request, 'ofertas/analisis.html', {
             'oferta': oferta,
             'analisis': analisis,
             'cv_subido': True,
-            'cv_texto_guardado': cv_texto
+            'cv_texto_guardado': cv_texto,
+            'idioma': get_idioma(request),
         })
     
     cv_texto_guardado = request.session.get('cv_texto', '')
@@ -252,7 +258,8 @@ def analizar_cv(request, pk):
     return render(request, 'ofertas/analisis.html', {
         'oferta': oferta,
         'cv_subido': cv_subido,
-        'cv_texto_guardado': cv_texto_guardado
+        'cv_texto_guardado': cv_texto_guardado,
+        'idioma': get_idioma(request),
     })
 
 def generar_cv(request, pk):
@@ -264,11 +271,12 @@ def generar_cv(request, pk):
         return redirect('analizar_cv', pk=pk)
     
     from .cv import generar_cv_adaptado
-    cv_generado = generar_cv_adaptado(oferta.descripcion, cv_texto)
+    cv_generado = generar_cv_adaptado(oferta.descripcion, cv_texto, get_idioma(request))
     
     return render(request, 'ofertas/cv_generado.html', {
         'oferta': oferta,
-        'cv_generado': cv_generado
+        'cv_generado': cv_generado,
+        'idioma': get_idioma(request),
     })
 
 def buscador(request):
@@ -291,4 +299,8 @@ def buscador(request):
         
         return redirect('lista_ofertas')
     
-    return render(request, 'ofertas/buscador.html')
+    return render(request, 'ofertas/buscador.html', {'idioma': get_idioma(request)})
+
+def cambiar_idioma(request, idioma):
+    request.session['idioma'] = idioma
+    return redirect(request.META.get('HTTP_REFERER', 'inicio'))

@@ -1,9 +1,9 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ idioma }}">
 <head>
     <meta charset="UTF-8">
-    <title>Buscador — CVMatch AI</title>
+    <title>{% if idioma == 'en' %}Search{% else %}Buscador{% endif %} — CVMatch AI</title>
     <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 </head>
@@ -13,88 +13,92 @@
     <a href="{% url 'inicio' %}" class="navbar-brand">CVMatch AI</a>
     <div class="navbar-nav">
         <a href="{% url 'buscador' %}" class="nav-link active">
-            <i class="ti ti-search"></i> Buscador
+            <i class="ti ti-search"></i> {% if idioma == 'en' %}Search{% else %}Buscador{% endif %}
         </a>
         <div class="navbar-divider"></div>
-        <a href="{% url 'lista_ofertas' %}" class="nav-link">Nuevas</a>
-        <a href="{% url 'ofertas_vistas' %}" class="nav-link">Vistas</a>
-        <a href="{% url 'ofertas_guardadas' %}" class="nav-link">Guardadas</a>
-        <a href="{% url 'ofertas_descartadas' %}" class="nav-link">Descartadas</a>
+        <a href="{% url 'lista_ofertas' %}" class="nav-link">{% if idioma == 'en' %}New{% else %}Nuevas{% endif %}</a>
+        <a href="{% url 'ofertas_vistas' %}" class="nav-link">{% if idioma == 'en' %}Viewed{% else %}Vistas{% endif %}</a>
+        <a href="{% url 'ofertas_guardadas' %}" class="nav-link">{% if idioma == 'en' %}Saved{% else %}Guardadas{% endif %}</a>
+        <a href="{% url 'ofertas_descartadas' %}" class="nav-link">{% if idioma == 'en' %}Discarded{% else %}Descartadas{% endif %}</a>
+        <div class="navbar-divider"></div>
+        <a href="{% url 'cambiar_idioma' 'es' %}" class="{% if idioma != 'en' %}lang-active{% else %}lang-inactive{% endif %}">ES</a>
+        <span style="color:rgba(255,255,255,0.3); font-size:11px;">|</span>
+        <a href="{% url 'cambiar_idioma' 'en' %}" class="{% if idioma == 'en' %}lang-active{% else %}lang-inactive{% endif %}">EN</a>
     </div>
 </nav>
 
 <div class="container" style="max-width: 600px; margin-top: 48px;">
     <div class="form-card">
-        <h1 class="form-title">¿Qué oferta estás buscando?</h1>
+        <h1 class="form-title">{% if idioma == 'en' %}What are you looking for?{% else %}¿Qué oferta estás buscando?{% endif %}</h1>
 
         <form method="POST">
             {% csrf_token %}
 
             <div class="form-group">
                 <label class="form-label">
-                    Fuente de búsqueda
+                    {% if idioma == 'en' %}Search source{% else %}Fuente de búsqueda{% endif %}
                     <span style="cursor:pointer; color:#1253A4; margin-left:6px; font-size:13px;" onclick="toggleInfo()">
                         <i class="ti ti-info-circle"></i>
                     </span>
                 </label>
                 <div id="info-fuentes" style="display:none; background:#EBF3FF; border-radius:8px; padding:12px; font-size:12px; color:#374151; margin-bottom:12px; line-height:1.6;">
-                    <strong>Adzuna — España</strong> — Ofertas en España<br>
-                    <strong>Adzuna — Reino Unido</strong> — Ofertas en Reino Unido<br>
-                    <strong>Adzuna — Estados Unidos</strong> — Ofertas en Estados Unidos<br>
-                    <strong>Jooble — Internacional</strong> — Agregador internacional, busca en 69 países<br>
-                    <strong>Arbeitnow — Europa</strong> — Especializado en Europa<br>
-                    <strong>Todas las fuentes</strong> — Busca en Adzuna ES, Jooble y Arbeitnow a la vez
+                    <strong>Adzuna — {% if idioma == 'en' %}Spain{% else %}España{% endif %}</strong> — {% if idioma == 'en' %}Offers in Spain{% else %}Ofertas en España{% endif %}<br>
+                    <strong>Adzuna — {% if idioma == 'en' %}United Kingdom{% else %}Reino Unido{% endif %}</strong> — {% if idioma == 'en' %}Offers in the UK{% else %}Ofertas en Reino Unido{% endif %}<br>
+                    <strong>Adzuna — {% if idioma == 'en' %}United States{% else %}Estados Unidos{% endif %}</strong> — {% if idioma == 'en' %}Offers in the US{% else %}Ofertas en Estados Unidos{% endif %}<br>
+                    <strong>Jooble — {% if idioma == 'en' %}International{% else %}Internacional{% endif %}</strong> — {% if idioma == 'en' %}International aggregator, 69 countries{% else %}Agregador internacional, 69 países{% endif %}<br>
+                    <strong>Arbeitnow — {% if idioma == 'en' %}Europe{% else %}Europa{% endif %}</strong> — {% if idioma == 'en' %}Specialized in Europe{% else %}Especializado en Europa{% endif %}<br>
+                    <strong>{% if idioma == 'en' %}All sources{% else %}Todas las fuentes{% endif %}</strong> — {% if idioma == 'en' %}Searches Adzuna, Jooble and Arbeitnow at once{% else %}Busca en Adzuna, Jooble y Arbeitnow a la vez{% endif %}
                 </div>
                 <select name="fuente" class="form-control">
-                    <option value="adzuna_es" {% if request.session.fuente == 'adzuna_es' %}selected{% endif %}>Adzuna — España</option>
-                    <option value="adzuna_uk" {% if request.session.fuente == 'adzuna_uk' %}selected{% endif %}>Adzuna — Reino Unido</option>
-                    <option value="adzuna_us" {% if request.session.fuente == 'adzuna_us' %}selected{% endif %}>Adzuna — Estados Unidos</option>
-                    <option value="jooble" {% if request.session.fuente == 'jooble' %}selected{% endif %}>Jooble — Internacional (69 países)</option>
-                    <option value="arbeitnow" {% if request.session.fuente == 'arbeitnow' %}selected{% endif %}>Arbeitnow — Europa</option>
-                    <option value="todas" {% if request.session.fuente == 'todas' %}selected{% endif %}>Todas las fuentes</option>
+                    <option value="adzuna_es" {% if request.session.fuente == 'adzuna_es' %}selected{% endif %}>Adzuna — {% if idioma == 'en' %}Spain{% else %}España{% endif %}</option>
+                    <option value="adzuna_uk" {% if request.session.fuente == 'adzuna_uk' %}selected{% endif %}>Adzuna — {% if idioma == 'en' %}United Kingdom{% else %}Reino Unido{% endif %}</option>
+                    <option value="adzuna_us" {% if request.session.fuente == 'adzuna_us' %}selected{% endif %}>Adzuna — {% if idioma == 'en' %}United States{% else %}Estados Unidos{% endif %}</option>
+                    <option value="jooble" {% if request.session.fuente == 'jooble' %}selected{% endif %}>Jooble — {% if idioma == 'en' %}International (69 countries){% else %}Internacional (69 países){% endif %}</option>
+                    <option value="arbeitnow" {% if request.session.fuente == 'arbeitnow' %}selected{% endif %}>Arbeitnow — {% if idioma == 'en' %}Europe{% else %}Europa{% endif %}</option>
+                    <option value="todas" {% if request.session.fuente == 'todas' %}selected{% endif %}>{% if idioma == 'en' %}All sources{% else %}Todas las fuentes{% endif %}</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Palabras clave</label>
+                <label class="form-label">{% if idioma == 'en' %}Keywords{% else %}Palabras clave{% endif %}</label>
                 <input type="text" name="keywords" class="form-control" placeholder="DevOps, cloud, Python..." value="{{ request.session.keywords|default:'' }}">
             </div>
 
             <div class="form-group">
-                <label class="form-label">Ubicación</label>
-                <input type="text" name="ubicacion" class="form-control" placeholder="Valencia, Madrid, Londres..." value="{{ request.session.ubicacion|default:'' }}">
+                <label class="form-label">{% if idioma == 'en' %}Location{% else %}Ubicación{% endif %}</label>
+                <input type="text" name="ubicacion" class="form-control" placeholder="{% if idioma == 'en' %}Valencia, Madrid, London...{% else %}Valencia, Madrid, Londres...{% endif %}" value="{{ request.session.ubicacion|default:'' }}">
             </div>
 
             <div class="form-group">
-                <label class="form-label">Modalidad</label>
+                <label class="form-label">{% if idioma == 'en' %}Modality{% else %}Modalidad{% endif %}</label>
                 <select name="modalidad" class="form-control">
-                    <option value="">Cualquiera</option>
-                    <option value="remoto">Remoto</option>
-                    <option value="hibrido">Híbrido</option>
-                    <option value="presencial">Presencial</option>
+                    <option value="">{% if idioma == 'en' %}Any{% else %}Cualquiera{% endif %}</option>
+                    <option value="remoto">{% if idioma == 'en' %}Remote{% else %}Remoto{% endif %}</option>
+                    <option value="hibrido">{% if idioma == 'en' %}Hybrid{% else %}Híbrido{% endif %}</option>
+                    <option value="presencial">{% if idioma == 'en' %}On-site{% else %}Presencial{% endif %}</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Experiencia</label>
+                <label class="form-label">{% if idioma == 'en' %}Experience{% else %}Experiencia{% endif %}</label>
                 <select name="experiencia" class="form-control">
-                    <option value="">Cualquiera</option>
-                    <option value="0">Sin experiencia</option>
-                    <option value="1">1 año o menos</option>
-                    <option value="2">2 años o menos</option>
-                    <option value="3">3 años o menos</option>
-                    <option value="5">+5 años</option>
+                    <option value="">{% if idioma == 'en' %}Any{% else %}Cualquiera{% endif %}</option>
+                    <option value="0">{% if idioma == 'en' %}No experience{% else %}Sin experiencia{% endif %}</option>
+                    <option value="1">{% if idioma == 'en' %}1 year or less{% else %}1 año o menos{% endif %}</option>
+                    <option value="2">{% if idioma == 'en' %}2 years or less{% else %}2 años o menos{% endif %}</option>
+                    <option value="3">{% if idioma == 'en' %}3 years or less{% else %}3 años o menos{% endif %}</option>
+                    <option value="5">{% if idioma == 'en' %}+5 years{% else %}+5 años{% endif %}</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Salario mínimo (opcional)</label>
-                <input type="number" name="salario_min" class="form-control" placeholder="Ej: 25000" value="{{ request.session.salario_min|default:'' }}">
+                <label class="form-label">{% if idioma == 'en' %}Minimum salary (optional){% else %}Salario mínimo (opcional){% endif %}</label>
+                <input type="number" name="salario_min" class="form-control" placeholder="{% if idioma == 'en' %}e.g. 25000{% else %}Ej: 25000{% endif %}" value="{{ request.session.salario_min|default:'' }}">
             </div>
 
             <div style="text-align: center; margin-top: 16px;">
                 <button type="submit" class="btn btn-primary" style="padding: 8px 24px; font-size: 14px;">
-                    Buscar ofertas
+                    {% if idioma == 'en' %}Search offers{% else %}Buscar ofertas{% endif %}
                 </button>
             </div>
         </form>

@@ -1,9 +1,9 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ idioma }}">
 <head>
     <meta charset="UTF-8">
-    <title>Analizar CV — CVMatch AI</title>
+    <title>{% if idioma == 'en' %}CV Analysis{% else %}Analizar CV{% endif %} — CVMatch AI</title>
     <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 </head>
@@ -13,24 +13,28 @@
     <a href="{% url 'inicio' %}" class="navbar-brand">CVMatch AI</a>
     <div class="navbar-nav">
         <a href="{% url 'buscador' %}" class="nav-link">
-            <i class="ti ti-search"></i> Buscador
+            <i class="ti ti-search"></i> {% if idioma == 'en' %}Search{% else %}Buscador{% endif %}
         </a>
         <div class="navbar-divider"></div>
-        <a href="{% url 'lista_ofertas' %}" class="nav-link">Nuevas</a>
-        <a href="{% url 'ofertas_vistas' %}" class="nav-link">Vistas</a>
-        <a href="{% url 'ofertas_guardadas' %}" class="nav-link">Guardadas</a>
-        <a href="{% url 'ofertas_descartadas' %}" class="nav-link">Descartadas</a>
+        <a href="{% url 'lista_ofertas' %}" class="nav-link">{% if idioma == 'en' %}New{% else %}Nuevas{% endif %}</a>
+        <a href="{% url 'ofertas_vistas' %}" class="nav-link">{% if idioma == 'en' %}Viewed{% else %}Vistas{% endif %}</a>
+        <a href="{% url 'ofertas_guardadas' %}" class="nav-link">{% if idioma == 'en' %}Saved{% else %}Guardadas{% endif %}</a>
+        <a href="{% url 'ofertas_descartadas' %}" class="nav-link">{% if idioma == 'en' %}Discarded{% else %}Descartadas{% endif %}</a>
+        <div class="navbar-divider"></div>
+        <a href="{% url 'cambiar_idioma' 'es' %}" class="{% if idioma != 'en' %}lang-active{% else %}lang-inactive{% endif %}">ES</a>
+        <span style="color:rgba(255,255,255,0.3); font-size:11px;">|</span>
+        <a href="{% url 'cambiar_idioma' 'en' %}" class="{% if idioma == 'en' %}lang-active{% else %}lang-inactive{% endif %}">EN</a>
     </div>
 </nav>
 
 <div class="container" style="max-width: 700px; margin-top: 32px;">
 
     <a href="{% url 'lista_ofertas' %}" class="btn btn-outline" style="margin-bottom: 24px; display: inline-flex;">
-        <i class="ti ti-arrow-left"></i> Volver a nuevas
+        <i class="ti ti-arrow-left"></i> {% if idioma == 'en' %}Back to new{% else %}Volver a nuevas{% endif %}
     </a>
 
     <div class="form-card">
-        <h1 class="form-title">Analizar CV</h1>
+        <h1 class="form-title">{% if idioma == 'en' %}CV Analysis{% else %}Analizar CV{% endif %}</h1>
         <p style="font-size: 13px; color: #6b7280; margin-bottom: 20px;">{{ oferta.titulo }} — {{ oferta.empresa }}</p>
 
         {% if error %}
@@ -42,41 +46,41 @@
         {% if analisis %}
             <div style="background: #f4f5f7; border-radius: 6px; padding: 16px; font-size: 13px; line-height: 1.7; white-space: pre-wrap;">{{ analisis }}</div>
             <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
-                <a href="{% url 'analizar_cv' oferta.pk %}" class="btn btn-outline">Volver a analizar</a>
+                <a href="{% url 'analizar_cv' oferta.pk %}" class="btn btn-outline">{% if idioma == 'en' %}Analyze again{% else %}Volver a analizar{% endif %}</a>
                 <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-primary">
-                    <i class="ti ti-external-link"></i> Ver oferta original
+                    <i class="ti ti-external-link"></i> {% if idioma == 'en' %}View original offer{% else %}Ver oferta original{% endif %}
                 </a>
                 <a href="{% url 'generar_cv' oferta.pk %}" class="btn btn-primary" id="btn-generar">
-                    <i class="ti ti-sparkles"></i> Generar CV adaptado
+                    <i class="ti ti-sparkles"></i> {% if idioma == 'en' %}Generate adapted CV{% else %}Generar CV adaptado{% endif %}
                 </a>
             </div>
 
         {% elif cv_subido %}
             <p style="font-size: 13px; color: #1D9E75; margin-bottom: 20px;">
-                <i class="ti ti-check"></i> CV cargado en sesión.
+                <i class="ti ti-check"></i> {% if idioma == 'en' %}CV loaded in session.{% else %}CV cargado en sesión.{% endif %}
             </p>
 
             <form method="POST" enctype="multipart/form-data" id="form-analizar">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 14px;">
-                    <i class="ti ti-file-text"></i> Analizar CV para esta oferta
+                    <i class="ti ti-file-text"></i> {% if idioma == 'en' %}Analyze CV for this offer{% else %}Analizar CV para esta oferta{% endif %}
                 </button>
             </form>
 
             <div style="margin-top: 20px; border-top: 0.5px solid #e5e7eb; padding-top: 16px;">
-                <p style="font-size: 12px; color: #9ca3af; margin-bottom: 10px;">¿Quieres usar un CV diferente?</p>
+                <p style="font-size: 12px; color: #9ca3af; margin-bottom: 10px;">{% if idioma == 'en' %}Want to use a different CV?{% else %}¿Quieres usar un CV diferente?{% endif %}</p>
                 <form method="POST" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="form-group">
-                        <label class="form-label">Sube otro PDF</label>
+                        <label class="form-label">{% if idioma == 'en' %}Upload another PDF{% else %}Sube otro PDF{% endif %}</label>
                         <input type="file" name="cv_pdf" accept=".pdf" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">O pega el texto</label>
-                        <textarea name="cv_texto_manual" class="form-control" rows="6" placeholder="Copia y pega el contenido de tu CV aquí..."></textarea>
+                        <label class="form-label">{% if idioma == 'en' %}Or paste the text{% else %}O pega el texto{% endif %}</label>
+                        <textarea name="cv_texto_manual" class="form-control" rows="6" placeholder="{% if idioma == 'en' %}Paste your CV content here...{% else %}Copia y pega el contenido de tu CV aquí...{% endif %}"></textarea>
                     </div>
                     <button type="submit" class="btn btn-outline" style="width: 100%; padding: 10px; font-size: 14px;">
-                        Usar este CV y analizar
+                        {% if idioma == 'en' %}Use this CV and analyze{% else %}Usar este CV y analizar{% endif %}
                     </button>
                 </form>
             </div>
@@ -85,15 +89,15 @@
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label class="form-label">Sube tu CV en PDF</label>
+                    <label class="form-label">{% if idioma == 'en' %}Upload your CV in PDF{% else %}Sube tu CV en PDF{% endif %}</label>
                     <input type="file" name="cv_pdf" accept=".pdf" class="form-control">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">O pega el texto de tu CV</label>
-                    <textarea name="cv_texto_manual" class="form-control" rows="10" placeholder="Copia y pega el contenido de tu CV aquí..."></textarea>
+                    <label class="form-label">{% if idioma == 'en' %}Or paste your CV text{% else %}O pega el texto de tu CV{% endif %}</label>
+                    <textarea name="cv_texto_manual" class="form-control" rows="10" placeholder="{% if idioma == 'en' %}Paste your CV content here...{% else %}Copia y pega el contenido de tu CV aquí...{% endif %}"></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 14px; margin-top: 8px;">
-                    <i class="ti ti-file-text"></i> Analizar CV para esta oferta
+                    <i class="ti ti-file-text"></i> {% if idioma == 'en' %}Analyze CV for this offer{% else %}Analizar CV para esta oferta{% endif %}
                 </button>
             </form>
         {% endif %}
@@ -108,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const btn = form.querySelector('button[type="submit"]');
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '<i class="ti ti-loader"></i> Analizando...';
+                btn.innerHTML = '<i class="ti ti-loader"></i> {% if idioma == "en" %}Analyzing...{% else %}Analizando...{% endif %}';
             }
         });
     });
@@ -116,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnGenerar = document.getElementById('btn-generar');
     if (btnGenerar) {
         btnGenerar.addEventListener('click', function() {
-            this.innerHTML = '<i class="ti ti-loader"></i> Generando...';
+            this.innerHTML = '<i class="ti ti-loader"></i> {% if idioma == "en" %}Generating...{% else %}Generando...{% endif %}';
         });
     }
 });

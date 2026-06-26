@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="es">
+<html lang="{{ idioma }}">
 <head>
     <meta charset="UTF-8">
     <title>CVMatch AI</title>
@@ -13,89 +13,100 @@
     <a href="{% url 'inicio' %}" class="navbar-brand">CVMatch AI</a>
     <div class="navbar-nav">
         <a href="{% url 'buscador' %}" class="nav-link">
-            <i class="ti ti-search"></i> Buscador
+            <i class="ti ti-search"></i> {% if idioma == 'en' %}Search{% else %}Buscador{% endif %}
         </a>
         <div class="navbar-divider"></div>
-        <a href="{% url 'lista_ofertas' %}" class="nav-link">Nuevas</a>
-        <a href="{% url 'ofertas_vistas' %}" class="nav-link">Vistas</a>
-        <a href="{% url 'ofertas_guardadas' %}" class="nav-link">Guardadas</a>
-        <a href="{% url 'ofertas_descartadas' %}" class="nav-link">Descartadas</a>
+        <a href="{% url 'lista_ofertas' %}" class="nav-link">{% if idioma == 'en' %}New{% else %}Nuevas{% endif %}</a>
+        <a href="{% url 'ofertas_vistas' %}" class="nav-link">{% if idioma == 'en' %}Viewed{% else %}Vistas{% endif %}</a>
+        <a href="{% url 'ofertas_guardadas' %}" class="nav-link">{% if idioma == 'en' %}Saved{% else %}Guardadas{% endif %}</a>
+        <a href="{% url 'ofertas_descartadas' %}" class="nav-link">{% if idioma == 'en' %}Discarded{% else %}Descartadas{% endif %}</a>
+        <div class="navbar-divider"></div>
+        <a href="{% url 'cambiar_idioma' 'es' %}" class="{% if idioma != 'en' %}lang-active{% else %}lang-inactive{% endif %}">ES</a>
+        <span style="color:rgba(255,255,255,0.3); font-size:11px;">|</span>
+        <a href="{% url 'cambiar_idioma' 'en' %}" class="{% if idioma == 'en' %}lang-active{% else %}lang-inactive{% endif %}">EN</a>
     </div>
 </nav>
 
 <div class="container" style="max-width: 760px; margin-top: 56px;">
 
-    <!-- HERO -->
     <div style="text-align: center; margin-bottom: 56px;">
         <h1 style="font-size: 36px; font-weight: 800; color: #0f172a; margin-bottom: 14px; letter-spacing: -1px;">CVMatch AI</h1>
         <p style="font-size: 16px; color: #64748b; max-width: 520px; margin: 0 auto; line-height: 1.7;">
-            Tu herramienta personal para buscar trabajo de forma inteligente. Busca ofertas, organízalas, analiza tu CV con IA y obtén el texto de tu CV reescrito y adaptado a cada oferta, listo para copiar.
+            {% if idioma == 'en' %}
+            Your personal tool for smart job searching. Search offers, organize them, and let AI analyze your CV for each one.
+            {% else %}
+            Tu herramienta personal para buscar trabajo de forma inteligente. Busca ofertas, organízalas y deja que la IA analice tu CV para cada una.
+            {% endif %}
         </p>
     </div>
 
-    <!-- CÓMO FUNCIONA -->
     <div style="margin-bottom: 48px;">
-        <h2 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 20px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">¿Cómo funciona?</h2>
+        <h2 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 20px; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">{% if idioma == 'en' %}How does it work?{% else %}¿Cómo funciona?{% endif %}</h2>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
 
             <div style="background: #fff; border: none; border-left: 4px solid #1253A4; border-radius: 12px; padding: 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.07);">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
                     <span style="background: linear-gradient(135deg, #1253A4, #0A3A78); color: #fff; font-size: 12px; font-weight: 700; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">1</span>
-                    <h3 style="font-size: 14px; font-weight: 700; margin: 0;">Configura tu búsqueda</h3>
+                    <h3 style="font-size: 14px; font-weight: 700; margin: 0;">{% if idioma == 'en' %}Configure your search{% else %}Configura tu búsqueda{% endif %}</h3>
                 </div>
-                <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin: 0;">Ve al buscador y pon las palabras clave que buscas y la ciudad o zona. También puedes filtrar por modalidad (remoto, híbrido, presencial) y experiencia requerida.</p>
+                <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin: 0;">{% if idioma == 'en' %}Go to the search page and enter your keywords and location. You can also filter by modality and experience.{% else %}Ve al buscador y pon las palabras clave que buscas y la ciudad o zona. También puedes filtrar por modalidad y experiencia requerida.{% endif %}</p>
             </div>
 
             <div style="background: #fff; border: none; border-left: 4px solid #1253A4; border-radius: 12px; padding: 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.07);">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
                     <span style="background: linear-gradient(135deg, #1253A4, #0A3A78); color: #fff; font-size: 12px; font-weight: 700; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">2</span>
-                    <h3 style="font-size: 14px; font-weight: 700; margin: 0;">Revisa las ofertas</h3>
+                    <h3 style="font-size: 14px; font-weight: 700; margin: 0;">{% if idioma == 'en' %}Review offers{% else %}Revisa las ofertas{% endif %}</h3>
                 </div>
-                <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin: 0;">Las ofertas aparecen en el listado de Nuevas. Puedes ver el resumen de cada una generado por IA, sin tener que abrir el enlace original.</p>
+                <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin: 0;">{% if idioma == 'en' %}Offers appear in the New list. You can view an AI-generated summary of each one — stack, modality, required experience — without opening the original link.{% else %}Las ofertas aparecen en el listado de Nuevas. Puedes ver el resumen de cada una — stack, modalidad, experiencia requerida — generado por IA, sin tener que abrir el enlace original.{% endif %}</p>
             </div>
 
             <div style="background: #fff; border: none; border-left: 4px solid #1253A4; border-radius: 12px; padding: 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.07);">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
                     <span style="background: linear-gradient(135deg, #1253A4, #0A3A78); color: #fff; font-size: 12px; font-weight: 700; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">3</span>
-                    <h3 style="font-size: 14px; font-weight: 700; margin: 0;">Organiza las que te interesan</h3>
+                    <h3 style="font-size: 14px; font-weight: 700; margin: 0;">{% if idioma == 'en' %}Organize your favorites{% else %}Organiza las que te interesan{% endif %}</h3>
                 </div>
-                <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin: 0;">Guarda las que te interesen, descarta las que no. Las que guardes quedan en tu lista de Guardadas para volver a ellas cuando quieras. Las descartadas puedes eliminarlas cuando quieras limpiar.</p>
+                <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin: 0;">{% if idioma == 'en' %}Save the ones you like, discard the ones you don't. Saved offers stay in your Saved list. Discarded ones can be deleted whenever you want to clean up.{% else %}Guarda las que te interesen, descarta las que no. Las que guardes quedan en tu lista de Guardadas. Las descartadas puedes eliminarlas cuando quieras limpiar.{% endif %}</p>
             </div>
 
             <div style="background: #fff; border: none; border-left: 4px solid #1253A4; border-radius: 12px; padding: 22px; box-shadow: 0 2px 12px rgba(0,0,0,0.07);">
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
                     <span style="background: linear-gradient(135deg, #1253A4, #0A3A78); color: #fff; font-size: 12px; font-weight: 700; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">4</span>
-                    <h3 style="font-size: 14px; font-weight: 700; margin: 0;">Analiza tu CV con IA</h3>
+                    <h3 style="font-size: 14px; font-weight: 700; margin: 0;">{% if idioma == 'en' %}Analyze your CV with AI{% else %}Analiza tu CV con IA{% endif %}</h3>
                 </div>
-                <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin: 0;">Desde cualquier oferta puedes analizar tu CV. Sube tu CV en PDF o pega el texto, y la IA te dice el porcentaje de compatibilidad, qué palabras clave faltan y qué cambios concretos hacer para pasar los filtros ATS.</p>
+                <p style="font-size: 13px; color: #64748b; line-height: 1.6; margin: 0;">{% if idioma == 'en' %}From any offer you can analyze your CV. Upload your CV in PDF or paste the text, and the AI tells you the compatibility percentage, missing keywords and concrete changes to pass ATS filters.{% else %}Desde cualquier oferta puedes analizar tu CV. Sube tu CV en PDF o pega el texto, y la IA te dice el porcentaje de compatibilidad, qué palabras clave faltan y qué cambios concretos hacer para pasar los filtros ATS.{% endif %}</p>
             </div>
 
         </div>
     </div>
 
-    <!-- BONUS -->
     <div style="background: #fff; border: none; border-radius: 14px; padding: 28px; margin-bottom: 48px; box-shadow: 0 4px 16px rgba(0,0,0,0.08);">
-        <h2 style="font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 18px; text-transform: uppercase; letter-spacing: 0.5px;">Y además...</h2>
+        <h2 style="font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 18px; text-transform: uppercase; letter-spacing: 0.5px;">{% if idioma == 'en' %}And also...{% else %}Y además...{% endif %}</h2>
         <div style="display: flex; flex-direction: column; gap: 14px;">
             <div style="display: flex; align-items: flex-start; gap: 14px;">
                 <i class="ti ti-sparkles" style="color: #1253A4; font-size: 18px; margin-top: 1px; flex-shrink: 0;"></i>
-                <p style="font-size: 13px; color: #64748b; margin: 0; line-height: 1.6;"><strong style="color: #0f172a;">Genera el texto de tu CV adaptado</strong> — después del análisis, puedes pedirle a la IA que reescriba el texto de tu CV completo adaptado a esa oferta concreta, manteniendo tu información real. Cópialo y pégalo en tu CV real para mantener el diseño profesional.</p>
+                <p style="font-size: 13px; color: #64748b; margin: 0; line-height: 1.6;">
+                    {% if idioma == 'en' %}<strong style="color: #0f172a;">Generate adapted CV text</strong> — after the analysis, you can ask the AI to rewrite your full CV text adapted to that specific offer, keeping your real information. Copy and paste it into your real CV to keep the professional design.{% else %}<strong style="color: #0f172a;">Genera el texto de tu CV adaptado</strong> — después del análisis, puedes pedirle a la IA que reescriba el texto de tu CV completo adaptado a esa oferta concreta, manteniendo tu información real. Cópialo y pégalo en tu CV real para mantener el diseño profesional.{% endif %}
+                </p>
             </div>
             <div style="display: flex; align-items: flex-start; gap: 14px;">
                 <i class="ti ti-history" style="color: #1253A4; font-size: 18px; margin-top: 1px; flex-shrink: 0;"></i>
-                <p style="font-size: 13px; color: #64748b; margin: 0; line-height: 1.6;"><strong style="color: #0f172a;">Tu CV se recuerda</strong> — una vez subes tu CV, lo recuerda durante toda la sesión. No tienes que volver a subirlo cada vez que analices una oferta nueva.</p>
+                <p style="font-size: 13px; color: #64748b; margin: 0; line-height: 1.6;">
+                    {% if idioma == 'en' %}<strong style="color: #0f172a;">Your CV is remembered</strong> — once you upload your CV, it is remembered for the entire session. You don't need to upload it again every time you analyze a new offer.{% else %}<strong style="color: #0f172a;">Tu CV se recuerda</strong> — una vez subes tu CV, lo recuerda durante toda la sesión. No tienes que volver a subirlo cada vez que analices una oferta nueva.{% endif %}
+                </p>
             </div>
             <div style="display: flex; align-items: flex-start; gap: 14px;">
                 <i class="ti ti-refresh" style="color: #1253A4; font-size: 18px; margin-top: 1px; flex-shrink: 0;"></i>
-                <p style="font-size: 13px; color: #64748b; margin: 0; line-height: 1.6;"><strong style="color: #0f172a;">Búsquedas frescas</strong> — cada vez que buscas de nuevo, las ofertas nuevas se actualizan automáticamente. Las que tenías guardadas o descartadas nunca se tocan.</p>
+                <p style="font-size: 13px; color: #64748b; margin: 0; line-height: 1.6;">
+                    {% if idioma == 'en' %}<strong style="color: #0f172a;">Fresh searches</strong> — every time you search again, new offers are updated automatically. Your saved or discarded offers are never touched.{% else %}<strong style="color: #0f172a;">Búsquedas frescas</strong> — cada vez que buscas de nuevo, las ofertas nuevas se actualizan automáticamente. Las que tenías guardadas o descartadas nunca se tocan.{% endif %}
+                </p>
             </div>
         </div>
     </div>
 
     <div style="text-align: center; margin-bottom: 56px;">
         <a href="{% url 'buscador' %}" class="btn btn-primary" style="padding: 14px 36px; font-size: 15px; font-weight: 700; border-radius: 10px;">
-            Empezar a buscar
+            {% if idioma == 'en' %}Start searching{% else %}Empezar a buscar{% endif %}
         </a>
     </div>
 
