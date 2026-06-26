@@ -1,0 +1,39 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Acceso — CVMatch AI</title>
+    <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+</head>
+<body>
+
+<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center;">
+    <div class="form-card" style="max-width: 400px; width: 100%; text-align: center;">
+        
+        <h1 style="font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.8px;">CVMatch AI</h1>
+        <p style="font-size: 14px; color: #94a3b8; margin-bottom: 32px;">Introduce la contraseña para acceder</p>
+
+        {% if error %}
+            <p style="color: #dc2626; font-size: 13px; margin-bottom: 16px; background: #FEF2F2; padding: 10px; border-radius: 6px;">
+                <i class="ti ti-alert-circle"></i> {{ error }}
+            </p>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group" style="text-align: left;">
+                <label class="form-label">Contraseña</label>
+                <input type="password" name="password" class="form-control" placeholder="••••••••" autofocus>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 11px; font-size: 14px; font-weight: 700; margin-top: 8px;">
+                Entrar
+            </button>
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>

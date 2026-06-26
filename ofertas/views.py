@@ -3,9 +3,21 @@ from django.core.paginator import Paginator
 from .models import Oferta
 from .api import buscar_ofertas
 from datetime import datetime
+from django.conf import settings
 import fitz
 import os
 import io
+
+
+def acceso(request):
+    if request.method == 'POST':
+        password = request.POST.get('password', '')
+        if password == settings.APP_PASSWORD:
+            request.session['acceso_validado'] = True
+            return redirect('inicio')
+        else:
+            return render(request, 'ofertas/acceso.html', {'error': 'Contraseña incorrecta'})
+    return render(request, 'ofertas/acceso.html')
 
 def inicio(request):
     return render(request, 'ofertas/inicio.html')

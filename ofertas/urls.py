@@ -13,4 +13,5 @@ urlpatterns = [
     path('ofertas/<int:pk>/analizar/', views.analizar_cv, name='analizar_cv'),
     path('ofertas/<int:pk>/estado/<str:estado>/', views.cambiar_estado, name='cambiar_estado'),
     path('ofertas/<int:pk>/generar-cv/', views.generar_cv, name='generar_cv'),
+    path('acceso/', views.acceso, name='acceso'),
 ]
