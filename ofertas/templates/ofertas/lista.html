@@ -35,7 +35,16 @@
 
     {% if busqueda_activa.keywords %}
     <p style="font-size: 12px; color: #6b7280; margin-bottom: 12px;">
-        <i class="ti ti-search"></i> Buscando <strong>{{ busqueda_activa.keywords }}</strong> en <strong>{{ busqueda_activa.ubicacion }}</strong>
+        Buscando <strong>{{ busqueda_activa.keywords }}</strong>
+        {% if busqueda_activa.ubicacion %} en <strong>{{ busqueda_activa.ubicacion }}</strong>{% endif %}
+        —
+        {% if busqueda_activa.fuente == 'adzuna_es' %}Adzuna España
+        {% elif busqueda_activa.fuente == 'adzuna_uk' %}Adzuna Reino Unido
+        {% elif busqueda_activa.fuente == 'adzuna_us' %}Adzuna Estados Unidos
+        {% elif busqueda_activa.fuente == 'jooble' %}Jooble Internacional
+        {% elif busqueda_activa.fuente == 'arbeitnow' %}Arbeitnow Europa
+        {% elif busqueda_activa.fuente == 'todas' %}Todas las fuentes
+        {% endif %}
     </p>
     {% endif %}
 

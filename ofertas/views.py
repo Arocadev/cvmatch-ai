@@ -28,49 +28,92 @@ def lista_ofertas(request):
         
         keywords = request.session.get('keywords', 'devops')
         ubicacion = request.session.get('ubicacion', 'Valencia')
+        fuente = request.session.get('fuente', 'adzuna_es')
         modalidad = request.session.get('modalidad', '')
         experiencia = request.session.get('experiencia', '')
         salario_min = request.session.get('salario_min', '')
         
-        resultado = buscar_ofertas(
+        resultados = buscar_ofertas(
             keywords=keywords,
             ubicacion=ubicacion,
-            salary_min=salario_min if salario_min else None
+            fuente=fuente,
+            salary_min=salario_min if salario_min else None,
         )
-        ofertas_api = resultado.get('results', [])
         
-        for item in ofertas_api:
-            descripcion = item.get('description', '').lower()
-            
-            if modalidad == 'remoto' and 'remoto' not in descripcion and 'remote' not in descripcion:
+        for item in resultados:
+            try:
+                if fuente in ('adzuna_es', 'adzuna_uk', 'adzuna_us'):
+                    oferta_id = item.get('id', '')
+                    titulo = item.get('title', '')
+                    empresa = item.get('company', {}).get('display_name', '')
+                    ubicacion_oferta = item.get('location', {}).get('display_name', '')
+                    descripcion = item.get('description', '')
+                    url_original = item.get('redirect_url', '')
+                    fecha = datetime.strptime(item['created'][:10], '%Y-%m-%d').date()
+                    fuente_nombre = fuente
+
+                elif fuente == 'jooble':
+                    oferta_id = str(item.get('id', ''))
+                    titulo = item.get('title', '')
+                    empresa = item.get('company', '')
+                    ubicacion_oferta = item.get('location', '')
+                    descripcion = item.get('snippet', '')
+                    url_original = item.get('link', '')
+                    fecha_str = item.get('updated', '')[:10]
+                    fecha = datetime.strptime(fecha_str, '%Y-%m-%d').date() if fecha_str else datetime.now().date()
+                    fuente_nombre = 'jooble'
+
+                elif fuente == 'arbeitnow':
+                    oferta_id = item.get('slug', '')
+                    titulo = item.get('title', '')
+                    empresa = item.get('company_name', '')
+                    ubicacion_oferta = item.get('location', '')
+                    descripcion = item.get('description', '')
+                    url_original = item.get('url', '')
+                    timestamp = item.get('created_at', 0)
+                    fecha = datetime.fromtimestamp(timestamp).date() if timestamp else datetime.now().date()
+                    fuente_nombre = 'arbeitnow'
+
+                elif fuente == 'todas':
+                    oferta_id = item.get('id', item.get('slug', ''))
+                    titulo = item.get('titulo', '')
+                    empresa = item.get('empresa', '')
+                    ubicacion_oferta = item.get('ubicacion', '')
+                    descripcion = item.get('descripcion', '')
+                    url_original = item.get('url_original', '')
+                    fecha = item.get('fecha', datetime.now().date())
+                    fuente_nombre = item.get('fuente', 'desconocida')
+
+                else:
+                    continue
+
+                desc_lower = descripcion.lower()
+                if modalidad == 'remoto' and 'remoto' not in desc_lower and 'remote' not in desc_lower:
+                    continue
+                if modalidad == 'hibrido' and 'híbrido' not in desc_lower and 'hibrido' not in desc_lower and 'hybrid' not in desc_lower:
+                    continue
+                if modalidad == 'presencial' and 'presencial' not in desc_lower:
+                    continue
+                if experiencia in ('0', '1') and any(x in desc_lower for x in ['3 años', '4 años', '5 años', 'senior']):
+                    continue
+                if experiencia == '2' and any(x in desc_lower for x in ['4 años', '5 años', 'senior']):
+                    continue
+
+                if oferta_id and not Oferta.objects.filter(url_original__contains=oferta_id).exists():
+                    Oferta.objects.create(
+                        titulo=titulo,
+                        empresa=empresa,
+                        ubicacion=ubicacion_oferta,
+                        descripcion=descripcion,
+                        url_original=url_original,
+                        fecha_publicacion=fecha,
+                        estado='nueva',
+                        fuente=fuente_nombre,
+                    )
+            except Exception as e:
+                print(f"Error procesando oferta: {e}")
                 continue
-            if modalidad == 'hibrido' and 'híbrido' not in descripcion and 'hibrido' not in descripcion and 'hybrid' not in descripcion:
-                continue
-            if modalidad == 'presencial' and 'presencial' not in descripcion:
-                continue
-            
-            if experiencia == '0' and any(x in descripcion for x in ['3 años', '4 años', '5 años', 'senior']):
-                continue
-            if experiencia == '1' and any(x in descripcion for x in ['3 años', '4 años', '5 años', 'senior']):
-                continue
-            if experiencia == '2' and any(x in descripcion for x in ['4 años', '5 años', 'senior']):
-                continue
-            
-            oferta_id = item.get('id')
-            if not Oferta.objects.filter(url_original__contains=oferta_id).exists():
-                Oferta.objects.create(
-                    titulo=item.get('title', ''),
-                    empresa=item['company'].get('display_name', ''),
-                    ubicacion=item['location'].get('display_name', ''),
-                    descripcion=item.get('description', ''),
-                    url_original=item.get('redirect_url', ''),
-                    fecha_publicacion=datetime.strptime(
-                        item['created'][:10], '%Y-%m-%d'
-                    ).date(),
-                    estado='nueva',
-                    fuente='adzuna',
-                )
-        
+
         request.session['buscar_ahora'] = False
 
     todas = Oferta.objects.filter(estado='nueva').order_by('-fecha_guardada')
@@ -88,6 +131,7 @@ def lista_ofertas(request):
     busqueda_activa = {
         'keywords': request.session.get('keywords', ''),
         'ubicacion': request.session.get('ubicacion', ''),
+        'fuente': request.session.get('fuente', 'adzuna_es'),
     }
 
     return render(request, 'ofertas/lista.html', {
@@ -234,12 +278,14 @@ def buscador(request):
         modalidad = request.POST.get('modalidad', '')
         experiencia = request.POST.get('experiencia', '')
         salario_min = request.POST.get('salario_min', '')
+        fuente = request.POST.get('fuente', 'adzuna_es')
 
         request.session['keywords'] = keywords
         request.session['ubicacion'] = ubicacion
         request.session['modalidad'] = modalidad
         request.session['experiencia'] = experiencia
         request.session['salario_min'] = salario_min
+        request.session['fuente'] = fuente
         request.session['buscar_ahora'] = True
         request.session.modified = True
         
