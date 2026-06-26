@@ -8,6 +8,8 @@
 
 **CVMatch AI** te ayuda a buscar, organizar y analizar ofertas de empleo usando inteligencia artificial. Sube tu CV, obtén un porcentaje de compatibilidad con cada oferta, descubre qué palabras clave faltan y genera el texto de tu CV adaptado para cada puesto.
 
+---
+
 ### ✨ Funcionalidades
 
 - 🔍 **Búsqueda multi-fuente** — Adzuna (España, UK, USA), Jooble (Internacional), Arbeitnow (Europa)
@@ -17,6 +19,8 @@
 - 🗂️ **Gestión de ofertas** — estados Nueva / Vista / Guardada / Descartada
 - 🌍 **Interfaz bilingüe** — Español / Inglés
 - 🔒 **Acceso protegido** — control de acceso con contraseña
+
+---
 
 ### 🛠️ Stack tecnológico
 
@@ -29,70 +33,64 @@
 | Lectura de PDF | PyMuPDF (fitz) |
 | Frontend | Django Templates + CSS |
 
+---
+
 ### 📁 Estructura del proyecto
+
+```
 cvmatch-ai/
-
-├── jobtracker/          # Configuración del proyecto Django
-
+├── jobtracker/
 │   ├── settings.py
-
 │   ├── urls.py
-
 │   └── wsgi.py
-
-├── ofertas/             # App principal
-
-│   ├── api.py           # Integración con APIs de empleo
-
-│   ├── cv.py            # Funciones de IA con Groq
-
-│   ├── middleware.py    # Protección con contraseña
-
-│   ├── models.py        # Modelo Oferta
-
-│   ├── views.py         # Vistas
-
-│   ├── urls.py          # URLs
-
-│   ├── static/          # CSS
-
-│   └── templates/       # Templates HTML
-
-├── .env.example         # Variables de entorno necesarias
-
+├── ofertas/
+│   ├── api.py
+│   ├── cv.py
+│   ├── middleware.py
+│   ├── models.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── static/
+│   │   └── ofertas/
+│   │       └── style.css
+│   └── templates/
+│       └── ofertas/
+│           ├── acceso.html
+│           ├── analisis.html
+│           ├── buscador.html
+│           ├── cv_generado.html
+│           ├── detalle.html
+│           ├── inicio.html
+│           └── lista.html
+├── .env.example
 ├── requirements.txt
-
 └── manage.py
+```
+
+---
 
 ### 🚀 Instalación
 
 ```bash
-# Clonar el repositorio
 git clone https://github.com/Arocadev/cvmatch-ai.git
 cd cvmatch-ai
 
-# Crear y activar entorno virtual
 python -m venv venv
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # Mac/Linux
+venv\Scripts\activate        # Windows
+source venv/bin/activate     # Mac/Linux
 
-# Instalar dependencias
 pip install -r requirements.txt
 
-# Configurar variables de entorno
 cp .env.example .env
-# Edita .env con tus API keys y credenciales de base de datos
+# Edita .env con tus API keys y credenciales
 
-# Ejecutar migraciones
 python manage.py migrate
-
-# Iniciar el servidor
 python manage.py runserver
 ```
 
-### 🔑 Variables de entorno
+---
 
-Copia `.env.example` a `.env` y rellena los valores:
+### 🔑 Variables de entorno
 
 ```env
 ADZUNA_APP_ID=        # https://developer.adzuna.com
@@ -109,9 +107,11 @@ DB_PORT=5432
 
 ---
 
-## 🇬🇧 English
+## 🌐 English
 
 **CVMatch AI** helps you search, organize and analyze job offers using AI. Upload your CV and get a compatibility score, keyword suggestions and an adapted CV text for each offer — all in one place.
+
+---
 
 ### ✨ Features
 
@@ -122,6 +122,8 @@ DB_PORT=5432
 - 🗂️ **Offer management** — New / Viewed / Saved / Discarded states
 - 🌍 **Bilingual interface** — Spanish / English
 - 🔒 **Password protected** — simple access control
+
+---
 
 ### 🛠️ Tech Stack
 
@@ -134,35 +136,64 @@ DB_PORT=5432
 | PDF parsing | PyMuPDF (fitz) |
 | Frontend | Django Templates + CSS |
 
+---
+
+### 📁 Project Structure
+
+```
+cvmatch-ai/
+├── jobtracker/
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── ofertas/
+│   ├── api.py
+│   ├── cv.py
+│   ├── middleware.py
+│   ├── models.py
+│   ├── views.py
+│   ├── urls.py
+│   ├── static/
+│   │   └── ofertas/
+│   │       └── style.css
+│   └── templates/
+│       └── ofertas/
+│           ├── acceso.html
+│           ├── analisis.html
+│           ├── buscador.html
+│           ├── cv_generado.html
+│           ├── detalle.html
+│           ├── inicio.html
+│           └── lista.html
+├── .env.example
+├── requirements.txt
+└── manage.py
+```
+
+---
+
 ### 🚀 Installation
 
 ```bash
-# Clone the repo
 git clone https://github.com/Arocadev/cvmatch-ai.git
 cd cvmatch-ai
 
-# Create and activate virtual environment
 python -m venv venv
-venv\Scripts\activate  # Windows
-source venv/bin/activate  # Mac/Linux
+venv\Scripts\activate        # Windows
+source venv/bin/activate     # Mac/Linux
 
-# Install dependencies
 pip install -r requirements.txt
 
-# Configure environment variables
 cp .env.example .env
 # Edit .env with your API keys and database credentials
 
-# Run migrations
 python manage.py migrate
-
-# Start the server
 python manage.py runserver
 ```
 
-### 🔑 Environment Variables
+---
 
-Copy `.env.example` to `.env` and fill in your values:
+### 🔑 Environment Variables
 
 ```env
 ADZUNA_APP_ID=        # https://developer.adzuna.com
