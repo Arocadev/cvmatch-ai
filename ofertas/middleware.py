@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 from django.conf import settings
 
-RUTAS_EXCLUIDAS = ['/acceso/', '/static/']
+RUTAS_EXCLUIDAS = ['/acceso/', '/static/', '/idioma/']
 
 class PasswordMiddleware:
     def __init__(self, get_response):
