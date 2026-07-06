@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 cliente = Groq(api_key=os.getenv('GROQ_API_KEY'))
+MODELO = os.getenv('GROQ_MODEL', 'qwen/qwen3.6-27b')
 
 def extraer_texto_pdf(pdf_bytes):
     doc = fitz.open(stream=pdf_bytes, filetype="pdf")
@@ -47,7 +48,7 @@ Oferta:
 Responde SOLO con el formato indicado, sin añadir nada más."""
 
     respuesta = cliente.chat.completions.create(
-        model='llama-3.3-70b-versatile',
+        model=MODELO,
         messages=[{'role': 'user', 'content': prompt}],
         max_tokens=500,
     )
@@ -121,7 +122,7 @@ CAMBIOS CONCRETOS:
 Sé directo, específico y realista con el nivel de experiencia del candidato."""
 
     respuesta = cliente.chat.completions.create(
-        model='llama-3.3-70b-versatile',
+        model=MODELO,
         messages=[{'role': 'user', 'content': prompt}],
         max_tokens=1000,
     )
@@ -165,7 +166,7 @@ Reescribe mi CV completo adaptado a esta oferta. Reglas:
 Devuelve SOLO el CV reescrito, sin explicaciones ni comentarios."""
 
     respuesta = cliente.chat.completions.create(
-        model='llama-3.3-70b-versatile',
+        model=MODELO,
         messages=[{'role': 'user', 'content': prompt}],
         max_tokens=2000,
     )
