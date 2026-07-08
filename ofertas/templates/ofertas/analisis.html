@@ -9,122 +9,83 @@
 </head>
 <body>
 
-<nav class="navbar">
-    <a href="{% url 'inicio' %}" class="navbar-brand">CVMatch AI</a>
-    <div class="navbar-nav">
-        <a href="{% url 'buscador' %}" class="nav-link">
-            <i class="ti ti-search"></i> {% if idioma == 'en' %}Search{% else %}Buscador{% endif %}
-        </a>
-        <div class="navbar-divider"></div>
-        <a href="{% url 'lista_ofertas' %}" class="nav-link">{% if idioma == 'en' %}New{% else %}Nuevas{% endif %}</a>
-        <a href="{% url 'ofertas_vistas' %}" class="nav-link">{% if idioma == 'en' %}Viewed{% else %}Vistas{% endif %}</a>
-        <a href="{% url 'ofertas_guardadas' %}" class="nav-link">{% if idioma == 'en' %}Saved{% else %}Guardadas{% endif %}</a>
-        <a href="{% url 'ofertas_descartadas' %}" class="nav-link">{% if idioma == 'en' %}Discarded{% else %}Descartadas{% endif %}</a>
-        <div class="navbar-divider"></div>
-        <a href="{% url 'cambiar_idioma' 'es' %}" class="{% if idioma != 'en' %}lang-active{% else %}lang-inactive{% endif %}">ES</a>
-        <span style="color:rgba(255,255,255,0.3); font-size:11px;">|</span>
-        <a href="{% url 'cambiar_idioma' 'en' %}" class="{% if idioma == 'en' %}lang-active{% else %}lang-inactive{% endif %}">EN</a>
-    </div>
-</nav>
+{% include 'ofertas/includes/navbar.html' %}
 
-<div class="container" style="max-width: 700px; margin-top: 32px;">
+<div class="container" style="max-width: 580px; margin-top: 40px; padding-bottom: 48px;">
 
-    <a href="{% url 'lista_ofertas' %}" class="btn btn-outline" style="margin-bottom: 24px; display: inline-flex;">
-        <i class="ti ti-arrow-left"></i> {% if idioma == 'en' %}Back to new{% else %}Volver a nuevas{% endif %}
-    </a>
+    <div class="form-card" style="padding: 32px;">
 
-    <div class="form-card">
-        <h1 class="form-title">{% if idioma == 'en' %}CV Analysis{% else %}Analizar CV{% endif %}</h1>
-        <p style="font-size: 13px; color: #6b7280; margin-bottom: 20px;">{{ oferta.titulo }} — {{ oferta.empresa }}</p>
+        <div style="text-align: center; margin-bottom: 24px;">
+            <h1 style="font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 6px;">{% if idioma == 'en' %}CV Analysis{% else %}Analizar CV{% endif %}</h1>
+            <p style="font-size: 13px; color: #6b7280;">{{ oferta.titulo }} — {{ oferta.empresa }}</p>
+        </div>
 
         {% if error %}
-            <p style="color: #dc2626; font-size: 13px; margin-bottom: 16px;">
-                <i class="ti ti-alert-circle"></i> {{ error }}
-            </p>
+        <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 12px 14px; margin-bottom: 20px; font-size: 13px; color: #dc2626; display: flex; align-items: center; gap: 8px;">
+            <i class="ti ti-alert-circle"></i> {{ error }}
+        </div>
         {% endif %}
 
         {% if analisis %}
-            <div style="background: #f4f5f7; border-radius: 6px; padding: 16px; font-size: 13px; line-height: 1.7; white-space: pre-wrap;">{{ analisis }}</div>
-            <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
+            <div class="markdown-content" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px; max-height: 480px; overflow-y: auto;">{{ analisis|safe }}</div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
                 <a href="{% url 'analizar_cv' oferta.pk %}" class="btn btn-outline">{% if idioma == 'en' %}Analyze again{% else %}Volver a analizar{% endif %}</a>
-                <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-primary">
-                    <i class="ti ti-external-link"></i> {% if idioma == 'en' %}View original offer{% else %}Ver oferta original{% endif %}
-                </a>
-                <a href="{% url 'generar_cv' oferta.pk %}" class="btn btn-primary" id="btn-generar">
-                    <i class="ti ti-sparkles"></i> {% if idioma == 'en' %}Generate adapted CV{% else %}Generar CV adaptado{% endif %}
-                </a>
+                <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-outline"><i class="ti ti-external-link"></i> {% if idioma == 'en' %}View offer{% else %}Ver oferta{% endif %}</a>
+                <a href="{% url 'generar_cv' oferta.pk %}" class="btn btn-primary" id="btn-generar"><i class="ti ti-sparkles"></i> {% if idioma == 'en' %}Generate adapted CV{% else %}Generar CV adaptado{% endif %}</a>
             </div>
 
-        {% elif cv_subido %}
-            <p style="font-size: 13px; color: #1D9E75; margin-bottom: 20px;">
-                <i class="ti ti-check"></i> {% if idioma == 'en' %}CV loaded in session.{% else %}CV cargado en sesión.{% endif %}
-            </p>
-
-            <form method="POST" enctype="multipart/form-data" id="form-analizar">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 14px;">
-                    <i class="ti ti-file-text"></i> {% if idioma == 'en' %}Analyze CV for this offer{% else %}Analizar CV para esta oferta{% endif %}
-                </button>
-            </form>
-
-            <div style="margin-top: 20px; border-top: 0.5px solid #e5e7eb; padding-top: 16px;">
-                <p style="font-size: 12px; color: #9ca3af; margin-bottom: 10px;">{% if idioma == 'en' %}Want to use a different CV?{% else %}¿Quieres usar un CV diferente?{% endif %}</p>
-                <form method="POST" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label class="form-label">{% if idioma == 'en' %}Upload another PDF{% else %}Sube otro PDF{% endif %}</label>
-                        <input type="file" name="cv_pdf" accept=".pdf" class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">{% if idioma == 'en' %}Or paste the text{% else %}O pega el texto{% endif %}</label>
-                        <textarea name="cv_texto_manual" class="form-control" rows="6" placeholder="{% if idioma == 'en' %}Paste your CV content here...{% else %}Copia y pega el contenido de tu CV aquí...{% endif %}"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-outline" style="width: 100%; padding: 10px; font-size: 14px;">
-                        {% if idioma == 'en' %}Use this CV and analyze{% else %}Usar este CV y analizar{% endif %}
-                    </button>
-                </form>
-            </div>
-
-        {% else %}
+        {% elif cvs_usuario %}
+            <p style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; text-align: center;">{% if idioma == 'en' %}Select CV{% else %}Selecciona un CV{% endif %}</p>
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
-                <div class="form-group">
-                    <label class="form-label">{% if idioma == 'en' %}Upload your CV in PDF{% else %}Sube tu CV en PDF{% endif %}</label>
-                    <input type="file" name="cv_pdf" accept=".pdf" class="form-control">
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                    {% for cv in cvs_usuario %}
+                    <label style="display: flex; align-items: center; gap: 10px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; cursor: pointer; transition: border-color 0.15s;">
+                        <input type="radio" name="cv_id" value="{{ cv.pk }}" {% if forloop.first %}checked{% endif %} style="width:15px; height:15px; flex-shrink:0;">
+                        <div style="min-width:0;">
+                            <p style="font-size: 13px; font-weight: 700; margin: 0; color: #0f172a;">{{ cv.nombre }}</p>
+                            <p style="font-size: 11px; color: #94a3b8; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ cv.texto|truncatechars:55 }}</p>
+                        </div>
+                    </label>
+                    {% endfor %}
                 </div>
-                <div class="form-group">
-                    <label class="form-label">{% if idioma == 'en' %}Or paste your CV text{% else %}O pega el texto de tu CV{% endif %}</label>
-                    <textarea name="cv_texto_manual" class="form-control" rows="10" placeholder="{% if idioma == 'en' %}Paste your CV content here...{% else %}Copia y pega el contenido de tu CV aquí...{% endif %}"></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; font-size: 14px; margin-top: 8px;">
-                    <i class="ti ti-file-text"></i> {% if idioma == 'en' %}Analyze CV for this offer{% else %}Analizar CV para esta oferta{% endif %}
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 11px;">
+                    <i class="ti ti-file-text"></i> {% if idioma == 'en' %}Analyze{% else %}Analizar{% endif %}
                 </button>
             </form>
+
+        {% else %}
+            <div style="text-align: center; padding: 24px 0;">
+                <i class="ti ti-files" style="font-size: 36px; color: #cbd5e1; display: block; margin-bottom: 10px;"></i>
+                <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">
+                    {% if idioma == 'en' %}No CVs saved yet.{% else %}Aún no tienes CVs guardados.{% endif %}
+                </p>
+                <a href="{% url 'perfil' %}" class="btn btn-primary">
+                    <i class="ti ti-user"></i> {% if idioma == 'en' %}Go to profile{% else %}Ir al perfil{% endif %}
+                </a>
+            </div>
         {% endif %}
+
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="{% url 'lista_ofertas' %}" class="btn btn-outline" style="font-size: 12px;">
+                <i class="ti ti-arrow-left"></i> {% if idioma == 'en' %}Back to offers{% else %}Volver a ofertas{% endif %}
+            </a>
+        </div>
+
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const forms = document.querySelectorAll('form');
-    forms.forEach(form => {
+    document.querySelectorAll('form').forEach(form => {
         form.addEventListener('submit', function() {
             const btn = form.querySelector('button[type="submit"]');
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="ti ti-loader"></i> {% if idioma == "en" %}Analyzing...{% else %}Analizando...{% endif %}';
-            }
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader"></i> {% if idioma == "en" %}Analyzing...{% else %}Analizando...{% endif %}'; }
         });
     });
-
     const btnGenerar = document.getElementById('btn-generar');
-    if (btnGenerar) {
-        btnGenerar.addEventListener('click', function() {
-            this.innerHTML = '<i class="ti ti-loader"></i> {% if idioma == "en" %}Generating...{% else %}Generando...{% endif %}';
-        });
-    }
+    if (btnGenerar) { btnGenerar.addEventListener('click', function() { this.innerHTML = '<i class="ti ti-loader"></i> {% if idioma == "en" %}Generating...{% else %}Generando...{% endif %}'; }); }
 });
 </script>
-
 </body>
 </html>

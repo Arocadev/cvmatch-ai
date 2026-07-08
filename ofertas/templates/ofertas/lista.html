@@ -9,35 +9,7 @@
 </head>
 <body>
 
-<nav class="navbar">
-    <a href="{% url 'inicio' %}" class="navbar-brand">CVMatch AI</a>
-    <div class="navbar-nav">
-        <a href="{% url 'buscador' %}" class="nav-link">
-            <i class="ti ti-search"></i> {% if idioma == 'en' %}Search{% else %}Buscador{% endif %}
-        </a>
-        <div class="navbar-divider"></div>
-        <a href="{% url 'lista_ofertas' %}" class="nav-link {% if seccion == 'nuevas' %}active{% endif %}">
-            {% if idioma == 'en' %}New{% else %}Nuevas{% endif %}
-            {% if contadores.nuevas %}<span style="font-size:11px; background:rgba(255,255,255,0.2); padding:1px 6px; border-radius:10px;">{{ contadores.nuevas }}</span>{% endif %}
-        </a>
-        <a href="{% url 'ofertas_vistas' %}" class="nav-link {% if seccion == 'vistas' %}active{% endif %}">
-            {% if idioma == 'en' %}Viewed{% else %}Vistas{% endif %}
-            {% if contadores.vistas %}<span style="font-size:11px; background:rgba(255,255,255,0.2); padding:1px 6px; border-radius:10px;">{{ contadores.vistas }}</span>{% endif %}
-        </a>
-        <a href="{% url 'ofertas_guardadas' %}" class="nav-link {% if seccion == 'guardadas' %}active{% endif %}">
-            {% if idioma == 'en' %}Saved{% else %}Guardadas{% endif %}
-            {% if contadores.guardadas %}<span style="font-size:11px; background:rgba(255,255,255,0.2); padding:1px 6px; border-radius:10px;">{{ contadores.guardadas }}</span>{% endif %}
-        </a>
-        <a href="{% url 'ofertas_descartadas' %}" class="nav-link {% if seccion == 'descartadas' %}active{% endif %}">
-            {% if idioma == 'en' %}Discarded{% else %}Descartadas{% endif %}
-            {% if contadores.descartadas %}<span style="font-size:11px; background:rgba(255,255,255,0.2); padding:1px 6px; border-radius:10px;">{{ contadores.descartadas }}</span>{% endif %}
-        </a>
-        <div class="navbar-divider"></div>
-        <a href="{% url 'cambiar_idioma' 'es' %}" class="{% if idioma != 'en' %}lang-active{% else %}lang-inactive{% endif %}">ES</a>
-        <span style="color:rgba(255,255,255,0.3); font-size:11px;">|</span>
-        <a href="{% url 'cambiar_idioma' 'en' %}" class="{% if idioma == 'en' %}lang-active{% else %}lang-inactive{% endif %}">EN</a>
-    </div>
-</nav>
+{% include 'ofertas/includes/navbar.html' %}
 
 <div class="container">
 
@@ -47,11 +19,11 @@
         <strong>{{ busqueda_activa.keywords }}</strong>
         {% if busqueda_activa.ubicacion %} {% if idioma == 'en' %}in{% else %}en{% endif %} <strong>{{ busqueda_activa.ubicacion }}</strong>{% endif %}
         —
-        {% if busqueda_activa.fuente == 'adzuna_es' %}{% if idioma == 'en' %}Adzuna Spain{% else %}Adzuna España{% endif %}
-        {% elif busqueda_activa.fuente == 'adzuna_uk' %}{% if idioma == 'en' %}Adzuna United Kingdom{% else %}Adzuna Reino Unido{% endif %}
-        {% elif busqueda_activa.fuente == 'adzuna_us' %}{% if idioma == 'en' %}Adzuna United States{% else %}Adzuna Estados Unidos{% endif %}
-        {% elif busqueda_activa.fuente == 'jooble' %}{% if idioma == 'en' %}Jooble International{% else %}Jooble Internacional{% endif %}
-        {% elif busqueda_activa.fuente == 'arbeitnow' %}{% if idioma == 'en' %}Arbeitnow Europe{% else %}Arbeitnow Europa{% endif %}
+        {% if busqueda_activa.fuente == 'adzuna_es' %}Adzuna España
+        {% elif busqueda_activa.fuente == 'adzuna_uk' %}Adzuna UK
+        {% elif busqueda_activa.fuente == 'adzuna_us' %}Adzuna US
+        {% elif busqueda_activa.fuente == 'jooble' %}Jooble
+        {% elif busqueda_activa.fuente == 'arbeitnow' %}Arbeitnow
         {% elif busqueda_activa.fuente == 'todas' %}{% if idioma == 'en' %}All sources{% else %}Todas las fuentes{% endif %}
         {% endif %}
     </p>
@@ -60,15 +32,13 @@
     {% if seccion == 'descartadas' %}
     <form method="POST" action="{% url 'eliminar_ofertas' %}" id="form-eliminar">
         {% csrf_token %}
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-            <div style="display: flex; gap: 8px;">
-                <button type="button" onclick="seleccionarTodas()" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px;">
-                    {% if idioma == 'en' %}Select all{% else %}Seleccionar todas{% endif %}
-                </button>
-                <button type="submit" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px; color: #dc2626; border-color: #dc2626;">
-                    {% if idioma == 'en' %}Delete selected{% else %}Eliminar seleccionadas{% endif %}
-                </button>
-            </div>
+        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <button type="button" onclick="seleccionarTodas()" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px;">
+                {% if idioma == 'en' %}Select all{% else %}Seleccionar todas{% endif %}
+            </button>
+            <button type="submit" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px; color: #dc2626; border-color: #dc2626;">
+                {% if idioma == 'en' %}Delete selected{% else %}Eliminar seleccionadas{% endif %}
+            </button>
         </div>
     {% endif %}
 
@@ -81,16 +51,7 @@
                 {% endif %}
                 <div>
                     <p class="card-title">{{ oferta.titulo }} — {{ oferta.empresa }}</p>
-                    <p class="card-meta">{{ oferta.ubicacion }} ·
-                        {% if oferta.fuente == 'adzuna_es' %}Adzuna · {% if idioma == 'en' %}Spain{% else %}España{% endif %}
-                        {% elif oferta.fuente == 'adzuna_uk' %}Adzuna · {% if idioma == 'en' %}United Kingdom{% else %}Reino Unido{% endif %}
-                        {% elif oferta.fuente == 'adzuna_us' %}Adzuna · {% if idioma == 'en' %}United States{% else %}Estados Unidos{% endif %}
-                        {% elif oferta.fuente == 'jooble' %}Jooble · {% if idioma == 'en' %}International{% else %}Internacional{% endif %}
-                        {% elif oferta.fuente == 'arbeitnow' %}Arbeitnow · {% if idioma == 'en' %}Europe{% else %}Europa{% endif %}
-                        {% else %}{{ oferta.fuente }}
-                        {% endif %}
-                        · {{ oferta.fecha_publicacion }}
-                    </p>
+                    <p class="card-meta">{{ oferta.ubicacion }} · {{ oferta.fuente }} · {{ oferta.fecha_publicacion }}</p>
                 </div>
             </div>
             <div class="card-actions">
@@ -111,7 +72,7 @@
         </div>
     </div>
     {% empty %}
-        <p style="color: #6b7280; text-align: center; margin-top: 40px;">{% if idioma == 'en' %}No offers here.{% else %}No hay ofertas aquí.{% endif %}</p>
+    <p style="color: #6b7280; text-align: center; margin-top: 40px;">{% if idioma == 'en' %}No offers here.{% else %}No hay ofertas aquí.{% endif %}</p>
     {% endfor %}
 
     {% if seccion == 'descartadas' %}
@@ -121,15 +82,11 @@
     {% if ofertas.has_other_pages %}
     <div class="pagination">
         <span class="page-info">{{ ofertas.paginator.count }} {% if idioma == 'en' %}offers{% else %}ofertas{% endif %}</span>
-        {% if ofertas.has_previous %}
-            <a href="?page={{ ofertas.previous_page_number }}" class="page-btn">&larr;</a>
-        {% endif %}
+        {% if ofertas.has_previous %}<a href="?page={{ ofertas.previous_page_number }}" class="page-btn">&larr;</a>{% endif %}
         {% for num in ofertas.paginator.page_range %}
             <a href="?page={{ num }}" class="page-btn {% if ofertas.number == num %}active{% endif %}">{{ num }}</a>
         {% endfor %}
-        {% if ofertas.has_next %}
-            <a href="?page={{ ofertas.next_page_number }}" class="page-btn">&rarr;</a>
-        {% endif %}
+        {% if ofertas.has_next %}<a href="?page={{ ofertas.next_page_number }}" class="page-btn">&rarr;</a>{% endif %}
     </div>
     {% endif %}
 </div>

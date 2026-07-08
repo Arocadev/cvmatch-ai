@@ -1,0 +1,41 @@
+<nav class="navbar">
+    <a href="{% url 'inicio' %}" class="navbar-brand">CVMatch AI</a>
+    <div class="navbar-nav">
+        <a href="{% url 'buscador' %}" class="nav-link {% if url_name == 'buscador' %}active{% endif %}">
+            {% if idioma == 'en' %}Search{% else %}Buscador{% endif %} <i class="ti ti-search"></i>
+        </a>
+        <div class="navbar-divider"></div>
+        <a href="{% url 'lista_ofertas' %}" class="nav-link {% if seccion == 'nuevas' %}active{% endif %}">
+            {% if idioma == 'en' %}New{% else %}Nuevas{% endif %}
+            {% if contadores.nuevas %}<span class="nav-badge">{{ contadores.nuevas }}</span>{% endif %}
+        </a>
+        <a href="{% url 'ofertas_vistas' %}" class="nav-link {% if seccion == 'vistas' %}active{% endif %}">
+            {% if idioma == 'en' %}Viewed{% else %}Vistas{% endif %}
+            {% if contadores.vistas %}<span class="nav-badge">{{ contadores.vistas }}</span>{% endif %}
+        </a>
+        <a href="{% url 'ofertas_guardadas' %}" class="nav-link {% if seccion == 'guardadas' %}active{% endif %}">
+            {% if idioma == 'en' %}Saved{% else %}Guardadas{% endif %}
+            {% if contadores.guardadas %}<span class="nav-badge">{{ contadores.guardadas }}</span>{% endif %}
+        </a>
+        <a href="{% url 'ofertas_descartadas' %}" class="nav-link {% if seccion == 'descartadas' %}active{% endif %}">
+            {% if idioma == 'en' %}Discarded{% else %}Descartadas{% endif %}
+            {% if contadores.descartadas %}<span class="nav-badge">{{ contadores.descartadas }}</span>{% endif %}
+        </a>
+        <div class="navbar-divider"></div>
+        <a href="{% url 'cambiar_idioma' 'es' %}" class="nav-lang {% if idioma == 'es' %}active{% endif %}">ES</a>
+        <span class="nav-lang-sep">|</span>
+        <a href="{% url 'cambiar_idioma' 'en' %}" class="nav-lang {% if idioma == 'en' %}active{% endif %}">EN</a>
+        <div class="navbar-divider"></div>
+        <a href="{% url 'perfil' %}" class="nav-link" style="gap: 6px;">
+            {% if request.user.profile.foto %}
+                <img src="data:{{ request.user.profile.foto_mime }};base64,{{ request.user.profile.foto_base64 }}" style="width:22px; height:22px; border-radius:50%; object-fit:cover;">
+            {% else %}
+                <i class="ti ti-user"></i>
+            {% endif %}
+            {{ request.user.username }}
+        </a>
+        <a href="{% url 'logout' %}" class="nav-link nav-logout" title="{% if idioma == 'en' %}Sign out{% else %}Cerrar sesión{% endif %}">
+            <i class="ti ti-logout"></i>
+        </a>
+    </div>
+</nav>

@@ -9,71 +9,187 @@
 </head>
 <body>
 
-<nav class="navbar">
-    <a href="{% url 'inicio' %}" class="navbar-brand">CVMatch AI</a>
-    <div class="navbar-nav">
-        <a href="{% url 'buscador' %}" class="nav-link">
-            <i class="ti ti-search"></i> {% if idioma == 'en' %}Search{% else %}Buscador{% endif %}
-        </a>
-        <div class="navbar-divider"></div>
-        <a href="{% url 'lista_ofertas' %}" class="nav-link">{% if idioma == 'en' %}New{% else %}Nuevas{% endif %}</a>
-        <a href="{% url 'ofertas_vistas' %}" class="nav-link">{% if idioma == 'en' %}Viewed{% else %}Vistas{% endif %}</a>
-        <a href="{% url 'ofertas_guardadas' %}" class="nav-link">{% if idioma == 'en' %}Saved{% else %}Guardadas{% endif %}</a>
-        <a href="{% url 'ofertas_descartadas' %}" class="nav-link">{% if idioma == 'en' %}Discarded{% else %}Descartadas{% endif %}</a>
-        <div class="navbar-divider"></div>
-        <a href="{% url 'cambiar_idioma' 'es' %}" class="{% if idioma != 'en' %}lang-active{% else %}lang-inactive{% endif %}">ES</a>
-        <span style="color:rgba(255,255,255,0.3); font-size:11px;">|</span>
-        <a href="{% url 'cambiar_idioma' 'en' %}" class="{% if idioma == 'en' %}lang-active{% else %}lang-inactive{% endif %}">EN</a>
-    </div>
-</nav>
+{% include 'ofertas/includes/navbar.html' %}
 
-<div class="container" style="max-width: 700px; margin-top: 32px;">
+<div class="container" style="max-width: 860px; margin-top: 28px; padding-bottom: 48px;">
 
-    <a href="{% url 'analizar_cv' oferta.pk %}" class="btn btn-outline" style="margin-bottom: 24px; display: inline-flex;">
+    <a href="{% url 'analizar_cv' oferta.pk %}" class="btn btn-outline" style="margin-bottom: 20px; display: inline-flex;">
         <i class="ti ti-arrow-left"></i> {% if idioma == 'en' %}Back to analysis{% else %}Volver al análisis{% endif %}
     </a>
 
-    <div class="form-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <div>
-                <h1 class="form-title" style="margin-bottom: 4px;">{% if idioma == 'en' %}Adapted CV{% else %}CV Adaptado{% endif %}</h1>
-                <p style="font-size: 13px; color: #6b7280;">{{ oferta.titulo }} — {{ oferta.empresa }}</p>
+    <div style="display: grid; grid-template-columns: 1fr 260px; gap: 20px; align-items: start;">
+
+        <div class="form-card" style="padding: 28px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <h1 style="font-size: 20px; font-weight: 700; margin: 0 0 4px; color: #0f172a;">{% if idioma == 'en' %}Adapted CV{% else %}CV Adaptado{% endif %}</h1>
+                    <p style="font-size: 13px; color: #6b7280; margin: 0;">{{ oferta.titulo }} — {{ oferta.empresa }}</p>
+                </div>
+                <button onclick="copiarCV()" class="btn btn-outline"><i class="ti ti-copy"></i> {% if idioma == 'en' %}Copy{% else %}Copiar{% endif %}</button>
             </div>
-            <button onclick="copiarCV()" class="btn btn-outline">
-                <i class="ti ti-copy"></i> {% if idioma == 'en' %}Copy{% else %}Copiar{% endif %}
+            <div id="cv-contenido" class="markdown-content" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px;">{{ cv_generado|safe }}</div>
+            <textarea id="cv-raw" style="display:none;">{{ cv_generado_raw }}</textarea>
+        </div>
+
+        <div style="position: sticky; top: 88px; display: flex; flex-direction: column; gap: 12px;">
+            <div class="form-card" style="padding: 20px;">
+                <p style="font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% if idioma == 'en' %}Actions{% else %}Acciones{% endif %}</p>
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <a href="{% url 'generar_cv' oferta.pk %}" class="btn btn-outline" id="btn-regenerar" style="justify-content: center;">
+                        <i class="ti ti-refresh"></i> {% if idioma == 'en' %}Regenerate{% else %}Regenerar{% endif %}
+                    </a>
+                    <button onclick="copiarCV()" class="btn btn-outline" style="justify-content: center;">
+                        <i class="ti ti-copy"></i> {% if idioma == 'en' %}Copy text{% else %}Copiar texto{% endif %}
+                    </button>
+                    <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-primary" style="justify-content: center;">
+                        <i class="ti ti-external-link"></i> {% if idioma == 'en' %}View offer{% else %}Ver oferta{% endif %}
+                    </a>
+                    <div style="border-top: 1px solid #f1f5f9; margin: 4px 0;"></div>
+                    <button onclick="abrirCreadorPDF()" class="btn btn-primary" style="justify-content: center; background: linear-gradient(135deg, #16a34a, #15803d); box-shadow: 0 2px 8px rgba(22,163,74,0.35);">
+                        <i class="ti ti-file-type-pdf"></i> {% if idioma == 'en' %}Create PDF{% else %}Crear PDF{% endif %}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Panel PDF inline — se muestra/oculta con JS -->
+<div id="panel-pdf-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:500; justify-content:flex-end;">
+    <div id="panel-pdf-inner" style="background:#fff; width:440px; max-width:95vw; height:100vh; overflow-y:auto; box-shadow:-8px 0 32px rgba(0,0,0,0.15); display:flex; flex-direction:column;">
+
+        <div style="background:linear-gradient(135deg,#1253A4,#0A3A78); padding:20px 24px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
+            <div>
+                <p style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:1px; margin:0 0 2px;">{% if idioma == 'en' %}PDF Creator{% else %}Creador de PDF{% endif %}</p>
+                <p style="font-size:14px; font-weight:700; color:#fff; margin:0;">{{ oferta.titulo }}</p>
+            </div>
+            <button onclick="cerrarPanelPDF()" style="background:rgba(255,255,255,0.15); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center;">✕</button>
+        </div>
+
+        <form method="POST" action="{% url 'descargar_pdf' oferta.pk %}" enctype="multipart/form-data" style="flex:1; padding:24px; display:flex; flex-direction:column; gap:20px;">
+            {% csrf_token %}
+
+            <!-- Datos personales -->
+            <div>
+                <p style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">{% if idioma == 'en' %}Personal data{% else %}Datos personales{% endif %}</p>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">{% if idioma == 'en' %}Full name{% else %}Nombre completo{% endif %}</label>
+                        <input type="text" name="nombre" value="{{ request.user.get_full_name|default:request.user.username }}" class="form-control" style="font-size:13px; padding:8px 12px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">{% if idioma == 'en' %}Professional title{% else %}Título profesional{% endif %}</label>
+                        <input type="text" name="subtitulo" placeholder="{% if idioma == 'en' %}Backend Developer · DevOps{% else %}Desarrollador Backend · DevOps{% endif %}" class="form-control" style="font-size:13px; padding:8px 12px;">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">{% if idioma == 'en' %}Contact{% else %}Contacto{% endif %}</label>
+                        <input type="text" name="contacto" placeholder="email@ejemplo.com · +34 600 000 000 · Valencia" class="form-control" style="font-size:13px; padding:8px 12px;">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plantilla -->
+            <div>
+                <p style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">{% if idioma == 'en' %}Template{% else %}Plantilla{% endif %}</p>
+                <input type="hidden" name="plantilla" id="plantilla-value" value="neutra">
+                <div style="display:flex; gap:8px;">
+                    <div onclick="seleccionarPlantilla('neutra', this)" id="p-neutra" style="flex:1; cursor:pointer; border:2px solid #1253A4; background:#EBF3FF; border-radius:10px; padding:12px; text-align:center; transition:all 0.15s;">
+                        <div style="width:100%; height:48px; background:#F9FAFB; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:6px; display:flex; align-items:center; justify-content:center;">
+                            <div style="width:60%; height:3px; background:#6B7280; border-radius:2px;"></div>
+                        </div>
+                        <p style="font-size:11px; font-weight:700; color:#374151; margin:0;">{% if idioma == 'en' %}Neutral{% else %}Neutra{% endif %}</p>
+                    </div>
+                    <div onclick="seleccionarPlantilla('profesional', this)" id="p-profesional" style="flex:1; cursor:pointer; border:2px solid #e2e8f0; background:#fff; border-radius:10px; padding:12px; text-align:center; transition:all 0.15s;">
+                        <div style="width:100%; height:48px; background:#1253A4; border-radius:6px; margin-bottom:6px; display:flex; align-items:center; justify-content:center;">
+                            <div style="width:60%; height:3px; background:rgba(255,255,255,0.5); border-radius:2px;"></div>
+                        </div>
+                        <p style="font-size:11px; font-weight:700; color:#1253A4; margin:0;">{% if idioma == 'en' %}Professional{% else %}Profesional{% endif %}</p>
+                    </div>
+                    <div onclick="seleccionarPlantilla('moderna', this)" id="p-moderna" style="flex:1; cursor:pointer; border:2px solid #e2e8f0; background:#fff; border-radius:10px; padding:12px; text-align:center; transition:all 0.15s;">
+                        <div style="width:100%; height:48px; background:#16a34a; border-radius:6px; margin-bottom:6px; display:flex; align-items:center; justify-content:center;">
+                            <div style="width:60%; height:3px; background:rgba(255,255,255,0.5); border-radius:2px;"></div>
+                        </div>
+                        <p style="font-size:11px; font-weight:700; color:#16a34a; margin:0;">{% if idioma == 'en' %}Modern{% else %}Moderna{% endif %}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Foto -->
+            <div>
+                <p style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">{% if idioma == 'en' %}Photo{% else %}Foto{% endif %}</p>
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                    <label style="display:flex; align-items:center; gap:10px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:8px; padding:10px 12px; cursor:pointer;">
+                        <input type="radio" name="opcion_foto" value="ninguna" checked style="width:15px; height:15px;">
+                        <span style="font-size:13px; color:#374151; font-weight:500;">{% if idioma == 'en' %}No photo{% else %}Sin foto{% endif %}</span>
+                    </label>
+                    {% if request.user.profile.foto %}
+                    <label style="display:flex; align-items:center; gap:10px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:8px; padding:10px 12px; cursor:pointer;">
+                        <input type="radio" name="opcion_foto" value="perfil" style="width:15px; height:15px;">
+                        <img src="data:{{ request.user.profile.foto_mime }};base64,{{ request.user.profile.foto_base64 }}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
+                        <span style="font-size:13px; color:#374151; font-weight:500;">{% if idioma == 'en' %}Use profile photo{% else %}Usar foto del perfil{% endif %}</span>
+                    </label>
+                    {% else %}
+                    <div style="background:#FFF7ED; border:1px solid #FED7AA; border-radius:8px; padding:10px 12px; font-size:12px; color:#c2410c;">
+                        <i class="ti ti-info-circle"></i>
+                        {% if idioma == 'en' %}Add a photo in your profile{% else %}Añade una foto en tu perfil{% endif %}
+                        — <a href="{% url 'perfil' %}" style="color:#c2410c; font-weight:700;">{% if idioma == 'en' %}Go to profile{% else %}Ir al perfil{% endif %}</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%; padding:13px; font-size:14px; font-weight:700; justify-content:center;">
+                <i class="ti ti-download"></i> {% if idioma == 'en' %}Download PDF{% else %}Descargar PDF{% endif %}
             </button>
-        </div>
-
-        <div id="cv-contenido" style="background: #f4f5f7; border-radius: 6px; padding: 20px; font-size: 13px; line-height: 1.8; white-space: pre-wrap;">{{ cv_generado }}</div>
-
-        <div style="margin-top: 16px; display: flex; gap: 8px;">
-            <a href="{% url 'generar_cv' oferta.pk %}" class="btn btn-outline" id="btn-regenerar">
-                <i class="ti ti-refresh"></i> {% if idioma == 'en' %}Regenerate{% else %}Regenerar{% endif %}
-            </a>
-            <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-primary">
-                <i class="ti ti-external-link"></i> {% if idioma == 'en' %}View original offer{% else %}Ver oferta original{% endif %}
-            </a>
-        </div>
+        </form>
     </div>
 </div>
 
 <script>
 function copiarCV() {
-    const texto = document.getElementById('cv-contenido').innerText;
+    const texto = document.getElementById('cv-raw').value;
     navigator.clipboard.writeText(texto).then(() => {
-        alert('{% if idioma == "en" %}CV copied to clipboard{% else %}CV copiado al portapapeles{% endif %}');
+        alert('{% if idioma == "en" %}Copied!{% else %}¡Copiado!{% endif %}');
     });
 }
 
+function abrirCreadorPDF() {
+    const overlay = document.getElementById('panel-pdf-overlay');
+    overlay.style.display = 'flex';
+}
+
+function cerrarPanelPDF() {
+    const overlay = document.getElementById('panel-pdf-overlay');
+    overlay.style.display = 'none';
+}
+
+function seleccionarPlantilla(valor, el) {
+    // Reset todos
+    ['neutra', 'profesional', 'moderna'].forEach(function(p) {
+        const div = document.getElementById('p-' + p);
+        div.style.borderColor = '#e2e8f0';
+        div.style.background = '#fff';
+    });
+    // Marcar seleccionado
+    el.style.borderColor = '#1253A4';
+    el.style.background = '#EBF3FF';
+    document.getElementById('plantilla-value').value = valor;
+}
+
+// Cerrar clickando el overlay
+document.getElementById('panel-pdf-overlay').addEventListener('click', function(e) {
+    if (e.target === this) cerrarPanelPDF();
+});
+
 document.addEventListener('DOMContentLoaded', function() {
-    const btnRegenerar = document.getElementById('btn-regenerar');
-    if (btnRegenerar) {
-        btnRegenerar.addEventListener('click', function() {
+    const btn = document.getElementById('btn-regenerar');
+    if (btn) {
+        btn.addEventListener('click', function() {
             this.innerHTML = '<i class="ti ti-loader"></i> {% if idioma == "en" %}Generating...{% else %}Generando...{% endif %}';
         });
     }
 });
 </script>
-
 </body>
 </html>

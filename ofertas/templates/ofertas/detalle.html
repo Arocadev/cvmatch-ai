@@ -9,66 +9,43 @@
 </head>
 <body>
 
-<nav class="navbar">
-    <a href="{% url 'inicio' %}" class="navbar-brand">CVMatch AI</a>
-    <div class="navbar-nav">
-        <a href="{% url 'buscador' %}" class="nav-link">
-            <i class="ti ti-search"></i> {% if idioma == 'en' %}Search{% else %}Buscador{% endif %}
-        </a>
-        <div class="navbar-divider"></div>
-        <a href="{% url 'lista_ofertas' %}" class="nav-link">{% if idioma == 'en' %}New{% else %}Nuevas{% endif %}</a>
-        <a href="{% url 'ofertas_vistas' %}" class="nav-link">{% if idioma == 'en' %}Viewed{% else %}Vistas{% endif %}</a>
-        <a href="{% url 'ofertas_guardadas' %}" class="nav-link">{% if idioma == 'en' %}Saved{% else %}Guardadas{% endif %}</a>
-        <a href="{% url 'ofertas_descartadas' %}" class="nav-link">{% if idioma == 'en' %}Discarded{% else %}Descartadas{% endif %}</a>
-        <div class="navbar-divider"></div>
-        <a href="{% url 'cambiar_idioma' 'es' %}" class="{% if idioma != 'en' %}lang-active{% else %}lang-inactive{% endif %}">ES</a>
-        <span style="color:rgba(255,255,255,0.3); font-size:11px;">|</span>
-        <a href="{% url 'cambiar_idioma' 'en' %}" class="{% if idioma == 'en' %}lang-active{% else %}lang-inactive{% endif %}">EN</a>
-    </div>
-</nav>
+{% include 'ofertas/includes/navbar.html' %}
 
-<div class="container" style="max-width: 700px; margin-top: 32px;">
+<div class="container" style="max-width: 860px; margin-top: 28px; padding-bottom: 48px;">
 
-    <a href="{% url 'lista_ofertas' %}" class="btn btn-outline" style="margin-bottom: 24px; display: inline-flex;">
-        <i class="ti ti-arrow-left"></i> {% if idioma == 'en' %}Back to new{% else %}Volver a nuevas{% endif %}
+    <a href="{% url 'lista_ofertas' %}" class="btn btn-outline" style="margin-bottom: 20px; display: inline-flex;">
+        <i class="ti ti-arrow-left"></i> {% if idioma == 'en' %}Back{% else %}Volver{% endif %}
     </a>
 
-    <div class="form-card">
-        <div style="margin-bottom: 20px;">
-            <h1 style="font-size: 18px; font-weight: 700; margin: 0 0 6px; color: #0f172a;">{{ oferta.titulo }}</h1>
-            <p style="font-size: 14px; color: #64748b; margin: 0;">{{ oferta.empresa }} · {{ oferta.ubicacion }}</p>
-            <p style="font-size: 12px; color: #94a3b8; margin: 4px 0 0;">{{ oferta.fuente }} · {{ oferta.fecha_publicacion }}</p>
+    <div style="display: grid; grid-template-columns: 1fr 320px; gap: 20px; align-items: start;">
+
+        <div class="form-card" style="padding: 28px;">
+            <div style="margin-bottom: 16px;">
+                <h1 style="font-size: 20px; font-weight: 700; margin: 0 0 6px; color: #0f172a;">{{ oferta.titulo }}</h1>
+                <p style="font-size: 14px; color: #64748b; margin: 0;">{{ oferta.empresa }} · {{ oferta.ubicacion }}</p>
+                <p style="font-size: 12px; color: #94a3b8; margin: 4px 0 0;">{{ oferta.fuente }} · {{ oferta.fecha_publicacion }}</p>
+            </div>
+
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;">
+                <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-primary"><i class="ti ti-external-link"></i> {% if idioma == 'en' %}View offer{% else %}Ver oferta{% endif %}</a>
+                <a href="{% url 'analizar_cv' oferta.pk %}" class="btn btn-outline"><i class="ti ti-file-text"></i> {% if idioma == 'en' %}Analyze CV{% else %}Analizar CV{% endif %}</a>
+                <a href="{% url 'cambiar_estado' oferta.pk 'guardada' %}" class="btn-save" style="display:inline-flex; align-items:center;">{% if idioma == 'en' %}Save{% else %}Guardar{% endif %}</a>
+                <a href="{% url 'cambiar_estado' oferta.pk 'descartada' %}" class="btn-discard" style="display:inline-flex; align-items:center;">{% if idioma == 'en' %}Discard{% else %}Descartar{% endif %}</a>
+            </div>
+
+            <div style="border-top: 1px solid #f1f5f9; padding-top: 16px;">
+                <p style="font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">{% if idioma == 'en' %}Full description{% else %}Descripción completa{% endif %}</p>
+                <div style="font-size: 13px; line-height: 1.7; color: #374151; max-height: 400px; overflow-y: auto;">{{ oferta.descripcion|safe }}</div>
+            </div>
         </div>
 
         {% if resumen %}
-        <div style="border-top: 0.5px solid #e5e7eb; padding-top: 16px; margin-bottom: 20px;">
-            <p style="font-size: 12px; font-weight: 700; color: #1253A4; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">{% if idioma == 'en' %}OFFER SUMMARY{% else %}RESUMEN DE LA OFERTA{% endif %}</p>
-            <div style="font-size: 13px; line-height: 1.7; color: #374151; white-space: pre-wrap;">{{ resumen }}</div>
+        <div class="form-card" style="padding: 24px; position: sticky; top: 88px;">
+            <p style="font-size: 11px; font-weight: 700; color: #1253A4; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% if idioma == 'en' %}AI Summary{% else %}Resumen IA{% endif %}</p>
+            <div class="markdown-content" style="max-height: 420px; overflow-y: auto;">{{ resumen|safe }}</div>
         </div>
         {% endif %}
 
-        <div style="border-top: 0.5px solid #e5e7eb; padding-top: 16px; margin-bottom: 20px;">
-            <p style="font-size: 12px; font-weight: 700; color: #94a3b8; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">{% if idioma == 'en' %}FULL DESCRIPTION{% else %}DESCRIPCIÓN COMPLETA{% endif %}</p>
-        <div style="font-size: 13px; line-height: 1.7; color: #374151;">{{ oferta.descripcion|safe }}</div>
-        </div>
-
-        <div style="border-top: 0.5px solid #e5e7eb; padding-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
-            <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-primary">
-                <i class="ti ti-external-link"></i> {% if idioma == 'en' %}View original offer{% else %}Ver oferta original{% endif %}
-            </a>
-            <a href="{% url 'analizar_cv' oferta.pk %}" class="btn btn-outline">
-                <i class="ti ti-file-text"></i> {% if idioma == 'en' %}Analyze CV{% else %}Analizar CV{% endif %}
-            </a>
-            <a href="{% url 'cambiar_estado' oferta.pk 'guardada' %}" class="btn-save" style="display:inline-flex; align-items:center;">
-                {% if idioma == 'en' %}Save{% else %}Guardar{% endif %}
-            </a>
-            <a href="{% url 'cambiar_estado' oferta.pk 'vista' %}" class="btn-discard" style="display:inline-flex; align-items:center;">
-                {% if idioma == 'en' %}Mark as viewed{% else %}Marcar como vista{% endif %}
-            </a>
-            <a href="{% url 'cambiar_estado' oferta.pk 'descartada' %}" class="btn-discard" style="display:inline-flex; align-items:center;">
-                {% if idioma == 'en' %}Discard{% else %}Descartar{% endif %}
-            </a>
-        </div>
     </div>
 </div>
 

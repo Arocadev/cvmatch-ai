@@ -1,0 +1,37 @@
+[2026-07-09 01:28:09,572] ERROR django.request Internal Server Error: /ofertas/40/generar-cv/
+Traceback (most recent call last):
+  File "C:\Users\Lenovo\Desktop\cvmatch-ai\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Lenovo\Desktop\cvmatch-ai\venv\Lib\site-packages\django\core\handlers\base.py", line 198, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Lenovo\Desktop\cvmatch-ai\venv\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Lenovo\Desktop\cvmatch-ai\ofertas\views.py", line 444, in generar_cv
+    cv_generado_raw = generar_cv_adaptado(
+        sanitizar_prompt(oferta.descripcion, max_length=8000),
+        sanitizar_prompt(cv_texto, max_length=20000),
+        get_idioma(request)
+    )
+  File "C:\Users\Lenovo\Desktop\cvmatch-ai\ofertas\cv.py", line 166, in generar_cv_adaptado
+    respuesta = cliente.chat.completions.create(
+        model=MODELO,
+        messages=[{'role': 'user', 'content': prompt}],
+        max_tokens=2000,
+    )
+  File "C:\Users\Lenovo\Desktop\cvmatch-ai\venv\Lib\site-packages\groq\resources\chat\completions.py", line 462, in create
+    return self._post(
+           ~~~~~~~~~~^
+        "/openai/v1/chat/completions",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<45 lines>...
+        stream_cls=Stream[ChatCompletionChunk],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Lenovo\Desktop\cvmatch-ai\venv\Lib\site-packages\groq\_base_client.py", line 1284, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Lenovo\Desktop\cvmatch-ai\venv\Lib\site-packages\groq\_base_client.py", line 1071, in request
+    raise self._make_status_error_from_response(err.response) from None
+groq.RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `openai/gpt-oss-120b` in organization `org_01kretb047e3ptz3ed70zpazmb` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 4645, Requested 3742. Please try again in 2.9025s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}
+[2026-07-09 01:28:09,582] ERROR django.server "GET /ofertas/40/generar-cv/ HTTP/1.1" 500 146771

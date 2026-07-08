@@ -1,0 +1,137 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ idioma }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if idioma == 'en' %}Profile{% else %}Perfil{% endif %} — CVMatch AI</title>
+    <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+</head>
+<body>
+
+{% include 'ofertas/includes/navbar.html' %}
+
+<div class="container" style="max-width: 720px; margin-top: 32px; padding-bottom: 48px;">
+
+    <h1 style="font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 24px; letter-spacing: -0.5px;">
+        {% if idioma == 'en' %}My profile{% else %}Mi perfil{% endif %}
+    </h1>
+
+    {% if mensaje %}
+    <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 12px 14px; margin-bottom: 20px; font-size: 13px; color: #16a34a; display: flex; align-items: center; gap: 8px;">
+        <i class="ti ti-circle-check"></i> {{ mensaje }}
+    </div>
+    {% endif %}
+
+    {% if error %}
+    <div style="background: #FEF2F2; border: 1px solid #FECACA; border-radius: 8px; padding: 12px 14px; margin-bottom: 20px; font-size: 13px; color: #dc2626; display: flex; align-items: center; gap: 8px;">
+        <i class="ti ti-alert-circle"></i> {{ error }}
+    </div>
+    {% endif %}
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+
+        <!-- Cuenta -->
+        <div class="form-card" style="padding: 24px;">
+            <h2 style="font-size: 12px; font-weight: 700; color: #94a3b8; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">{% if idioma == 'en' %}Account{% else %}Cuenta{% endif %}</h2>
+
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
+                {% if profile.foto %}
+                    <img src="data:{{ profile.foto_mime }};base64,{{ profile.foto_base64 }}" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 3px solid #e2e8f0;">
+                {% else %}
+                    <div style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #1253A4, #0A3A78); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="ti ti-user" style="font-size: 26px; color: #fff;"></i>
+                    </div>
+                {% endif %}
+                <div>
+                    <p style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 2px;">{{ request.user.username }}</p>
+                    <p style="font-size: 12px; color: #94a3b8;">{% if idioma == 'en' %}Since{% else %}Desde{% endif %} {{ request.user.date_joined|date:"d/m/Y" }}</p>
+                </div>
+            </div>
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="foto">
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label class="form-label">{% if idioma == 'en' %}Profile photo{% else %}Foto de perfil{% endif %}</label>
+                    <input type="file" name="foto" accept="image/*" class="form-control" style="padding: 8px;">
+                    <p style="font-size: 11px; color: #94a3b8; margin-top: 4px;">{% if idioma == 'en' %}JPG, PNG. Max 2MB. Used in generated CVs.{% else %}JPG, PNG. Máx 2MB. Se usará en los CVs generados.{% endif %}</p>
+                </div>
+                <button type="submit" class="btn btn-outline" style="width: 100%; justify-content: center;">
+                    <i class="ti ti-upload"></i> {% if idioma == 'en' %}Update photo{% else %}Actualizar foto{% endif %}
+                </button>
+            </form>
+
+            <div style="border-top: 1px solid #f1f5f9; margin-top: 20px; padding-top: 16px;">
+                <a href="{% url 'cambiar_password' %}" class="btn btn-outline" style="width: 100%; justify-content: center;">
+                    <i class="ti ti-lock"></i> {% if idioma == 'en' %}Change password{% else %}Cambiar contraseña{% endif %}
+                </a>
+            </div>
+        </div>
+
+        <!-- CVs -->
+        <div class="form-card" style="padding: 24px;">
+            <h2 style="font-size: 12px; font-weight: 700; color: #94a3b8; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">
+                {% if idioma == 'en' %}My CVs{% else %}Mis CVs{% endif %}
+                <span style="font-weight: 500; color: #cbd5e1;">({{ cvs.count }}/3)</span>
+            </h2>
+
+            {% for cv in cvs %}
+            <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="min-width: 0;">
+                    <p style="font-size: 13px; font-weight: 700; margin: 0 0 2px; color: #0f172a;">{{ cv.nombre }}</p>
+                    <p style="font-size: 11px; color: #94a3b8; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ cv.texto|truncatechars:50 }}</p>
+                </div>
+                <form method="POST" action="{% url 'eliminar_cv' cv.pk %}" style="margin-left: 12px; flex-shrink: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-discard" style="padding: 4px 8px;"
+                        onclick="return confirm(this.dataset.msg)"
+                        data-msg="{% if idioma == 'en' %}Delete this CV?{% else %}¿Eliminar este CV?{% endif %}">
+                        <i class="ti ti-trash"></i>
+                    </button>
+                </form>
+            </div>
+            {% empty %}
+            <div style="text-align: center; padding: 24px 0; color: #94a3b8;">
+                <i class="ti ti-files" style="font-size: 28px; display: block; margin-bottom: 6px;"></i>
+                <p style="font-size: 12px;">{% if idioma == 'en' %}No CVs yet{% else %}Aún no tienes CVs{% endif %}</p>
+            </div>
+            {% endfor %}
+
+            {% if puede_añadir_cv %}
+            <div style="border-top: 1px solid #f1f5f9; margin-top: 16px; padding-top: 16px;">
+                <p style="font-size: 12px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">{% if idioma == 'en' %}Add CV{% else %}Añadir CV{% endif %}</p>
+                <form method="POST" action="{% url 'subir_cv' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-group" style="margin-bottom: 10px;">
+                        <label class="form-label">{% if idioma == 'en' %}Name{% else %}Nombre{% endif %}</label>
+                        <input type="text" name="nombre" class="form-control" placeholder="Backend, DevOps, General..." maxlength="100">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label class="form-label">PDF</label>
+                        <input type="file" name="cv_pdf" accept=".pdf" class="form-control" style="padding: 8px;">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                        <i class="ti ti-plus"></i> {% if idioma == 'en' %}Save CV{% else %}Guardar CV{% endif %}
+                    </button>
+                </form>
+            </div>
+            {% else %}
+            <div style="margin-top: 12px; background: #FFF7ED; border: 1px solid #FED7AA; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #c2410c;">
+                <i class="ti ti-info-circle"></i> {% if idioma == 'en' %}Max 3 CVs. Delete one to add another.{% else %}Máximo 3 CVs. Elimina uno para añadir otro.{% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <div style="text-align: center; margin-top: 24px;">
+        <a href="{% url 'logout' %}" class="btn btn-outline" style="color: #dc2626; border-color: #FECACA;">
+            <i class="ti ti-logout"></i> {% if idioma == 'en' %}Sign out{% else %}Cerrar sesión{% endif %}
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>
