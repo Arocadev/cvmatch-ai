@@ -3,6 +3,7 @@
 <html lang="{{ idioma }}">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="{% static 'ofertas/favicon.png' %}">
     <title>{% if idioma == 'en' %}CV Analysis{% else %}Analizar CV{% endif %} — CVMatch AI</title>
     <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
@@ -11,7 +12,8 @@
 
 {% include 'ofertas/includes/navbar.html' %}
 
-<div class="container" style="max-width: 580px; margin-top: 40px; padding-bottom: 48px;">
+<div class="page-content">
+<div class="container" style="max-width: 760px; padding-bottom: 48px;">
 
     <div class="form-card" style="padding: 32px;">
 
@@ -27,7 +29,7 @@
         {% endif %}
 
         {% if analisis %}
-            <div class="markdown-content" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px; max-height: 480px; overflow-y: auto;">{{ analisis|safe }}</div>
+            <div class="markdown-content" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px;">{{ analisis|safe }}</div>
             <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
                 <a href="{% url 'analizar_cv' oferta.pk %}" class="btn btn-outline">{% if idioma == 'en' %}Analyze again{% else %}Volver a analizar{% endif %}</a>
                 <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-outline"><i class="ti ti-external-link"></i> {% if idioma == 'en' %}View offer{% else %}Ver oferta{% endif %}</a>
@@ -43,8 +45,8 @@
                     <label style="display: flex; align-items: center; gap: 10px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; cursor: pointer; transition: border-color 0.15s;">
                         <input type="radio" name="cv_id" value="{{ cv.pk }}" {% if forloop.first %}checked{% endif %} style="width:15px; height:15px; flex-shrink:0;">
                         <div style="min-width:0;">
-                            <p style="font-size: 13px; font-weight: 700; margin: 0; color: #0f172a;">{{ cv.nombre }}</p>
-                            <p style="font-size: 11px; color: #94a3b8; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ cv.texto|truncatechars:55 }}</p>
+                            <p style="font-size: 13px; font-weight: 700; margin: 0 0 2px; color: #0f172a;">{{ cv.nombre }}</p>
+                            <p style="font-size: 11px; color: #94a3b8; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ cv.texto|truncatechars:80 }}</p>
                         </div>
                     </label>
                     {% endfor %}
@@ -74,6 +76,7 @@
 
     </div>
 </div>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -87,5 +90,8 @@ document.addEventListener('DOMContentLoaded', function() {
     if (btnGenerar) { btnGenerar.addEventListener('click', function() { this.innerHTML = '<i class="ti ti-loader"></i> {% if idioma == "en" %}Generating...{% else %}Generando...{% endif %}'; }); }
 });
 </script>
+
+{% include 'ofertas/includes/footer.html' %}
+
 </body>
 </html>

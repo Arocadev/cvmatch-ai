@@ -3,6 +3,7 @@
 <html lang="{{ idioma }}">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="{% static 'ofertas/favicon.png' %}">
     <title>{% if idioma == 'en' %}Login{% else %}Iniciar sesión{% endif %} — CVMatch AI</title>
     <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
@@ -10,16 +11,17 @@
 <body>
 
 <nav class="navbar">
-    <span class="navbar-brand">CVMatch AI</span>
+    <span class="navbar-brand" style="font-size: 26px;">CVMatch AI</span>
     <div class="navbar-nav">
-        <a href="{% url 'cambiar_idioma' 'es' %}" class="{% if idioma != 'en' %}lang-active{% else %}lang-inactive{% endif %}">ES</a>
-        <span style="color:rgba(255,255,255,0.3); font-size:11px;">|</span>
-        <a href="{% url 'cambiar_idioma' 'en' %}" class="{% if idioma == 'en' %}lang-active{% else %}lang-inactive{% endif %}">EN</a>
+        <a href="{% url 'cambiar_idioma' 'es' %}" class="nav-lang {% if idioma == 'es' %}active{% endif %}" style="font-size: 11px;">ES</a>
+        <span class="nav-lang-sep">|</span>
+        <a href="{% url 'cambiar_idioma' 'en' %}" class="nav-lang {% if idioma == 'en' %}active{% endif %}" style="font-size: 11px;">EN</a>
     </div>
 </nav>
 
-<div style="min-height: calc(100vh - 68px); display: flex; align-items: center; justify-content: center; padding: 24px;">
-    <div class="form-card" style="max-width: 420px; width: 100%;">
+<div class="page-content" style="justify-content: center; align-items: center; display: flex;">
+<div style="width: 100%; max-width: 420px; padding: 40px 24px;">
+    <div class="form-card">
 
         <div style="text-align: center; margin-bottom: 32px;">
             <h1 style="font-size: 26px; font-weight: 800; color: #0f172a; letter-spacing: -0.8px; margin-bottom: 6px;">CVMatch AI</h1>
@@ -58,6 +60,9 @@
 
     </div>
 </div>
+</div>
+
+{% include 'ofertas/includes/footer.html' %}
 
 </body>
 </html>

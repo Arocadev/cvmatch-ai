@@ -3,21 +3,88 @@
 <html lang="{{ idioma }}">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="{% static 'ofertas/favicon.png' %}">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>CVMatch AI</title>
     <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <style>
+        .lista-layout { display: flex; gap: 24px; align-items: flex-start; }
+        .lista-columna { flex: 1; min-width: 0; }
+
+        .panel-detalle {
+            width: 380px;
+            flex-shrink: 0;
+            background: #fff;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            position: sticky;
+            top: 80px;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+        }
+        .panel-detalle.panel--oculto { display: none; }
+        .panel-detalle.panel--cargando { opacity: 0.5; pointer-events: none; }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .panel-titulo { font-size: 16px; font-weight: 700; color: #0f172a; margin: 0; line-height: 1.4; }
+        .panel-cerrar { background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 18px; padding: 0; flex-shrink: 0; }
+        .panel-cerrar:hover { color: #0f172a; }
+
+        .panel-meta { font-size: 12px; margin-bottom: 14px; display: flex; flex-wrap: wrap; gap: 6px; }
+        .panel-meta span { background: #f1f5f9; padding: 2px 8px; border-radius: 4px; color: #475569; }
+
+        .panel-acciones {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .panel-descripcion {
+            font-size: 13px;
+            color: #374151;
+            line-height: 1.7;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .spinner {
+            width: 20px; height: 20px;
+            border: 2px solid #e2e8f0;
+            border-top-color: #1253A4;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin: 12px auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .card { cursor: pointer; }
+        .card.card--activa { border-color: #1253A4; background: #EBF3FF; }
+    </style>
 </head>
 <body>
 
 {% include 'ofertas/includes/navbar.html' %}
 
+<div class="page-content">
 <div class="container">
 
     {% if busqueda_activa.keywords %}
-    <p style="font-size: 12px; color: #6b7280; margin-bottom: 12px;">
+    <p style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;">
         {% if idioma == 'en' %}Searching{% else %}Buscando{% endif %}
-        <strong>{{ busqueda_activa.keywords }}</strong>
-        {% if busqueda_activa.ubicacion %} {% if idioma == 'en' %}in{% else %}en{% endif %} <strong>{{ busqueda_activa.ubicacion }}</strong>{% endif %}
+        <strong style="color: #374151;">{{ busqueda_activa.keywords }}</strong>
+        {% if busqueda_activa.ubicacion %} {% if idioma == 'en' %}in{% else %}en{% endif %} <strong style="color: #374151;">{{ busqueda_activa.ubicacion }}</strong>{% endif %}
         —
         {% if busqueda_activa.fuente == 'adzuna_es' %}Adzuna España
         {% elif busqueda_activa.fuente == 'adzuna_uk' %}Adzuna UK
@@ -29,67 +96,136 @@
     </p>
     {% endif %}
 
-    {% if seccion == 'descartadas' %}
-    <form method="POST" action="{% url 'eliminar_ofertas' %}" id="form-eliminar">
-        {% csrf_token %}
-        <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-            <button type="button" onclick="seleccionarTodas()" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px;">
-                {% if idioma == 'en' %}Select all{% else %}Seleccionar todas{% endif %}
-            </button>
-            <button type="submit" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px; color: #dc2626; border-color: #dc2626;">
-                {% if idioma == 'en' %}Delete selected{% else %}Eliminar seleccionadas{% endif %}
-            </button>
-        </div>
-    {% endif %}
+    <div class="lista-layout">
 
-    {% for oferta in ofertas %}
-    <div class="card">
-        <div class="card-header">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                {% if seccion == 'descartadas' %}
-                <input type="checkbox" name="ofertas_ids" value="{{ oferta.pk }}" style="width: 16px; height: 16px; cursor: pointer;">
-                {% endif %}
-                <div>
-                    <p class="card-title">{{ oferta.titulo }} — {{ oferta.empresa }}</p>
-                    <p class="card-meta">{{ oferta.ubicacion }} · {{ oferta.fuente }} · {{ oferta.fecha_publicacion }}</p>
+        <!-- ── Columna de tarjetas ─────────────────────────────────────── -->
+        <div class="lista-columna">
+
+            {% if seccion == 'descartadas' %}
+            <form method="POST" action="{% url 'eliminar_ofertas' %}" id="form-eliminar">
+                {% csrf_token %}
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <button type="button" onclick="seleccionarTodas()" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px;">
+                        {% if idioma == 'en' %}Select all{% else %}Seleccionar todas{% endif %}
+                    </button>
+                    <button type="submit" class="btn btn-outline" style="font-size: 12px; padding: 4px 12px; color: #dc2626; border-color: #dc2626;">
+                        {% if idioma == 'en' %}Delete selected{% else %}Eliminar seleccionadas{% endif %}
+                    </button>
+                </div>
+            {% endif %}
+
+            {% for oferta in ofertas %}
+            <div class="card" data-oferta-id="{{ oferta.pk }}">
+                <div class="card-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        {% if seccion == 'descartadas' %}
+                        <input type="checkbox" name="ofertas_ids" value="{{ oferta.pk }}"
+                               style="width: 16px; height: 16px; cursor: pointer;"
+                               data-accion onclick="event.stopPropagation()">
+                        {% endif %}
+                        <div>
+                            <p class="card-title">{{ oferta.titulo }} — {{ oferta.empresa }}</p>
+                            <p class="card-meta">{{ oferta.ubicacion }} · {{ oferta.fuente }} · {{ oferta.fecha_publicacion }}</p>
+                        </div>
+                    </div>
+                    <div class="card-actions" data-accion>
+                        <a href="{% url 'cambiar_estado' oferta.pk 'guardada' %}"
+                           class="btn-save"
+                           data-cambiar-estado="guardada"
+                           data-oferta-id="{{ oferta.pk }}"
+                           onclick="event.preventDefault(); event.stopPropagation();">
+                            {% if idioma == 'en' %}Save{% else %}Guardar{% endif %}
+                        </a>
+                        <a href="{% url 'cambiar_estado' oferta.pk 'descartada' %}"
+                           class="btn-discard"
+                           data-cambiar-estado="descartada"
+                           data-oferta-id="{{ oferta.pk }}"
+                           onclick="event.preventDefault(); event.stopPropagation();">
+                            {% if idioma == 'en' %}Discard{% else %}Descartar{% endif %}
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer" data-accion onclick="event.stopPropagation()">
+                    <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-primary">
+                        <i class="ti ti-external-link"></i>
+                        {% if idioma == 'en' %}View on web{% else %}Ver en web{% endif %}
+                    </a>
+                    <a href="{% url 'detalle_oferta' oferta.pk %}" class="btn btn-outline">
+                        <i class="ti ti-file-description"></i>
+                        {% if idioma == 'en' %}View in CVMatch{% else %}Ver en CVMatch{% endif %}
+                    </a>
+                    <a href="{% url 'analizar_cv' oferta.pk %}" class="btn btn-outline">
+                        <i class="ti ti-file-text"></i>
+                        {% if idioma == 'en' %}Analyze CV{% else %}Analizar CV{% endif %}
+                    </a>
                 </div>
             </div>
-            <div class="card-actions">
-                <a href="{% url 'cambiar_estado' oferta.pk 'guardada' %}" class="btn-save">{% if idioma == 'en' %}Save{% else %}Guardar{% endif %}</a>
-                <a href="{% url 'cambiar_estado' oferta.pk 'descartada' %}" class="btn-discard">{% if idioma == 'en' %}Discard{% else %}Descartar{% endif %}</a>
+            {% empty %}
+            <p style="color: #94a3b8; text-align: center; margin-top: 40px;">
+                {% if idioma == 'en' %}
+                    No {{ seccion }} offers.
+                {% else %}
+                    {% if seccion == 'nuevas' %}No hay ofertas nuevas.
+                    {% elif seccion == 'vistas' %}No hay ofertas vistas.
+                    {% elif seccion == 'guardadas' %}No hay ofertas guardadas.
+                    {% elif seccion == 'descartadas' %}No hay ofertas descartadas.
+                    {% endif %}
+                {% endif %}
+            </p>
+            {% endfor %}
+
+            {% if seccion == 'descartadas' %}
+            </form>
+            {% endif %}
+
+            {% if ofertas.has_other_pages %}
+            <div class="pagination">
+                <span class="page-info">{{ ofertas.paginator.count }} {% if idioma == 'en' %}offers{% else %}ofertas{% endif %}</span>
+                {% if ofertas.has_previous %}<a href="?page={{ ofertas.previous_page_number }}" class="page-btn">&larr;</a>{% endif %}
+                {% for num in ofertas.paginator.page_range %}
+                    <a href="?page={{ num }}" class="page-btn {% if ofertas.number == num %}active{% endif %}">{{ num }}</a>
+                {% endfor %}
+                {% if ofertas.has_next %}<a href="?page={{ ofertas.next_page_number }}" class="page-btn">&rarr;</a>{% endif %}
             </div>
-        </div>
-        <div class="card-footer">
-            <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-primary">
-                <i class="ti ti-external-link"></i> {% if idioma == 'en' %}View offer{% else %}Ver oferta{% endif %}
-            </a>
-            <a href="{% url 'detalle_oferta' oferta.pk %}" class="btn btn-outline">
-                <i class="ti ti-list"></i> {% if idioma == 'en' %}Summary{% else %}Resumen{% endif %}
-            </a>
-            <a href="{% url 'analizar_cv' oferta.pk %}" class="btn btn-outline">
-                <i class="ti ti-file-text"></i> {% if idioma == 'en' %}Analyze CV{% else %}Analizar CV{% endif %}
-            </a>
-        </div>
-    </div>
-    {% empty %}
-    <p style="color: #6b7280; text-align: center; margin-top: 40px;">{% if idioma == 'en' %}No offers here.{% else %}No hay ofertas aquí.{% endif %}</p>
-    {% endfor %}
+            {% endif %}
 
-    {% if seccion == 'descartadas' %}
-    </form>
-    {% endif %}
+        </div><!-- /lista-columna -->
 
-    {% if ofertas.has_other_pages %}
-    <div class="pagination">
-        <span class="page-info">{{ ofertas.paginator.count }} {% if idioma == 'en' %}offers{% else %}ofertas{% endif %}</span>
-        {% if ofertas.has_previous %}<a href="?page={{ ofertas.previous_page_number }}" class="page-btn">&larr;</a>{% endif %}
-        {% for num in ofertas.paginator.page_range %}
-            <a href="?page={{ num }}" class="page-btn {% if ofertas.number == num %}active{% endif %}">{{ num }}</a>
-        {% endfor %}
-        {% if ofertas.has_next %}<a href="?page={{ ofertas.next_page_number }}" class="page-btn">&rarr;</a>{% endif %}
+        <!-- ── Panel lateral — solo preview estático ──────────────────── -->
+        <div id="panel-detalle" class="panel-detalle panel--oculto">
+            <div class="panel-header">
+                <h2 class="panel-titulo" id="panel-titulo">—</h2>
+                <button class="panel-cerrar" id="panel-cerrar" title="Cerrar">✕</button>
+            </div>
+            <div class="panel-meta">
+                <span id="panel-empresa">—</span>
+                <span id="panel-ubicacion">—</span>
+                <span id="panel-fuente">—</span>
+                <span id="panel-fecha">—</span>
+            </div>
+            <div class="panel-acciones">
+                <a href="#" target="_blank" id="panel-url" class="btn btn-primary" style="font-size: 12px;">
+                    <i class="ti ti-external-link"></i>
+                    {% if idioma == 'en' %}View on web{% else %}Ver en web{% endif %}
+                </a>
+                <a href="#" id="panel-link-cvmatch" class="btn btn-outline" style="font-size: 12px;">
+                    <i class="ti ti-file-description"></i>
+                    {% if idioma == 'en' %}View in CVMatch{% else %}Ver en CVMatch{% endif %}
+                </a>
+                <a href="#" id="panel-link-analizar" class="btn btn-outline" style="font-size: 12px;">
+                    <i class="ti ti-file-text"></i>
+                    {% if idioma == 'en' %}Analyze CV{% else %}Analizar CV{% endif %}
+                </a>
+            </div>
+            <div class="panel-descripcion" id="panel-descripcion"></div>
+        </div>
+
     </div>
-    {% endif %}
+
 </div>
+</div>
+
+{% include 'ofertas/includes/footer.html' %}
 
 <script>
 function seleccionarTodas() {
@@ -98,6 +234,7 @@ function seleccionarTodas() {
     checkboxes.forEach(cb => cb.checked = !todasMarcadas);
 }
 </script>
+<script src="{% static 'ofertas/js/panel_oferta.js' %}"></script>
 
 </body>
 </html>

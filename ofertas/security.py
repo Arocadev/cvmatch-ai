@@ -22,6 +22,10 @@ def rate_limit(key_prefix, limite, periodo):
     def decorator(view_func):
         @wraps(view_func)
         def wrapper(request, *args, **kwargs):
+            # Desactivado en desarrollo
+            if getattr(settings, 'DEBUG', False):
+                return view_func(request, *args, **kwargs)
+
             ip = get_client_ip(request)
             cache_key = f'rl:{key_prefix}:{ip}'
             intentos = cache.get(cache_key, 0)
@@ -105,7 +109,6 @@ def sanitizar_prompt(texto, max_length=30000):
     if not texto:
         return ''
     texto = texto.replace('\x00', '')
-    # Elimina patrones típicos de prompt injection
     patrones_peligrosos = [
         r'ignore previous instructions',
         r'ignore all previous',
@@ -122,6 +125,5 @@ def sanitizar_prompt(texto, max_length=30000):
     for patron in patrones_peligrosos:
         if re.search(patron, texto_lower):
             logger.warning(f'Posible prompt injection detectado — patrón: {patron}')
-            # No bloqueamos, solo logueamos — el LLM tiene instrucciones claras
             break
     return texto[:max_length].strip()

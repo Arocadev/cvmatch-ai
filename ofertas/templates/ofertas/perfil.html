@@ -3,6 +3,7 @@
 <html lang="{{ idioma }}">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="{% static 'ofertas/favicon.png' %}">
     <title>{% if idioma == 'en' %}Profile{% else %}Perfil{% endif %} — CVMatch AI</title>
     <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
@@ -11,7 +12,8 @@
 
 {% include 'ofertas/includes/navbar.html' %}
 
-<div class="container" style="max-width: 720px; margin-top: 32px; padding-bottom: 48px;">
+<div class="page-content">
+<div class="container" style="max-width: 960px; padding-bottom: 48px;">
 
     <h1 style="font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 24px; letter-spacing: -0.5px;">
         {% if idioma == 'en' %}My profile{% else %}Mi perfil{% endif %}
@@ -29,7 +31,7 @@
     </div>
     {% endif %}
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; align-items: start;">
 
         <!-- Cuenta -->
         <div class="form-card" style="padding: 24px;">
@@ -55,16 +57,19 @@
                 <div class="form-group" style="margin-bottom: 12px;">
                     <label class="form-label">{% if idioma == 'en' %}Profile photo{% else %}Foto de perfil{% endif %}</label>
                     <input type="file" name="foto" accept="image/*" class="form-control" style="padding: 8px;">
-                    <p style="font-size: 11px; color: #94a3b8; margin-top: 4px;">{% if idioma == 'en' %}JPG, PNG. Max 2MB. Used in generated CVs.{% else %}JPG, PNG. Máx 2MB. Se usará en los CVs generados.{% endif %}</p>
+                    <p style="font-size: 11px; color: #94a3b8; margin-top: 4px;">{% if idioma == 'en' %}JPG, PNG. Max 2MB.{% else %}JPG, PNG. Máx 2MB.{% endif %}</p>
                 </div>
                 <button type="submit" class="btn btn-outline" style="width: 100%; justify-content: center;">
                     <i class="ti ti-upload"></i> {% if idioma == 'en' %}Update photo{% else %}Actualizar foto{% endif %}
                 </button>
             </form>
 
-            <div style="border-top: 1px solid #f1f5f9; margin-top: 20px; padding-top: 16px;">
+            <div style="border-top: 1px solid #f1f5f9; margin-top: 20px; padding-top: 16px; display: flex; flex-direction: column; gap: 8px;">
                 <a href="{% url 'cambiar_password' %}" class="btn btn-outline" style="width: 100%; justify-content: center;">
                     <i class="ti ti-lock"></i> {% if idioma == 'en' %}Change password{% else %}Cambiar contraseña{% endif %}
+                </a>
+                <a href="{% url 'logout' %}" class="btn btn-outline" style="width: 100%; justify-content: center; color: #dc2626; border-color: #FECACA;">
+                    <i class="ti ti-logout"></i> {% if idioma == 'en' %}Sign out{% else %}Cerrar sesión{% endif %}
                 </a>
             </div>
         </div>
@@ -123,15 +128,57 @@
             {% endif %}
         </div>
 
-    </div>
+        <!-- Token Groq -->
+        <div class="form-card" style="padding: 24px;">
+            <h2 style="font-size: 12px; font-weight: 700; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">
+                {% if idioma == 'en' %}Groq API Token{% else %}Token Groq{% endif %}
+            </h2>
+            <p style="font-size: 12px; color: #64748b; margin-bottom: 16px; line-height: 1.6;">
+                {% if idioma == 'en' %}
+                    Optional. If you add your own token, the AI will use your account instead of the shared one. Get it free at
+                {% else %}
+                    Opcional. Si añades tu propio token, la IA usará tu cuenta en vez de la compartida. Consíguelo gratis en
+                {% endif %}
+                <a href="https://console.groq.com" target="_blank" style="color: #1253A4; font-weight: 600; text-decoration: none;">console.groq.com</a>
+                —
+                <a href="{% url 'faq' %}" style="color: #1253A4; text-decoration: none;">{% if idioma == 'en' %}How?{% else %}¿Cómo?{% endif %}</a>
+            </p>
 
-    <div style="text-align: center; margin-top: 24px;">
-        <a href="{% url 'logout' %}" class="btn btn-outline" style="color: #dc2626; border-color: #FECACA;">
-            <i class="ti ti-logout"></i> {% if idioma == 'en' %}Sign out{% else %}Cerrar sesión{% endif %}
-        </a>
+            {% if profile.tiene_groq_token %}
+            <div style="background: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; font-size: 12px; color: #16a34a; display: flex; align-items: center; gap: 6px;">
+                <i class="ti ti-circle-check"></i>
+                {% if idioma == 'en' %}Token saved and active{% else %}Token guardado y activo{% endif %}
+            </div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="groq_token">
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label class="form-label">{% if idioma == 'en' %}Token (gsk_...){% else %}Token (gsk_...){% endif %}</label>
+                    <input type="password" name="groq_token" class="form-control"
+                           placeholder="gsk_..."
+                           autocomplete="off">
+                    <p style="font-size: 11px; color: #94a3b8; margin-top: 4px;">
+                        {% if idioma == 'en' %}Leave empty to remove the saved token.{% else %}Déjalo vacío para eliminar el token guardado.{% endif %}
+                    </p>
+                </div>
+                <button type="submit" class="btn btn-outline" style="width: 100%; justify-content: center;">
+                    <i class="ti ti-key"></i>
+                    {% if profile.tiene_groq_token %}
+                        {% if idioma == 'en' %}Update token{% else %}Actualizar token{% endif %}
+                    {% else %}
+                        {% if idioma == 'en' %}Save token{% else %}Guardar token{% endif %}
+                    {% endif %}
+                </button>
+            </form>
+        </div>
+
     </div>
 
 </div>
+</div>
 
+{% include 'ofertas/includes/footer.html' %}
 </body>
 </html>

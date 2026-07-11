@@ -7,13 +7,24 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-cliente = Groq(api_key=os.getenv('GROQ_API_KEY'))
 MODELO = os.getenv('GROQ_MODEL', 'openai/gpt-oss-120b')
+
+
+def _get_cliente(token: str | None = None) -> Groq:
+    """
+    Devuelve un cliente Groq usando:
+    1. El token del usuario (si lo ha configurado en su perfil)
+    2. El token global del .env como fallback para la demo
+    """
+    api_key = token or os.getenv('GROQ_API_KEY')
+    return Groq(api_key=api_key)
+
 
 def limpiar_respuesta(texto):
     texto = re.sub(r'<think>[\s\S]*?</think>', '', texto)
     texto = re.sub(r'<think>[\s\S]*', '', texto)
     return texto.strip()
+
 
 def extraer_texto_pdf(pdf_bytes):
     doc = fitz.open(stream=pdf_bytes, filetype="pdf")
@@ -22,8 +33,10 @@ def extraer_texto_pdf(pdf_bytes):
         texto += page.get_text()
     return texto
 
-def _llamar_groq(prompt, max_tokens=500):
+
+def _llamar_groq(prompt, max_tokens=500, token: str | None = None):
     """Llama a Groq con reintento automático si hay rate limit."""
+    cliente = _get_cliente(token)
     for intento in range(3):
         try:
             respuesta = cliente.chat.completions.create(
@@ -46,7 +59,8 @@ def _llamar_groq(prompt, max_tokens=500):
                     )
             raise
 
-def resumir_oferta(descripcion_oferta, idioma='es'):
+
+def resumir_oferta(descripcion_oferta, idioma='es', token=None):
     if idioma == 'en':
         prompt = f"""Analyze this job offer and extract the key information in this exact format:
 
@@ -78,9 +92,10 @@ Oferta:
 
 Responde SOLO con el formato indicado, sin añadir nada más."""
 
-    return _llamar_groq(prompt, max_tokens=500)
+    return _llamar_groq(prompt, max_tokens=800, token=token)
 
-def analizar_oferta_para_cv(descripcion_oferta, cv_texto, idioma='es'):
+
+def analizar_oferta_para_cv(descripcion_oferta, cv_texto, idioma='es', token=None):
     if idioma == 'en':
         prompt = f"""You are an expert in recruitment and ATS CV optimization.
 
@@ -142,9 +157,10 @@ CAMBIOS CONCRETOS:
 
 Sé directo, específico y realista."""
 
-    return _llamar_groq(prompt, max_tokens=1000)
+    return _llamar_groq(prompt, max_tokens=1000, token=token)
 
-def generar_cv_adaptado(descripcion_oferta, cv_texto, idioma='es'):
+
+def generar_cv_adaptado(descripcion_oferta, cv_texto, idioma='es', token=None):
     if idioma == 'en':
         prompt = f"""You are an expert in CV writing and ATS optimization.
 
@@ -178,4 +194,4 @@ Reescribe mi CV completo adaptado a esta oferta. Reglas:
 - Mantén las mismas secciones (Estudios, Experiencia, Proyectos, Habilidades, Idiomas)
 - Devuelve SOLO el CV reescrito, sin explicaciones ni comentarios"""
 
-    return _llamar_groq(prompt, max_tokens=2000)
+    return _llamar_groq(prompt, max_tokens=2000, token=token)

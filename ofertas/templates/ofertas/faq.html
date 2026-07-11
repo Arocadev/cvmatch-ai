@@ -1,0 +1,230 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ idioma }}">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="{% static 'ofertas/favicon.png' %}">
+    <title>FAQ — CVMatch AI</title>
+    <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <style>
+        .faq-container { max-width: 760px; margin: 40px auto; padding: 0 24px 60px; }
+        .legal-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; text-decoration: none; margin-bottom: 28px; }
+        .legal-back:hover { color: #1253A4; }
+        .faq-container h1 { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.5px; }
+        .faq-subtitulo { font-size: 13px; color: #94a3b8; margin-bottom: 36px; }
+        .faq-seccion-titulo { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #94a3b8; margin: 32px 0 12px; }
+        .faq-item { border: 1.5px solid #e2e8f0; border-radius: 10px; margin-bottom: 8px; overflow: hidden; background: #fff; }
+        .faq-pregunta { width: 100%; background: #fff; border: none; padding: 16px 20px; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 12px; color: #0f172a; font-size: 14px; font-weight: 600; }
+        .faq-pregunta:hover { background: #f8fafc; }
+        .faq-item.abierto .faq-pregunta { background: #EBF3FF; color: #1253A4; }
+        .faq-pregunta .icono { color: #1253A4; font-size: 16px; flex-shrink: 0; transition: transform 0.2s; }
+        .faq-item.abierto .faq-pregunta .icono { transform: rotate(45deg); }
+        .faq-respuesta { display: none; padding: 4px 20px 18px; background: #fff; font-size: 14px; color: #374151; line-height: 1.8; border-top: 1px solid #e2e8f0; }
+        .faq-item.abierto .faq-respuesta { display: block; }
+        .faq-respuesta p { margin-bottom: 10px; margin-top: 10px; }
+        .faq-respuesta ul { padding-left: 20px; margin: 8px 0 12px; }
+        .faq-respuesta li { margin-bottom: 6px; }
+        .faq-respuesta a { color: #1253A4; text-decoration: none; }
+        .faq-respuesta a:hover { text-decoration: underline; }
+        .faq-respuesta code { background: #f1f5f9; padding: 2px 7px; border-radius: 4px; font-family: monospace; font-size: 13px; color: #0A3A78; border: 1px solid #e2e8f0; }
+        .paso { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 12px; }
+        .paso-num { background: #1253A4; color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+        .aviso { background: #EBF3FF; border-left: 3px solid #1253A4; padding: 10px 14px; border-radius: 0 6px 6px 0; margin-top: 12px; font-size: 13px; color: #1253A4; }
+    </style>
+</head>
+<body>
+
+{% include 'ofertas/includes/navbar.html' %}
+
+<div class="page-content">
+<div class="faq-container">
+
+    <a href="javascript:history.back()" class="legal-back">
+        <i class="ti ti-arrow-left"></i>
+        {% if idioma == 'en' %}Back{% else %}Volver{% endif %}
+    </a>
+
+    <h1>FAQ</h1>
+    <p class="faq-subtitulo">{% if idioma == 'en' %}Frequently asked questions about CVMatch AI{% else %}Preguntas frecuentes sobre CVMatch AI{% endif %}</p>
+
+    {% if idioma == 'en' %}
+
+    <p class="faq-seccion-titulo">Groq API Token</p>
+
+    <div class="faq-item abierto">
+        <button class="faq-pregunta">What is a Groq token and why do I need one?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <p>CVMatch AI uses <strong>Groq</strong> to run the AI models that analyze your CV, summarize job offers, and generate adapted CVs. Groq offers a free API with a generous usage limit — no credit card required.</p>
+            <p>The app works out of the box with a shared token. If you add your own, you get dedicated usage limits.</p>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <button class="faq-pregunta">How do I get a free Groq token?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <div class="paso"><div class="paso-num">1</div><div>Go to <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a> and create a free account.</div></div>
+            <div class="paso"><div class="paso-num">2</div><div>Click <strong>API Keys</strong> in the left sidebar.</div></div>
+            <div class="paso"><div class="paso-num">3</div><div>Click <strong>Create API Key</strong>, give it a name and confirm.</div></div>
+            <div class="paso"><div class="paso-num">4</div><div>Copy the key — it starts with <code>gsk_</code>. You will only see it once.</div></div>
+            <div class="paso"><div class="paso-num">5</div><div>Go to your <a href="{% url 'perfil' %}">Profile</a> in CVMatch AI and paste it in the Groq token field.</div></div>
+            <div class="aviso"><i class="ti ti-shield-check"></i> Your token is encrypted with AES-256 before being stored. Never shown in plain text after saving.</div>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <button class="faq-pregunta">Is the free Groq plan enough?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <p>Yes. The free plan includes 14,400 requests/day, no credit card required. A typical CVMatch AI session uses 3–5 requests.</p>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <button class="faq-pregunta">I get an error when using AI features. What should I check?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <ul>
+                <li>If you added your own token, make sure it starts with <code>gsk_</code> and was copied completely.</li>
+                <li>Verify the token is still active at <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a>.</li>
+                <li>If you hit rate limits, wait a few minutes and try again.</li>
+            </ul>
+        </div>
+    </div>
+
+    <p class="faq-seccion-titulo">Job search</p>
+
+    <div class="faq-item">
+        <button class="faq-pregunta">Why are some offers in English when searching in Spain?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <p>Job data comes from external APIs. Some international companies post in English regardless of country. Try <strong>Adzuna España</strong> as the source for more Spanish-language results.</p>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <button class="faq-pregunta">What does each status mean?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <ul>
+                <li><strong>New</strong> — Retrieved from the last search, not yet reviewed.</li>
+                <li><strong>Viewed</strong> — Opened at least once.</li>
+                <li><strong>Saved</strong> — Marked for follow-up.</li>
+                <li><strong>Discarded</strong> — Can be permanently deleted from the Discarded tab.</li>
+            </ul>
+        </div>
+    </div>
+
+    <p class="faq-seccion-titulo">CV and PDF</p>
+
+    <div class="faq-item">
+        <button class="faq-pregunta">Can I save more than one CV?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <p>Yes, up to 3 CVs in your profile (PDF or text). When analyzing an offer, you can choose which one to use.</p>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <button class="faq-pregunta">What is the difference between automatic and manual PDF mode?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <p><strong>Automatic</strong>: uses the AI-generated CV adapted to the specific job offer.</p>
+            <p><strong>Manual</strong>: you write or paste the CV content yourself in the PDF creator.</p>
+        </div>
+    </div>
+
+    {% else %}
+
+    <p class="faq-seccion-titulo">Token de API de Groq</p>
+
+    <div class="faq-item abierto">
+        <button class="faq-pregunta">¿Qué es un token de Groq y para qué lo necesito?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <p>CVMatch AI usa <strong>Groq</strong> para ejecutar los modelos de IA que analizan tu CV, resumen las ofertas y generan CVs adaptados. Groq ofrece una API gratuita con un límite de uso generoso — sin tarjeta de crédito.</p>
+            <p>La app funciona directamente con un token compartido. Si añades el tuyo, tendrás límites de uso dedicados.</p>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <button class="faq-pregunta">¿Cómo consigo un token de Groq gratuito?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <div class="paso"><div class="paso-num">1</div><div>Ve a <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a> y crea una cuenta gratuita.</div></div>
+            <div class="paso"><div class="paso-num">2</div><div>Haz clic en <strong>API Keys</strong> en el menú lateral izquierdo.</div></div>
+            <div class="paso"><div class="paso-num">3</div><div>Pulsa <strong>Create API Key</strong>, ponle un nombre y confirma.</div></div>
+            <div class="paso"><div class="paso-num">4</div><div>Copia la clave — empieza por <code>gsk_</code>. Solo la verás una vez.</div></div>
+            <div class="paso"><div class="paso-num">5</div><div>Ve a tu <a href="{% url 'perfil' %}">Perfil</a> en CVMatch AI y pégala en el campo de token Groq.</div></div>
+            <div class="aviso"><i class="ti ti-shield-check"></i> Tu token se cifra con AES-256 antes de guardarse. Nunca se muestra en texto plano tras guardarlo.</div>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <button class="faq-pregunta">¿Es suficiente el plan gratuito de Groq?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <p>Sí. El plan gratuito incluye 14.400 peticiones/día, sin tarjeta de crédito. Una sesión típica en CVMatch AI consume entre 3 y 5 peticiones.</p>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <button class="faq-pregunta">Me da error al usar las funciones de IA. ¿Qué compruebo?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <ul>
+                <li>Si has añadido tu propio token, comprueba que empiece por <code>gsk_</code> y se haya copiado completo.</li>
+                <li>Verifica que el token sigue activo en <a href="https://console.groq.com" target="_blank" rel="noopener">console.groq.com</a>.</li>
+                <li>Si has alcanzado el límite de peticiones, espera unos minutos e inténtalo de nuevo.</li>
+            </ul>
+        </div>
+    </div>
+
+    <p class="faq-seccion-titulo">Búsqueda de ofertas</p>
+
+    <div class="faq-item">
+        <button class="faq-pregunta">¿Por qué algunas ofertas aparecen en inglés aunque busco en España?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <p>Los datos provienen de APIs externas. Algunas empresas publican en inglés independientemente del país. Prueba a usar <strong>Adzuna España</strong> como fuente para obtener más resultados en castellano.</p>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <button class="faq-pregunta">¿Qué significa cada estado de las ofertas?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <ul>
+                <li><strong>Nueva</strong> — Obtenida en la última búsqueda, aún no revisada.</li>
+                <li><strong>Vista</strong> — Abierta al menos una vez.</li>
+                <li><strong>Guardada</strong> — Marcada para hacer seguimiento.</li>
+                <li><strong>Descartada</strong> — Se puede eliminar definitivamente desde la pestaña de descartadas.</li>
+            </ul>
+        </div>
+    </div>
+
+    <p class="faq-seccion-titulo">CV y PDF</p>
+
+    <div class="faq-item">
+        <button class="faq-pregunta">¿Puedo guardar más de un CV?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <p>Sí, hasta 3 CVs en tu perfil (en PDF o texto). Al analizar una oferta, puedes elegir cuál usar.</p>
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <button class="faq-pregunta">¿Qué diferencia hay entre el modo automático y el manual en el creador de PDF?<i class="ti ti-plus icono"></i></button>
+        <div class="faq-respuesta">
+            <p><strong>Automático</strong>: usa el CV generado por la IA, adaptado a la oferta concreta.</p>
+            <p><strong>Manual</strong>: escribes o pegas el contenido del CV directamente en el creador de PDF.</p>
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>
+</div>
+
+{% include 'ofertas/includes/footer.html' %}
+
+<script>
+document.querySelectorAll('.faq-pregunta').forEach(btn => {
+    btn.addEventListener('click', function () {
+        const item = this.closest('.faq-item');
+        const estaAbierto = item.classList.contains('abierto');
+        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('abierto'));
+        if (!estaAbierto) item.classList.add('abierto');
+    });
+});
+</script>
+
+</body>
+</html>

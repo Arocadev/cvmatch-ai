@@ -3,6 +3,7 @@
 <html lang="{{ idioma }}">
 <head>
     <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="{% static 'ofertas/favicon.png' %}">
     <title>{% if idioma == 'en' %}Search{% else %}Buscador{% endif %} — CVMatch AI</title>
     <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
@@ -13,7 +14,8 @@
 {% include 'ofertas/includes/navbar.html' %}
 {% endwith %}
 
-<div class="container" style="max-width: 600px; margin-top: 40px;">
+<div class="page-content">
+<div class="container" style="max-width: 600px;">
     <div class="form-card">
         <h1 class="form-title">{% if idioma == 'en' %}What are you looking for?{% else %}¿Qué estás buscando?{% endif %}</h1>
         <form method="POST">
@@ -26,7 +28,7 @@
                     <strong>Adzuna US</strong> — Ofertas en Estados Unidos<br>
                     <strong>Jooble</strong> — Agregador internacional, 69 países<br>
                     <strong>Arbeitnow</strong> — Especializado en Europa<br>
-                    <strong>{% if idioma == 'en' %}All{% else %}Todas{% endif %}</strong> — Busca en las tres a la vez
+                    <strong>{% if idioma == 'en' %}All{% else %}Todas{% endif %}</strong> — Busca en todas a la vez
                 </div>
                 <select name="fuente" class="form-control">
                     <option value="adzuna_es" {% if request.session.fuente == 'adzuna_es' %}selected{% endif %}>Adzuna — España</option>
@@ -77,9 +79,13 @@
         </form>
     </div>
 </div>
+</div>
 
 <script>
 function toggleInfo() { const i = document.getElementById('info-fuentes'); i.style.display = i.style.display === 'none' ? 'block' : 'none'; }
 </script>
+
+{% include 'ofertas/includes/footer.html' %}
+
 </body>
 </html>

@@ -1,0 +1,134 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ idioma }}">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="{% static 'ofertas/favicon.png' %}">
+    <title>{% if idioma == 'en' %}Privacy Policy{% else %}Política de Privacidad{% endif %} — CVMatch AI</title>
+    <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <style>
+        .legal-container { max-width: 760px; margin: 40px auto; padding: 0 24px 60px; }
+        .legal-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; text-decoration: none; margin-bottom: 28px; }
+        .legal-back:hover { color: #1253A4; }
+        .legal-container h1 { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.5px; }
+        .legal-subtitulo { font-size: 13px; color: #94a3b8; margin-bottom: 36px; }
+        .legal-container h2 { font-size: 16px; font-weight: 700; color: #1253A4; margin: 32px 0 10px; }
+        .legal-container p, .legal-container li { font-size: 14px; color: #374151; line-height: 1.8; }
+        .legal-container ul { padding-left: 20px; margin-top: 6px; }
+        .legal-container a { color: #1253A4; text-decoration: none; }
+        .legal-container a:hover { text-decoration: underline; }
+        .tabla-datos { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 13px; }
+        .tabla-datos th { text-align: left; padding: 10px 14px; background: #1253A4; color: #fff; font-weight: 600; border-bottom: 2px solid #0A3A78; }
+        .tabla-datos td { padding: 10px 14px; color: #374151; border-bottom: 1px solid #e2e8f0; vertical-align: top; background: #fff; }
+        .tabla-datos tr:nth-child(even) td { background: #f8fafc; }
+    </style>
+</head>
+<body>
+
+{% include 'ofertas/includes/navbar.html' %}
+
+<div class="page-content">
+<div class="legal-container">
+
+    <a href="javascript:history.back()" class="legal-back">
+        <i class="ti ti-arrow-left"></i>
+        {% if idioma == 'en' %}Back{% else %}Volver{% endif %}
+    </a>
+
+    <h1>{% if idioma == 'en' %}Privacy Policy{% else %}Política de Privacidad{% endif %}</h1>
+    <p class="legal-subtitulo">{% if idioma == 'en' %}Last updated: July 2026{% else %}Última actualización: julio de 2026{% endif %}</p>
+
+    {% if idioma == 'en' %}
+
+    <h2>1. Data controller</h2>
+    <p>CVMatch AI is a personal demo project by Alejandro Rodríguez Calabuig.<br>
+    Contact: <a href="mailto:aleexrc.xtv@gmail.com">aleexrc.xtv@gmail.com</a></p>
+
+    <h2>2. What data we collect</h2>
+    <table class="tabla-datos">
+        <tr><th>Data</th><th>Purpose</th><th>Retention</th></tr>
+        <tr><td>Username and password (hashed)</td><td>Account authentication</td><td>Until account deletion</td></tr>
+        <tr><td>Profile photo</td><td>Optional. Displayed in generated PDFs</td><td>Until manually removed</td></tr>
+        <tr><td>CV text</td><td>AI analysis and CV generation</td><td>Until manually removed (max. 3 CVs)</td></tr>
+        <tr><td>Groq API token</td><td>AI requests. Stored encrypted (AES-256)</td><td>Until manually removed</td></tr>
+        <tr><td>Job offers</td><td>Retrieved from external APIs</td><td>Until discarded or deleted</td></tr>
+        <tr><td>Security logs</td><td>Failed logins, suspicious activity</td><td>30 days</td></tr>
+    </table>
+
+    <h2>3. Legal basis</h2>
+    <p>Processing is based on the performance of the service contract (Article 6.1.b GDPR) and legitimate interest in maintaining security (Article 6.1.f GDPR).</p>
+
+    <h2>4. Data sharing</h2>
+    <p>CVMatch AI does not sell or share personal data with third parties, except:</p>
+    <ul>
+        <li><strong>Groq API</strong>: CV text and job descriptions are sent using the user's own API key. <a href="https://groq.com/privacy-policy/" target="_blank" rel="noopener">Groq privacy policy</a></li>
+        <li><strong>Adzuna, Jooble, Arbeitnow</strong>: search queries only, no personal data included.</li>
+    </ul>
+
+    <h2>5. Data security</h2>
+    <ul>
+        <li>Passwords hashed with PBKDF2.</li>
+        <li>Groq tokens encrypted with AES-256 (Fernet).</li>
+        <li>HTTPS in production.</li>
+        <li>Sessions in Redis with 7-day expiry.</li>
+    </ul>
+
+    <h2>6. Your rights (GDPR)</h2>
+    <p>You have the right to access, rectify, erase, port, and object to your data. Contact <a href="mailto:aleexrc.xtv@gmail.com">aleexrc.xtv@gmail.com</a>. Response within 30 days.</p>
+    <p>You may also complain to the AEPD: <a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a></p>
+
+    <h2>7. Cookies</h2>
+    <p>Only a strictly necessary session cookie is used. No tracking or advertising cookies.</p>
+
+    {% else %}
+
+    <h2>1. Responsable del tratamiento</h2>
+    <p>CVMatch AI es un proyecto personal de demostración de Alejandro Rodríguez Calabuig.<br>
+    Contacto: <a href="mailto:aleexrc.xtv@gmail.com">aleexrc.xtv@gmail.com</a></p>
+
+    <h2>2. Datos que recogemos</h2>
+    <table class="tabla-datos">
+        <tr><th>Dato</th><th>Finalidad</th><th>Conservación</th></tr>
+        <tr><td>Nombre de usuario y contraseña (hasheada)</td><td>Autenticación en la cuenta</td><td>Hasta eliminación de la cuenta</td></tr>
+        <tr><td>Foto de perfil</td><td>Opcional. Se incluye en los PDFs generados</td><td>Hasta eliminación manual</td></tr>
+        <tr><td>Texto del CV</td><td>Análisis IA y generación de CV adaptado</td><td>Hasta eliminación manual (máx. 3 CVs)</td></tr>
+        <tr><td>Token de API de Groq</td><td>Peticiones IA. Se almacena cifrado (AES-256)</td><td>Hasta eliminación manual</td></tr>
+        <tr><td>Ofertas de empleo</td><td>Obtenidas de APIs externas</td><td>Hasta descartarlas o eliminarlas</td></tr>
+        <tr><td>Logs de seguridad</td><td>Intentos de login fallidos, actividad sospechosa</td><td>30 días</td></tr>
+    </table>
+
+    <h2>3. Base legal del tratamiento</h2>
+    <p>El tratamiento se basa en la ejecución del contrato de servicio (art. 6.1.b RGPD) y el interés legítimo en mantener la seguridad (art. 6.1.f RGPD).</p>
+
+    <h2>4. Cesión de datos</h2>
+    <p>CVMatch AI no vende ni cede datos personales a terceros, excepto:</p>
+    <ul>
+        <li><strong>Groq API</strong>: el texto del CV y la descripción de la oferta se envían usando la clave del propio usuario. <a href="https://groq.com/privacy-policy/" target="_blank" rel="noopener">Política de privacidad de Groq</a></li>
+        <li><strong>Adzuna, Jooble, Arbeitnow</strong>: solo se envían consultas de búsqueda, sin datos personales.</li>
+    </ul>
+
+    <h2>5. Seguridad de los datos</h2>
+    <ul>
+        <li>Contraseñas hasheadas con PBKDF2.</li>
+        <li>Tokens de Groq cifrados con AES-256 (Fernet).</li>
+        <li>HTTPS en producción.</li>
+        <li>Sesiones en Redis con expiración de 7 días.</li>
+    </ul>
+
+    <h2>6. Tus derechos (RGPD)</h2>
+    <p>Tienes derecho a acceder, rectificar, suprimir, portar y oponerte al tratamiento de tus datos. Contacta en <a href="mailto:aleexrc.xtv@gmail.com">aleexrc.xtv@gmail.com</a>. Respondemos en 30 días.</p>
+    <p>También puedes reclamar ante la AEPD: <a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es</a></p>
+
+    <h2>7. Cookies</h2>
+    <p>Solo se utiliza una cookie de sesión estrictamente necesaria. No se usan cookies de seguimiento ni publicidad.</p>
+
+    {% endif %}
+
+</div>
+</div>
+
+{% include 'ofertas/includes/footer.html' %}
+
+</body>
+</html>

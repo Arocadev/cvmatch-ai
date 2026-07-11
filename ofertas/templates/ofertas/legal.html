@@ -1,0 +1,106 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="{{ idioma }}">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="{% static 'ofertas/favicon.png' %}">
+    <title>{% if idioma == 'en' %}Legal Notice{% else %}Aviso Legal{% endif %} — CVMatch AI</title>
+    <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <style>
+        .legal-container { max-width: 760px; margin: 40px auto; padding: 0 24px 60px; }
+        .legal-back { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; text-decoration: none; margin-bottom: 28px; }
+        .legal-back:hover { color: #1253A4; }
+        .legal-container h1 { font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.5px; }
+        .legal-subtitulo { font-size: 13px; color: #94a3b8; margin-bottom: 36px; }
+        .legal-container h2 { font-size: 16px; font-weight: 700; color: #1253A4; margin: 32px 0 10px; }
+        .legal-container p, .legal-container li { font-size: 14px; color: #374151; line-height: 1.8; }
+        .legal-container ul { padding-left: 20px; margin-top: 6px; }
+        .legal-container a { color: #1253A4; text-decoration: none; }
+        .legal-container a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+{% include 'ofertas/includes/navbar.html' %}
+
+<div class="page-content">
+<div class="legal-container">
+
+    <a href="javascript:history.back()" class="legal-back">
+        <i class="ti ti-arrow-left"></i>
+        {% if idioma == 'en' %}Back{% else %}Volver{% endif %}
+    </a>
+
+    <h1>{% if idioma == 'en' %}Legal Notice{% else %}Aviso Legal{% endif %}</h1>
+    <p class="legal-subtitulo">{% if idioma == 'en' %}Last updated: July 2026{% else %}Última actualización: julio de 2026{% endif %}</p>
+
+    {% if idioma == 'en' %}
+
+    <h2>1. Service identification</h2>
+    <p>CVMatch AI is a personal demo project developed by Alejandro Rodríguez Calabuig. It is not operated by a registered company. The service is provided for demonstration and portfolio purposes only.</p>
+    <p>Contact: <a href="mailto:aleexrc.xtv@gmail.com">aleexrc.xtv@gmail.com</a></p>
+
+    <h2>2. Purpose of the service</h2>
+    <p>CVMatch AI allows users to search for job offers from external sources, analyze compatibility between their CV and a job description using artificial intelligence, and generate adapted CVs in PDF format.</p>
+
+    <h2>3. Intellectual property</h2>
+    <p>The source code, design, and content of CVMatch AI are the property of the developer. Job offer data is retrieved from third-party APIs (Adzuna, Jooble, Arbeitnow) and belongs to their respective owners.</p>
+
+    <h2>4. Disclaimer of liability</h2>
+    <p>CVMatch AI is a demo project provided "as is", without warranty of any kind. The developer is not responsible for:</p>
+    <ul>
+        <li>The accuracy or availability of job offers from external sources.</li>
+        <li>The quality of AI-generated content, which may contain errors or inaccuracies.</li>
+        <li>Any damages arising from the use or inability to use the service.</li>
+    </ul>
+
+    <h2>5. Third-party services</h2>
+    <p>CVMatch AI integrates with the following external services:</p>
+    <ul>
+        <li><strong>Groq API</strong> — AI inference. Each user provides their own API key.</li>
+        <li><strong>Adzuna, Jooble, Arbeitnow</strong> — Job offer data sources.</li>
+    </ul>
+
+    <h2>6. Applicable law</h2>
+    <p>This legal notice is governed by Spanish law. Any disputes shall be submitted to the courts of Valencia, Spain.</p>
+
+    {% else %}
+
+    <h2>1. Identificación del servicio</h2>
+    <p>CVMatch AI es un proyecto personal de demostración desarrollado por Alejandro Rodríguez Calabuig. No está operado por ninguna empresa registrada. El servicio se ofrece exclusivamente con fines de demostración y portfolio profesional.</p>
+    <p>Contacto: <a href="mailto:aleexrc.xtv@gmail.com">aleexrc.xtv@gmail.com</a></p>
+
+    <h2>2. Objeto del servicio</h2>
+    <p>CVMatch AI permite a los usuarios buscar ofertas de empleo de fuentes externas, analizar la compatibilidad entre su CV y una oferta mediante inteligencia artificial, y generar CVs adaptados en formato PDF.</p>
+
+    <h2>3. Propiedad intelectual</h2>
+    <p>El código fuente, diseño y contenidos propios de CVMatch AI son propiedad del desarrollador. Los datos de ofertas de empleo se obtienen de APIs de terceros (Adzuna, Jooble, Arbeitnow) y pertenecen a sus respectivos titulares.</p>
+
+    <h2>4. Exención de responsabilidad</h2>
+    <p>CVMatch AI es un proyecto de demostración y se ofrece "tal cual", sin garantías de ningún tipo. El desarrollador no se responsabiliza de:</p>
+    <ul>
+        <li>La exactitud o disponibilidad de las ofertas de empleo obtenidas de fuentes externas.</li>
+        <li>La calidad del contenido generado por IA, que puede contener errores o inexactitudes.</li>
+        <li>Cualquier daño derivado del uso o imposibilidad de uso del servicio.</li>
+    </ul>
+
+    <h2>5. Servicios de terceros</h2>
+    <p>CVMatch AI se integra con los siguientes servicios externos:</p>
+    <ul>
+        <li><strong>Groq API</strong> — Inferencia de IA. Cada usuario aporta su propia clave de API.</li>
+        <li><strong>Adzuna, Jooble, Arbeitnow</strong> — Fuentes de datos de ofertas de empleo.</li>
+    </ul>
+
+    <h2>6. Legislación aplicable</h2>
+    <p>El presente aviso legal se rige por la legislación española. Para cualquier controversia, las partes se someten a los juzgados y tribunales de Valencia, España.</p>
+
+    {% endif %}
+
+</div>
+</div>
+
+{% include 'ofertas/includes/footer.html' %}
+
+</body>
+</html>

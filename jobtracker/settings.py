@@ -24,6 +24,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -83,6 +84,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'ofertas' / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
@@ -95,6 +97,8 @@ SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SECURE = not DEBUG
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 7 días
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
 
 # ─── CSRF ────────────────────────────────────────────────────────────────────
 CSRF_COOKIE_HTTPONLY = True
@@ -112,17 +116,35 @@ if not DEBUG:
 # ─── Uploads ─────────────────────────────────────────────────────────────────
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
-MAX_FOTO_SIZE_BYTES = 2 * 1024 * 1024   # 2 MB para fotos
-MAX_PDF_SIZE_BYTES = 5 * 1024 * 1024    # 5 MB para CVs
+MAX_FOTO_SIZE_BYTES = 2 * 1024 * 1024
+MAX_PDF_SIZE_BYTES  = 5 * 1024 * 1024
 
 # ─── Rate limiting ───────────────────────────────────────────────────────────
 RATELIMIT_USE_CACHE = 'default'
 
+# ─── Redis + Caché ───────────────────────────────────────────────────────────
+REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': REDIS_URL,
     }
 }
+
+# ─── Celery ───────────────────────────────────────────────────────────────────
+CELERY_BROKER_URL           = REDIS_URL
+CELERY_RESULT_BACKEND       = REDIS_URL
+CELERY_ACCEPT_CONTENT       = ['json']
+CELERY_TASK_SERIALIZER      = 'json'
+CELERY_RESULT_SERIALIZER    = 'json'
+CELERY_TIMEZONE             = TIME_ZONE
+CELERY_TASK_TRACK_STARTED   = True
+CELERY_TASK_TIME_LIMIT      = 120
+CELERY_TASK_SOFT_TIME_LIMIT = 90
+
+# ─── Cifrado tokens Groq ─────────────────────────────────────────────────────
+ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY', '')
 
 # ─── Logging ─────────────────────────────────────────────────────────────────
 LOGS_DIR = BASE_DIR / 'logs'
@@ -170,4 +192,5 @@ LOGGING = {
             'propagate': False,
         },
     },
+    
 }
