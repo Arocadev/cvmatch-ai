@@ -3,353 +3,176 @@
 <html lang="{{ idioma }}">
 <head>
     <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <link rel="icon" type="image/png" href="{% static 'ofertas/favicon.png' %}">
     <title>{% if idioma == 'en' %}Create CV{% else %}Crear CV{% endif %} — CVMatch AI</title>
     <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
-    <style>
-        .modo-tabs {
-            display: flex;
-            gap: 0;
-            margin-bottom: 28px;
-            background: #f1f5f9;
-            border-radius: 10px;
-            padding: 4px;
-        }
-        .modo-tab {
-            flex: 1;
-            padding: 10px;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 600;
-            color: #64748b;
-            cursor: pointer;
-            border-radius: 7px;
-            transition: all 0.15s;
-            border: none;
-            background: none;
-        }
-        .modo-tab.activo {
-            background: #fff;
-            color: #1253A4;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-        }
-        .modo-contenido { display: none; }
-        .modo-contenido.activo { display: block; }
-        .cv-preview {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 20px;
-            font-size: 13px;
-            line-height: 1.8;
-            color: #374151;
-            min-height: 200px;
-            white-space: pre-wrap;
-        }
-        .spinner {
-            width: 20px; height: 20px;
-            border: 2px solid #e2e8f0;
-            border-top-color: #1253A4;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-    </style>
+    <link rel="stylesheet" href="{% static 'ofertas/crear_cv.css' %}">
 </head>
 <body>
 
 {% include 'ofertas/includes/navbar.html' %}
 
-<div class="page-content">
-<div class="container" style="max-width: 860px; padding-bottom: 48px;">
+<script type="application/json" id="cvs-data">{{ cvs_json|safe }}</script>
+<script>
+var IDIOMA = "{{ idioma }}";
+var URL_MEJORAR = "{% url 'mejorar_cv_ia' %}";
+var URL_ADAPTAR = "{% url 'adaptar_cv_oferta_externa' %}";
+</script>
 
-    <h1 style="font-size: 22px; font-weight: 800; color: #0f172a; margin-bottom: 6px; letter-spacing: -0.5px;">
-        {% if idioma == 'en' %}Create CV{% else %}Crear CV{% endif %}
-    </h1>
-    <p style="font-size: 13px; color: #64748b; margin-bottom: 28px;">
-        {% if idioma == 'en' %}Generate a professional PDF without needing a job offer.{% else %}Genera un PDF profesional sin necesitar una oferta de trabajo.{% endif %}
+<div class="page-content">
+<div class="container crear-container">
+
+    <h1 class="crear-titulo">{% if idioma == 'en' %}Create CV{% else %}Crear CV{% endif %}</h1>
+    <p class="crear-subtitulo">
+        {% if idioma == 'en' %}Generate a professional PDF without needing a saved job offer.{% else %}Genera un PDF profesional sin necesitar una oferta guardada.{% endif %}
     </p>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+    <div class="crear-layout">
 
-        <!-- ── Columna izquierda: entrada ─────────────────────────────── -->
-        <div class="form-card" style="padding: 28px;">
+        <!-- Col 1: Contenido -->
+        <div class="form-card crear-col">
+            <p class="col-label">{% if idioma == 'en' %}CV Content{% else %}Contenido del CV{% endif %}</p>
 
-            <!-- Tabs modo -->
             <div class="modo-tabs">
-                <button class="modo-tab activo" onclick="cambiarModo('manual', this)">
-                    <i class="ti ti-pencil"></i>
-                    {% if idioma == 'en' %}Manual{% else %}Manual{% endif %}
+                <button class="modo-tab activo" data-modo="manual">
+                    <i class="ti ti-pencil"></i> Manual
                 </button>
-                <button class="modo-tab" onclick="cambiarModo('ia', this)">
-                    <i class="ti ti-sparkles"></i>
-                    {% if idioma == 'en' %}AI assisted{% else %}Con IA{% endif %}
+                <button class="modo-tab" data-modo="ia">
+                    <i class="ti ti-sparkles"></i> IA
                 </button>
-            </div>
-
-            <!-- Modo manual -->
-            <div id="modo-manual" class="modo-contenido activo">
-                <p style="font-size: 12px; color: #64748b; margin-bottom: 16px;">
-                    {% if idioma == 'en' %}Write your CV directly. Use the PDF creator on the right to format it.{% else %}Escribe tu CV directamente. Usa el creador de PDF a la derecha para darle formato.{% endif %}
-                </p>
-                <div class="form-group">
-                    <label class="form-label">{% if idioma == 'en' %}CV content{% else %}Contenido del CV{% endif %}</label>
-                    <textarea id="cv-manual-texto" class="form-control" rows="14" placeholder="{% if idioma == 'en' %}Write your experience, skills, education...{% else %}Escribe tu experiencia, habilidades, formación...{% endif %}" style="resize: vertical; font-size: 13px; line-height: 1.7;"></textarea>
-                </div>
-                {% if cvs_usuario %}
-                <div style="border-top: 1px solid #f1f5f9; padding-top: 14px; margin-top: 4px;">
-                    <p style="font-size: 12px; color: #64748b; margin-bottom: 10px;">{% if idioma == 'en' %}Or load a saved CV:{% else %}O carga un CV guardado:{% endif %}</p>
-                    <div style="display: flex; flex-direction: column; gap: 6px;">
-                        {% for cv in cvs_usuario %}
-                        <button onclick="cargarCV(`{{ cv.texto|escapejs }}`)" class="btn btn-outline" style="font-size: 12px; justify-content: flex-start; text-align: left;">
-                            <i class="ti ti-file-text"></i> {{ cv.nombre }}
-                        </button>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-                <button onclick="usarManual()" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 16px; padding: 11px;">
-                    <i class="ti ti-arrow-right"></i>
-                    {% if idioma == 'en' %}Use this content{% else %}Usar este contenido{% endif %}
+                <button class="modo-tab" data-modo="oferta">
+                    <i class="ti ti-briefcase"></i>
+                    {% if idioma == 'en' %}External{% else %}Externa{% endif %}
                 </button>
             </div>
 
-            <!-- Modo IA -->
-            <div id="modo-ia" class="modo-contenido">
-                <p style="font-size: 12px; color: #64748b; margin-bottom: 16px;">
-                    {% if idioma == 'en' %}Paste your current CV and the AI will restructure and improve it professionally.{% else %}Pega tu CV actual y la IA lo restructurará y mejorará de forma profesional.{% endif %}
-                </p>
-                <div class="form-group">
-                    <label class="form-label">{% if idioma == 'en' %}Your current CV (text){% else %}Tu CV actual (texto){% endif %}</label>
-                    <textarea id="cv-ia-texto" class="form-control" rows="10" placeholder="{% if idioma == 'en' %}Paste your CV here...{% else %}Pega aquí tu CV...{% endif %}" style="resize: vertical; font-size: 13px;"></textarea>
-                </div>
-                {% if cvs_usuario %}
-                <div style="border-top: 1px solid #f1f5f9; padding-top: 14px; margin-top: 4px;">
-                    <p style="font-size: 12px; color: #64748b; margin-bottom: 10px;">{% if idioma == 'en' %}Or load a saved CV:{% else %}O carga un CV guardado:{% endif %}</p>
-                    <div style="display: flex; flex-direction: column; gap: 6px;">
-                        {% for cv in cvs_usuario %}
-                        <button onclick="cargarCVIA(`{{ cv.texto|escapejs }}`)" class="btn btn-outline" style="font-size: 12px; justify-content: flex-start;">
-                            <i class="ti ti-file-text"></i> {{ cv.nombre }}
-                        </button>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-                <button onclick="mejorarConIA()" id="btn-mejorar" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 16px; padding: 11px; background: linear-gradient(135deg, #7c3aed, #6d28d9); box-shadow: 0 2px 8px rgba(109,40,217,0.35);">
+            <!-- Manual -->
+            <div class="modo-contenido activo" id="modo-manual">
+                <p class="modo-desc">{% if idioma == 'en' %}Write your CV. Preview updates automatically.{% else %}Escribe tu CV. La vista previa se actualiza sola.{% endif %}</p>
+                <textarea id="cv-manual-texto" class="form-control" rows="12"
+                    placeholder="{% if idioma == 'en' %}Experience, skills, education...{% else %}Experiencia, habilidades, formación...{% endif %}"></textarea>
+                <div id="lista-cvs-manual" class="lista-cvs"></div>
+            </div>
+
+            <!-- IA -->
+            <div class="modo-contenido" id="modo-ia">
+                <p class="modo-desc">{% if idioma == 'en' %}Paste your CV and AI will restructure and improve it.{% else %}Pega tu CV y la IA lo restructurará y mejorará.{% endif %}</p>
+                <textarea id="cv-ia-texto" class="form-control" rows="10"
+                    placeholder="{% if idioma == 'en' %}Paste your CV here...{% else %}Pega aquí tu CV...{% endif %}"></textarea>
+                <div id="lista-cvs-ia" class="lista-cvs"></div>
+                <button id="btn-mejorar" class="btn btn-primary btn-full">
                     <i class="ti ti-sparkles"></i>
                     {% if idioma == 'en' %}Improve with AI{% else %}Mejorar con IA{% endif %}
                 </button>
             </div>
 
+            <!-- Oferta externa -->
+            <div class="modo-contenido" id="modo-oferta">
+                <p class="modo-desc">{% if idioma == 'en' %}Paste the job offer and your CV. AI will adapt your CV to that offer.{% else %}Pega la oferta y tu CV. La IA adaptará tu CV a esa oferta.{% endif %}</p>
+                <label class="form-label">{% if idioma == 'en' %}Job offer description{% else %}Descripción de la oferta{% endif %}</label>
+                <textarea id="oferta-externa-texto" class="form-control" rows="5"
+                    placeholder="{% if idioma == 'en' %}Paste the job description here...{% else %}Pega aquí la descripción de la oferta...{% endif %}"></textarea>
+                <label class="form-label" style="margin-top: 10px;">{% if idioma == 'en' %}Your CV{% else %}Tu CV{% endif %}</label>
+                <textarea id="cv-oferta-texto" class="form-control" rows="5"
+                    placeholder="{% if idioma == 'en' %}Paste your CV here...{% else %}Pega aquí tu CV...{% endif %}"></textarea>
+                <div id="lista-cvs-oferta" class="lista-cvs"></div>
+                <button id="btn-adaptar" class="btn btn-primary btn-full">
+                    <i class="ti ti-sparkles"></i>
+                    {% if idioma == 'en' %}Adapt CV to offer{% else %}Adaptar CV a la oferta{% endif %}
+                </button>
+            </div>
         </div>
 
-        <!-- ── Columna derecha: preview + PDF ────────────────────────── -->
-        <div style="display: flex; flex-direction: column; gap: 16px; position: sticky; top: 88px;">
-
-            <!-- Preview -->
-            <div class="form-card" style="padding: 20px;">
-                <p style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px;">
-                    {% if idioma == 'en' %}Preview{% else %}Vista previa{% endif %}
-                </p>
-                <div id="cv-preview" class="cv-preview markdown-content">
-                    <span style="color: #cbd5e1; font-style: italic;">{% if idioma == 'en' %}Your CV will appear here...{% else %}Tu CV aparecerá aquí...{% endif %}</span>
-                </div>
-                <div style="display: flex; gap: 8px; margin-top: 12px;">
-                    <button onclick="copiarPreview()" class="btn btn-outline" style="flex: 1; justify-content: center; font-size: 12px;" id="btn-copiar">
-                        <i class="ti ti-copy"></i> {% if idioma == 'en' %}Copy{% else %}Copiar{% endif %}
-                    </button>
-                </div>
+        <!-- Col 2: Vista previa -->
+        <div class="form-card crear-col">
+            <div class="preview-header">
+                <p class="col-label" style="margin:0">{% if idioma == 'en' %}Preview{% else %}Vista previa{% endif %}</p>
+                <button id="btn-copiar" class="btn btn-outline btn-sm">
+                    <i class="ti ti-copy"></i> {% if idioma == 'en' %}Copy{% else %}Copiar{% endif %}
+                </button>
             </div>
-
-            <!-- Creador PDF -->
-            <div class="form-card" style="padding: 20px;">
-                <p style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px;">
-                    {% if idioma == 'en' %}PDF Creator{% else %}Creador de PDF{% endif %}
-                </p>
-                <form method="POST" action="{% url 'descargar_pdf_libre' %}" id="form-pdf">
-                    {% csrf_token %}
-                    <input type="hidden" name="cv_contenido" id="cv-contenido-hidden">
-
-                    <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px;">
-                        <div>
-                            <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">{% if idioma == 'en' %}Full name{% else %}Nombre completo{% endif %}</label>
-                            <input type="text" name="nombre" value="{{ request.user.get_full_name|default:request.user.username }}" class="form-control" style="font-size: 13px; padding: 8px 12px;">
-                        </div>
-                        <div>
-                            <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">{% if idioma == 'en' %}Professional title{% else %}Título profesional{% endif %}</label>
-                            <input type="text" name="subtitulo" placeholder="Backend Developer · DevOps" class="form-control" style="font-size: 13px; padding: 8px 12px;">
-                        </div>
-                        <div>
-                            <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">Email</label>
-                            <input type="text" name="email" placeholder="email@ejemplo.com" class="form-control" style="font-size: 13px; padding: 8px 12px;">
-                        </div>
-                        <div>
-                            <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">{% if idioma == 'en' %}Phone{% else %}Teléfono{% endif %}</label>
-                            <input type="text" name="telefono" placeholder="+34 600 000 000" class="form-control" style="font-size: 13px; padding: 8px 12px;">
-                        </div>
-                        <div>
-                            <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">LinkedIn</label>
-                            <input type="text" name="linkedin" placeholder="linkedin.com/in/tu-perfil" class="form-control" style="font-size: 13px; padding: 8px 12px;">
-                        </div>
-                        <div>
-                            <label style="font-size: 12px; font-weight: 700; color: #374151; display: block; margin-bottom: 4px;">{% if idioma == 'en' %}Location{% else %}Ubicación{% endif %}</label>
-                            <input type="text" name="ubicacion" placeholder="Valencia, España" class="form-control" style="font-size: 13px; padding: 8px 12px;">
-                        </div>
-                    </div>
-
-                    <!-- Plantilla -->
-                    <p style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">{% if idioma == 'en' %}Template{% else %}Plantilla{% endif %}</p>
-                    <input type="hidden" name="plantilla" id="plantilla-value" value="neutra">
-                    <div style="display: flex; gap: 6px; margin-bottom: 16px;">
-                        <div onclick="seleccionarPlantilla('neutra', this)" id="p-neutra" style="flex:1; cursor:pointer; border:2px solid #1253A4; background:#EBF3FF; border-radius:8px; padding:10px 6px; text-align:center;">
-                            <div style="height:32px; background:#F9FAFB; border:1px solid #e2e8f0; border-radius:4px; margin-bottom:4px;"></div>
-                            <p style="font-size:10px; font-weight:700; color:#374151; margin:0;">{% if idioma == 'en' %}Neutral{% else %}Neutra{% endif %}</p>
-                        </div>
-                        <div onclick="seleccionarPlantilla('profesional', this)" id="p-profesional" style="flex:1; cursor:pointer; border:2px solid #e2e8f0; background:#fff; border-radius:8px; padding:10px 6px; text-align:center;">
-                            <div style="height:32px; background:#1253A4; border-radius:4px; margin-bottom:4px;"></div>
-                            <p style="font-size:10px; font-weight:700; color:#1253A4; margin:0;">{% if idioma == 'en' %}Professional{% else %}Profesional{% endif %}</p>
-                        </div>
-                        <div onclick="seleccionarPlantilla('moderna', this)" id="p-moderna" style="flex:1; cursor:pointer; border:2px solid #e2e8f0; background:#fff; border-radius:8px; padding:10px 6px; text-align:center;">
-                            <div style="height:32px; background:#16a34a; border-radius:4px; margin-bottom:4px;"></div>
-                            <p style="font-size:10px; font-weight:700; color:#16a34a; margin:0;">{% if idioma == 'en' %}Modern{% else %}Moderna{% endif %}</p>
-                        </div>
-                    </div>
-
-                    <!-- Foto -->
-                    {% if request.user.profile.foto %}
-                    <div style="margin-bottom: 16px;">
-                        <label style="display:flex; align-items:center; gap:8px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:8px; padding:10px 12px; cursor:pointer;">
-                            <input type="checkbox" name="usar_foto" value="perfil" style="width:15px; height:15px;">
-                            <img src="data:{{ request.user.profile.foto_mime }};base64,{{ request.user.profile.foto_base64 }}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;">
-                            <span style="font-size:13px; color:#374151; font-weight:500;">{% if idioma == 'en' %}Include profile photo{% else %}Incluir foto de perfil{% endif %}</span>
-                        </label>
-                        <input type="hidden" name="opcion_foto" id="opcion-foto-value" value="ninguna">
-                    </div>
-                    {% endif %}
-
-                    <button type="submit" onclick="prepararPDF()" class="btn btn-primary" style="width:100%; padding:12px; font-size:14px; font-weight:700; justify-content:center;">
-                        <i class="ti ti-download"></i> {% if idioma == 'en' %}Download PDF{% else %}Descargar PDF{% endif %}
-                    </button>
-                </form>
+            <div id="cv-preview" class="cv-preview vacio markdown-content">
+                {% if idioma == 'en' %}Your CV will appear here...{% else %}Tu CV aparecerá aquí...{% endif %}
             </div>
-
         </div>
+
+        <!-- Col 3: Creador PDF -->
+        <div class="form-card crear-col">
+            <p class="col-label">{% if idioma == 'en' %}PDF Creator{% else %}Creador de PDF{% endif %}</p>
+            <form method="POST" action="{% url 'descargar_pdf_libre' %}" id="form-pdf">
+                {% csrf_token %}
+                <input type="hidden" name="cv_contenido" id="cv-contenido-hidden">
+
+                <div class="pdf-campos">
+                    <div>
+                        <label class="form-label">{% if idioma == 'en' %}Full name{% else %}Nombre completo{% endif %}</label>
+                        <input type="text" name="nombre" value="{{ request.user.get_full_name|default:request.user.username }}" class="form-control">
+                    </div>
+                    <div>
+                        <label class="form-label">{% if idioma == 'en' %}Professional title{% else %}Título profesional{% endif %}</label>
+                        <input type="text" name="subtitulo" placeholder="Backend Developer · DevOps" class="form-control">
+                    </div>
+                    <div>
+                        <label class="form-label">Email</label>
+                        <input type="text" name="email" placeholder="email@ejemplo.com" class="form-control">
+                    </div>
+                    <div>
+                        <label class="form-label">{% if idioma == 'en' %}Phone{% else %}Teléfono{% endif %}</label>
+                        <input type="text" name="telefono" placeholder="+34 600 000 000" class="form-control">
+                    </div>
+                    <div>
+                        <label class="form-label">LinkedIn</label>
+                        <input type="text" name="linkedin" placeholder="linkedin.com/in/tu-perfil" class="form-control">
+                    </div>
+                    <div>
+                        <label class="form-label">{% if idioma == 'en' %}Location{% else %}Ubicación{% endif %}</label>
+                        <input type="text" name="ubicacion" placeholder="Valencia, España" class="form-control">
+                    </div>
+                </div>
+
+                <p class="col-label" style="margin-bottom: 10px;">{% if idioma == 'en' %}Template{% else %}Plantilla{% endif %}</p>
+                <input type="hidden" name="plantilla" id="plantilla-value" value="neutra">
+                <div class="plantillas">
+                    <div class="plantilla-item activa" data-plantilla="neutra" id="p-neutra">
+                        <div class="plantilla-preview" style="background:#F9FAFB; border:1px solid #e2e8f0;"></div>
+                        <p class="plantilla-nombre">{% if idioma == 'en' %}Neutral{% else %}Neutra{% endif %}</p>
+                    </div>
+                    <div class="plantilla-item" data-plantilla="profesional" id="p-profesional">
+                        <div class="plantilla-preview" style="background:#1253A4;"></div>
+                        <p class="plantilla-nombre" style="color:#1253A4;">{% if idioma == 'en' %}Professional{% else %}Profesional{% endif %}</p>
+                    </div>
+                    <div class="plantilla-item" data-plantilla="moderna" id="p-moderna">
+                        <div class="plantilla-preview" style="background:#16a34a;"></div>
+                        <p class="plantilla-nombre" style="color:#16a34a;">{% if idioma == 'en' %}Modern{% else %}Moderna{% endif %}</p>
+                    </div>
+                </div>
+
+                {% if request.user.profile.foto %}
+                <label class="foto-label">
+                    <input type="checkbox" name="usar_foto" value="perfil" id="check-foto">
+                    <img src="data:{{ request.user.profile.foto_mime }};base64,{{ request.user.profile.foto_base64 }}" class="foto-thumb">
+                    <span>{% if idioma == 'en' %}Include photo{% else %}Incluir foto{% endif %}</span>
+                </label>
+                <input type="hidden" name="opcion_foto" id="opcion-foto-value" value="ninguna">
+                {% else %}
+                <input type="hidden" name="opcion_foto" value="ninguna">
+                {% endif %}
+
+                <button type="submit" class="btn btn-primary btn-full" style="margin-top: 16px; padding: 12px; font-size: 14px; font-weight: 700;">
+                    <i class="ti ti-download"></i> {% if idioma == 'en' %}Download PDF{% else %}Descargar PDF{% endif %}
+                </button>
+            </form>
+        </div>
+
     </div>
-
 </div>
 </div>
 
 {% include 'ofertas/includes/footer.html' %}
 
-<script>
-const idioma = '{{ idioma }}';
-let cvActual = '';
-
-function cambiarModo(modo, btn) {
-    document.querySelectorAll('.modo-tab').forEach(t => t.classList.remove('activo'));
-    document.querySelectorAll('.modo-contenido').forEach(c => c.classList.remove('activo'));
-    btn.classList.add('activo');
-    document.getElementById('modo-' + modo).classList.add('activo');
-}
-
-function cargarCV(texto) {
-    document.getElementById('cv-manual-texto').value = texto;
-}
-
-function cargarCVIA(texto) {
-    document.getElementById('cv-ia-texto').value = texto;
-}
-
-function usarManual() {
-    const texto = document.getElementById('cv-manual-texto').value.trim();
-    if (!texto) {
-        alert(idioma === 'en' ? 'Write something first.' : 'Escribe algo primero.');
-        return;
-    }
-    cvActual = texto;
-    document.getElementById('cv-preview').innerHTML = texto.replace(/\n/g, '<br>');
-}
-
-async function mejorarConIA() {
-    const texto = document.getElementById('cv-ia-texto').value.trim();
-    if (!texto) {
-        alert(idioma === 'en' ? 'Paste your CV first.' : 'Pega tu CV primero.');
-        return;
-    }
-    const btn = document.getElementById('btn-mejorar');
-    const preview = document.getElementById('cv-preview');
-    btn.disabled = true;
-    btn.innerHTML = '<div class="spinner" style="margin:0 auto; width:16px; height:16px;"></div>';
-    preview.innerHTML = '<div class="spinner"></div>';
-
-    try {
-        const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
-        const res = await fetch('{% url "mejorar_cv_ia" %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'X-CSRFToken': csrf,
-            },
-            body: new URLSearchParams({ cv_texto: texto })
-        });
-        const data = await res.json();
-        if (data.status === 'ok') {
-            cvActual = data.texto;
-            preview.innerHTML = data.html;
-        } else {
-            preview.innerHTML = `<p style="color:#dc2626;">${data.mensaje || 'Error'}</p>`;
-        }
-    } catch (err) {
-        preview.innerHTML = `<p style="color:#dc2626;">${err.message}</p>`;
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="ti ti-sparkles"></i> ' + (idioma === 'en' ? 'Improve with AI' : 'Mejorar con IA');
-    }
-}
-
-function copiarPreview() {
-    if (!cvActual) return;
-    navigator.clipboard.writeText(cvActual).then(() => {
-        const btn = document.getElementById('btn-copiar');
-        const orig = btn.innerHTML;
-        btn.innerHTML = '<i class="ti ti-check"></i> ' + (idioma === 'en' ? 'Copied!' : '¡Copiado!');
-        setTimeout(() => btn.innerHTML = orig, 2000);
-    });
-}
-
-function prepararPDF(e) {
-    if (!cvActual) {
-        alert(idioma === 'en' ? 'Generate or write a CV first.' : 'Genera o escribe un CV primero.');
-        if (e) e.preventDefault();
-        return false;
-    }
-    document.getElementById('cv-contenido-hidden').value = cvActual;
-
-    // Foto
-    const checkFoto = document.querySelector('input[name="usar_foto"]');
-    if (checkFoto) {
-        document.getElementById('opcion-foto-value').value = checkFoto.checked ? 'perfil' : 'ninguna';
-    }
-    return true;
-}
-
-function seleccionarPlantilla(valor, el) {
-    ['neutra', 'profesional', 'moderna'].forEach(p => {
-        const d = document.getElementById('p-' + p);
-        d.style.borderColor = '#e2e8f0';
-        d.style.background = '#fff';
-    });
-    el.style.borderColor = '#1253A4';
-    el.style.background = '#EBF3FF';
-    document.getElementById('plantilla-value').value = valor;
-}
-
-document.getElementById('form-pdf').addEventListener('submit', function(e) {
-    if (!prepararPDF(e)) e.preventDefault();
-});
-</script>
+<script src="{% static 'ofertas/js/crear_cv.js' %}"></script>
 
 </body>
 </html>

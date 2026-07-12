@@ -26,6 +26,7 @@ urlpatterns = [
     path('ofertas/<int:pk>/',                     views.detalle_oferta, name='detalle_oferta'),
     path('ofertas/<int:pk>/resumen-ia/',          views.resumen_ia,     name='resumen_ia'),
     path('tarea/<str:task_id>/status/',           views.resumen_ia_status, name='resumen_ia_status'),
+    path('tarea/<str:task_id>/status-cv/',        views.task_cv_status,    name='task_cv_status'),
     path('ofertas/<int:pk>/analizar/',            views.analizar_cv,    name='analizar_cv'),
     path('ofertas/<int:pk>/estado/<str:estado>/', views.cambiar_estado, name='cambiar_estado'),
     path('ofertas/<int:pk>/generar-cv/',          views.generar_cv,     name='generar_cv'),
@@ -35,7 +36,8 @@ urlpatterns = [
     # Crear CV independiente
     path('crear-cv/',         views.crear_cv,           name='crear_cv'),
     path('crear-cv/mejorar/', views.mejorar_cv_ia,      name='mejorar_cv_ia'),
-    path('crear-cv/pdf/',     views.descargar_pdf_libre, name='descargar_pdf_libre'),
+    path('crear-cv/pdf/',     views.descargar_pdf_libre,        name='descargar_pdf_libre'),
+    path('crear-cv/adaptar/',  views.adaptar_cv_oferta_externa,  name='adaptar_cv_oferta_externa'),
 
     # Idioma y legal
     path('idioma/<str:idioma>/', views.cambiar_idioma, name='cambiar_idioma'),

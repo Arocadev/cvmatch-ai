@@ -662,12 +662,30 @@ def faq(request):
 # ─── Crear CV independiente ───────────────────────────────────────────────────
 
 @login_required
+def task_cv_status(request, task_id):
+    from celery.result import AsyncResult
+    result = AsyncResult(task_id)
+    if result.ready():
+        data = result.get(timeout=1)
+        if data and data.get('status') == 'ok':
+            return JsonResponse({'status': 'ok', 'texto': data.get('texto',''), 'html': data.get('html','')})
+        return JsonResponse({'status': 'error', 'mensaje': 'Error en la tarea'})
+    return JsonResponse({'status': 'pending'})
+
+
+@login_required
 def crear_cv(request):
+    import json
     profile = get_or_create_profile(request.user)
     cvs_usuario = CVUsuario.objects.filter(usuario=request.user)
+    cvs_json = json.dumps([
+        {'id': cv.pk, 'nombre': cv.nombre, 'texto': cv.texto}
+        for cv in cvs_usuario
+    ], ensure_ascii=False)
     return render(request, 'ofertas/crear_cv.html', {
         'idioma': get_idioma(request),
         'cvs_usuario': cvs_usuario,
+        'cvs_json': cvs_json,
         'profile': profile,
         'contadores': get_contadores(request.user),
     })
@@ -680,36 +698,11 @@ def mejorar_cv_ia(request):
     cv_texto = sanitizar_texto(request.POST.get('cv_texto', ''), max_length=50000).strip()
     if not cv_texto:
         return JsonResponse({'status': 'error', 'mensaje': 'CV vacío.'}, status=400)
-
     token = _get_groq_token(request)
-    idioma = get_idioma(request)
-
-    if idioma == 'en':
-        prompt = f"""You are an expert CV writer. Restructure and improve this CV professionally.
-Rules:
-- Keep ALL real information, do not invent anything
-- Improve wording and structure
-- Use clear sections: Profile, Experience, Projects, Education, Skills, Languages
-- Return ONLY the improved CV, no explanations
-
-CV:
-{sanitizar_prompt(cv_texto, max_length=20000)}"""
-    else:
-        prompt = f"""Eres un experto redactor de CVs. Restructura y mejora este CV de forma profesional.
-Reglas:
-- Mantén TODA la información real, no inventes nada
-- Mejora la redacción y estructura
-- Usa secciones claras: Perfil, Experiencia, Proyectos, Formación, Habilidades, Idiomas
-- Devuelve SOLO el CV mejorado, sin explicaciones
-
-CV:
-{sanitizar_prompt(cv_texto, max_length=20000)}"""
-
-    from .cv import _llamar_groq
     try:
-        texto_mejorado = _llamar_groq(prompt, max_tokens=2000, token=token)
-        html = render_md(texto_mejorado)
-        return JsonResponse({'status': 'ok', 'texto': texto_mejorado, 'html': html})
+        from .tasks import task_mejorar_cv
+        task = task_mejorar_cv.delay(cv_texto, get_idioma(request), token)
+        return JsonResponse({'status': 'pending', 'task_id': task.id})
     except Exception as e:
         return JsonResponse({'status': 'error', 'mensaje': str(e)}, status=500)
 
@@ -761,3 +754,20 @@ def descargar_pdf_libre(request):
     response = HttpResponse(buffer, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
     return response
+
+
+@login_required
+@require_POST
+@rate_limit('adaptar_cv', limite=10, periodo=3600)
+def adaptar_cv_oferta_externa(request):
+    oferta_texto = sanitizar_texto(request.POST.get('oferta_texto', ''), max_length=10000).strip()
+    cv_texto     = sanitizar_texto(request.POST.get('cv_texto', ''), max_length=50000).strip()
+    if not oferta_texto or not cv_texto:
+        return JsonResponse({'status': 'error', 'mensaje': 'Faltan datos.'}, status=400)
+    token = _get_groq_token(request)
+    try:
+        from .tasks import task_adaptar_cv
+        task = task_adaptar_cv.delay(oferta_texto, cv_texto, get_idioma(request), token)
+        return JsonResponse({'status': 'pending', 'task_id': task.id})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'mensaje': str(e)}, status=500)
