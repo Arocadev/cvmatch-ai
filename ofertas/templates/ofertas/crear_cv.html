@@ -8,6 +8,126 @@
     <title>{% if idioma == 'en' %}Create CV{% else %}Crear CV{% endif %} — CVMatch AI</title>
     <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <style>
+        .crear-container { max-width: 1400px; padding-bottom: 48px; }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .page-header h1 {
+            font-size: 28px; font-weight: 800; color: #0f172a;
+            margin: 0 0 8px; letter-spacing: -0.5px;
+        }
+        .page-header p { font-size: 15px; color: #64748b; margin: 0; }
+
+        /* Grid — stretch hace que ambas cols tengan la misma altura */
+        .crear-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: stretch;
+        }
+        .col-izq { display: flex; flex-direction: column; }
+        .col-der { display: flex; flex-direction: column; }
+
+        /* La card ocupa toda la altura de la columna */
+        .col-izq .form-card,
+        .col-der .form-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Preview ocupa el espacio restante de la card derecha */
+        .preview-wrap {
+            height: 560px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .col-label {
+            font-size: 11px; font-weight: 700; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 12px; display: block;
+        }
+        .separador { border: none; border-top: 1px solid #e2e8f0; margin: 18px 0; }
+
+        .plantillas { display: flex; gap: 6px; margin-bottom: 14px; }
+        .plantilla-item {
+            flex: 1; cursor: pointer;
+            border: 2px solid #e2e8f0; background: #fff;
+            border-radius: 8px; padding: 8px 4px; text-align: center;
+            transition: all 0.15s;
+        }
+        .plantilla-item.activa { border-color: #1253A4; background: #EBF3FF; }
+        .plantilla-preview { height: 24px; border-radius: 4px; margin-bottom: 4px; }
+        .plantilla-nombre { font-size: 9px; font-weight: 700; color: #374151; margin: 0; }
+
+        .foto-check-label {
+            display: flex; align-items: center; gap: 10px;
+            background: #f8fafc; border: 1.5px solid #e2e8f0;
+            border-radius: 8px; padding: 10px 14px; cursor: pointer;
+            font-size: 13px; color: #374151; font-weight: 500;
+            transition: all 0.15s; margin-bottom: 14px;
+        }
+        .foto-check-label:has(input:checked) { border-color: #1253A4; background: #EBF3FF; }
+        .foto-check-label input { width: 16px; height: 16px; cursor: pointer; }
+        .foto-thumb { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+
+        .modo-tabs {
+            display: flex; background: #f1f5f9;
+            border-radius: 10px; padding: 4px; margin-bottom: 16px;
+        }
+        .modo-tab {
+            flex: 1; padding: 9px; text-align: center;
+            font-size: 13px; font-weight: 600; color: #64748b;
+            cursor: pointer; border-radius: 7px; border: none;
+            background: none; transition: all 0.15s;
+        }
+        .modo-tab.activo { background: #fff; color: #1253A4; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        .modo-contenido { display: none; }
+        .modo-contenido.activo { display: block; }
+        .modo-desc { font-size: 12px; color: #64748b; margin-bottom: 10px; }
+        .lista-cvs { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+
+        .cv-preview { font-size: 13px; line-height: 1.8; color: #374151; }
+        .cv-preview.vacio { color: #94a3b8; font-style: italic; }
+        .preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+
+        /* Botón descargar — fuera del grid, abajo centrado */
+        .descarga-wrapper {
+            margin-top: 24px;
+            text-align: center;
+        }
+        .btn-descarga-principal {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #1253A4;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 48px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s;
+            letter-spacing: -0.2px;
+        }
+        .btn-descarga-principal:hover { background: #0e3f82; }
+        .btn-descarga-principal:disabled { background: #94a3b8; cursor: not-allowed; }
+        .btn-descarga-principal i { font-size: 20px; }
+
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @media (max-width: 900px) {
+            .crear-layout { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
 
@@ -23,22 +143,20 @@ var URL_ADAPTAR = "{% url 'adaptar_cv_oferta_externa' %}";
 <div class="page-content">
 <div class="container crear-container">
 
-    <h1 class="crear-titulo">{% if idioma == 'en' %}Create CV{% else %}Crear CV{% endif %}</h1>
-    <p class="crear-subtitulo">
-        {% if idioma == 'en' %}Generate a professional PDF without needing a saved job offer.{% else %}Genera un PDF profesional sin necesitar una oferta guardada.{% endif %}
-    </p>
+    <div class="page-header">
+        <h1>{% if idioma == 'en' %}Create CV{% else %}Crear CV{% endif %}</h1>
+        <p>{% if idioma == 'en' %}Generate a professional PDF using AI.{% else %}Genera un PDF profesional con ayuda de la IA.{% endif %}</p>
+    </div>
 
     <div class="crear-layout">
 
-        <!-- Col 1: Contenido -->
-        <div class="form-card crear-col">
-            <p class="col-label">{% if idioma == 'en' %}CV Content{% else %}Contenido del CV{% endif %}</p>
+        <!-- ── Col izquierda ─────────────────────────────────────────── -->
+        <div class="col-izq">
+        <div class="form-card" style="padding: 24px;">
 
+            <span class="col-label">{% if idioma == 'en' %}CV Content{% else %}Contenido del CV{% endif %}</span>
             <div class="modo-tabs">
-                <button class="modo-tab activo" data-modo="manual">
-                    <i class="ti ti-pencil"></i> Manual
-                </button>
-                <button class="modo-tab" data-modo="ia">
+                <button class="modo-tab activo" data-modo="ia">
                     <i class="ti ti-sparkles"></i> IA
                 </button>
                 <button class="modo-tab" data-modo="oferta">
@@ -47,125 +165,109 @@ var URL_ADAPTAR = "{% url 'adaptar_cv_oferta_externa' %}";
                 </button>
             </div>
 
-            <!-- Manual -->
-            <div class="modo-contenido activo" id="modo-manual">
-                <p class="modo-desc">{% if idioma == 'en' %}Write your CV. Preview updates automatically.{% else %}Escribe tu CV. La vista previa se actualiza sola.{% endif %}</p>
-                <textarea id="cv-manual-texto" class="form-control" rows="12"
-                    placeholder="{% if idioma == 'en' %}Experience, skills, education...{% else %}Experiencia, habilidades, formación...{% endif %}"></textarea>
-                <div id="lista-cvs-manual" class="lista-cvs"></div>
-            </div>
-
-            <!-- IA -->
-            <div class="modo-contenido" id="modo-ia">
-                <p class="modo-desc">{% if idioma == 'en' %}Paste your CV and AI will restructure and improve it.{% else %}Pega tu CV y la IA lo restructurará y mejorará.{% endif %}</p>
-                <textarea id="cv-ia-texto" class="form-control" rows="10"
+            <div class="modo-contenido activo" id="modo-ia">
+                <p class="modo-desc">{% if idioma == 'en' %}Paste your CV and AI will restructure and improve it.{% else %}Pega tu CV y la IA lo restructurará y mejorará profesionalmente.{% endif %}</p>
+                <textarea id="cv-ia-texto" class="form-control" rows="14"
                     placeholder="{% if idioma == 'en' %}Paste your CV here...{% else %}Pega aquí tu CV...{% endif %}"></textarea>
                 <div id="lista-cvs-ia" class="lista-cvs"></div>
-                <button id="btn-mejorar" class="btn btn-primary btn-full">
+                <button id="btn-mejorar" class="btn btn-primary" style="width:100%; margin-top:12px;">
                     <i class="ti ti-sparkles"></i>
                     {% if idioma == 'en' %}Improve with AI{% else %}Mejorar con IA{% endif %}
                 </button>
             </div>
 
-            <!-- Oferta externa -->
             <div class="modo-contenido" id="modo-oferta">
                 <p class="modo-desc">{% if idioma == 'en' %}Paste the job offer and your CV. AI will adapt your CV to that offer.{% else %}Pega la oferta y tu CV. La IA adaptará tu CV a esa oferta.{% endif %}</p>
                 <label class="form-label">{% if idioma == 'en' %}Job offer description{% else %}Descripción de la oferta{% endif %}</label>
-                <textarea id="oferta-externa-texto" class="form-control" rows="5"
+                <textarea id="oferta-externa-texto" class="form-control" rows="4"
                     placeholder="{% if idioma == 'en' %}Paste the job description here...{% else %}Pega aquí la descripción de la oferta...{% endif %}"></textarea>
-                <label class="form-label" style="margin-top: 10px;">{% if idioma == 'en' %}Your CV{% else %}Tu CV{% endif %}</label>
-                <textarea id="cv-oferta-texto" class="form-control" rows="5"
+                <label class="form-label" style="margin-top:10px;">{% if idioma == 'en' %}Your CV{% else %}Tu CV{% endif %}</label>
+                <textarea id="cv-oferta-texto" class="form-control" rows="4"
                     placeholder="{% if idioma == 'en' %}Paste your CV here...{% else %}Pega aquí tu CV...{% endif %}"></textarea>
                 <div id="lista-cvs-oferta" class="lista-cvs"></div>
-                <button id="btn-adaptar" class="btn btn-primary btn-full">
+                <button id="btn-adaptar" class="btn btn-primary" style="width:100%; margin-top:12px;">
                     <i class="ti ti-sparkles"></i>
                     {% if idioma == 'en' %}Adapt CV to offer{% else %}Adaptar CV a la oferta{% endif %}
                 </button>
             </div>
+
+            <hr class="separador">
+
+            <span class="col-label">{% if idioma == 'en' %}Template{% else %}Plantilla{% endif %}</span>
+            <input type="hidden" id="plantilla-value" value="ats">
+            <div class="plantillas">
+                <div class="plantilla-item activa" data-plantilla="ats" id="p-ats">
+                    <div class="plantilla-preview" style="background:#F9FAFB; border:1px solid #000;"></div>
+                    <p class="plantilla-nombre">ATS</p>
+                </div>
+                <div class="plantilla-item" data-plantilla="executive" id="p-executive">
+                    <div class="plantilla-preview" style="background:#183A63;"></div>
+                    <p class="plantilla-nombre" style="color:#183A63;">Executive</p>
+                </div>
+                <div class="plantilla-item" data-plantilla="sidebar" id="p-sidebar">
+                    <div class="plantilla-preview" style="background:#202535;"></div>
+                    <p class="plantilla-nombre" style="color:#202535;">Sidebar</p>
+                </div>
+                <div class="plantilla-item" data-plantilla="minimal" id="p-minimal">
+                    <div class="plantilla-preview" style="background:#fff; border:1px solid #1a1a1a;"></div>
+                    <p class="plantilla-nombre">Minimal</p>
+                </div>
+                <div class="plantilla-item" data-plantilla="compact" id="p-compact">
+                    <div class="plantilla-preview" style="background:#1b4332;"></div>
+                    <p class="plantilla-nombre" style="color:#1b4332;">One Page</p>
+                </div>
+            </div>
+
+            {% if request.user.profile.foto %}
+            <label class="foto-check-label">
+                <input type="checkbox" id="check-foto">
+                <img src="data:{{ request.user.profile.foto_mime }};base64,{{ request.user.profile.foto_base64 }}" class="foto-thumb">
+                <span>{% if idioma == 'en' %}Include photo{% else %}Incluir foto{% endif %}</span>
+            </label>
+            {% endif %}
+
+        </div>
         </div>
 
-        <!-- Col 2: Vista previa -->
-        <div class="form-card crear-col">
+        <!-- ── Col derecha: preview ───────────────────────────────────── -->
+        <div class="col-der">
+        <div class="form-card" style="padding: 24px;">
             <div class="preview-header">
                 <p class="col-label" style="margin:0">{% if idioma == 'en' %}Preview{% else %}Vista previa{% endif %}</p>
-                <button id="btn-copiar" class="btn btn-outline btn-sm">
+                <button id="btn-copiar" class="btn btn-outline" style="font-size:11px; padding:4px 10px;">
                     <i class="ti ti-copy"></i> {% if idioma == 'en' %}Copy{% else %}Copiar{% endif %}
                 </button>
             </div>
-            <div id="cv-preview" class="cv-preview vacio markdown-content">
-                {% if idioma == 'en' %}Your CV will appear here...{% else %}Tu CV aparecerá aquí...{% endif %}
+            <div class="preview-wrap">
+                <div id="cv-preview" class="cv-preview vacio markdown-content">
+                    {% if idioma == 'en' %}Your CV will appear here after processing with AI...{% else %}Tu CV aparecerá aquí tras procesarlo con IA...{% endif %}
+                </div>
             </div>
         </div>
-
-        <!-- Col 3: Creador PDF -->
-        <div class="form-card crear-col">
-            <p class="col-label">{% if idioma == 'en' %}PDF Creator{% else %}Creador de PDF{% endif %}</p>
-            <form method="POST" action="{% url 'descargar_pdf_libre' %}" id="form-pdf">
-                {% csrf_token %}
-                <input type="hidden" name="cv_contenido" id="cv-contenido-hidden">
-
-                <div class="pdf-campos">
-                    <div>
-                        <label class="form-label">{% if idioma == 'en' %}Full name{% else %}Nombre completo{% endif %}</label>
-                        <input type="text" name="nombre" value="{{ request.user.get_full_name|default:request.user.username }}" class="form-control">
-                    </div>
-                    <div>
-                        <label class="form-label">{% if idioma == 'en' %}Professional title{% else %}Título profesional{% endif %}</label>
-                        <input type="text" name="subtitulo" placeholder="Backend Developer · DevOps" class="form-control">
-                    </div>
-                    <div>
-                        <label class="form-label">Email</label>
-                        <input type="text" name="email" placeholder="email@ejemplo.com" class="form-control">
-                    </div>
-                    <div>
-                        <label class="form-label">{% if idioma == 'en' %}Phone{% else %}Teléfono{% endif %}</label>
-                        <input type="text" name="telefono" placeholder="+34 600 000 000" class="form-control">
-                    </div>
-                    <div>
-                        <label class="form-label">LinkedIn</label>
-                        <input type="text" name="linkedin" placeholder="linkedin.com/in/tu-perfil" class="form-control">
-                    </div>
-                    <div>
-                        <label class="form-label">{% if idioma == 'en' %}Location{% else %}Ubicación{% endif %}</label>
-                        <input type="text" name="ubicacion" placeholder="Valencia, España" class="form-control">
-                    </div>
-                </div>
-
-                <p class="col-label" style="margin-bottom: 10px;">{% if idioma == 'en' %}Template{% else %}Plantilla{% endif %}</p>
-                <input type="hidden" name="plantilla" id="plantilla-value" value="neutra">
-                <div class="plantillas">
-                    <div class="plantilla-item activa" data-plantilla="neutra" id="p-neutra">
-                        <div class="plantilla-preview" style="background:#F9FAFB; border:1px solid #e2e8f0;"></div>
-                        <p class="plantilla-nombre">{% if idioma == 'en' %}Neutral{% else %}Neutra{% endif %}</p>
-                    </div>
-                    <div class="plantilla-item" data-plantilla="profesional" id="p-profesional">
-                        <div class="plantilla-preview" style="background:#1253A4;"></div>
-                        <p class="plantilla-nombre" style="color:#1253A4;">{% if idioma == 'en' %}Professional{% else %}Profesional{% endif %}</p>
-                    </div>
-                    <div class="plantilla-item" data-plantilla="moderna" id="p-moderna">
-                        <div class="plantilla-preview" style="background:#16a34a;"></div>
-                        <p class="plantilla-nombre" style="color:#16a34a;">{% if idioma == 'en' %}Modern{% else %}Moderna{% endif %}</p>
-                    </div>
-                </div>
-
-                {% if request.user.profile.foto %}
-                <label class="foto-label">
-                    <input type="checkbox" name="usar_foto" value="perfil" id="check-foto">
-                    <img src="data:{{ request.user.profile.foto_mime }};base64,{{ request.user.profile.foto_base64 }}" class="foto-thumb">
-                    <span>{% if idioma == 'en' %}Include photo{% else %}Incluir foto{% endif %}</span>
-                </label>
-                <input type="hidden" name="opcion_foto" id="opcion-foto-value" value="ninguna">
-                {% else %}
-                <input type="hidden" name="opcion_foto" value="ninguna">
-                {% endif %}
-
-                <button type="submit" class="btn btn-primary btn-full" style="margin-top: 16px; padding: 12px; font-size: 14px; font-weight: 700;">
-                    <i class="ti ti-download"></i> {% if idioma == 'en' %}Download PDF{% else %}Descargar PDF{% endif %}
-                </button>
-            </form>
         </div>
 
     </div>
+
+    <!-- ── Botón descargar — fuera del grid, centrado abajo ──────────── -->
+    <div class="descarga-wrapper">
+        <form method="POST" action="{% url 'descargar_pdf_libre' %}" id="form-pdf">
+            {% csrf_token %}
+            <input type="hidden" name="cv_contenido" id="cv-contenido-hidden">
+            <input type="hidden" name="plantilla" id="plantilla-form">
+            <input type="hidden" name="opcion_foto" id="opcion-foto-form" value="ninguna">
+            <input type="hidden" name="nombre" value="">
+            <input type="hidden" name="subtitulo" value="">
+            <input type="hidden" name="email" value="">
+            <input type="hidden" name="telefono" value="">
+            <input type="hidden" name="linkedin" value="">
+            <input type="hidden" name="ubicacion" value="">
+            <button type="submit" id="btn-descargar" class="btn-descarga-principal" disabled>
+                <i class="ti ti-download"></i>
+                {% if idioma == 'en' %}Download PDF{% else %}Descargar PDF{% endif %}
+            </button>
+        </form>
+    </div>
+
 </div>
 </div>
 

@@ -91,30 +91,19 @@ def task_generar_cv(self, oferta_id: int, cv_texto: str, idioma: str = 'es', tok
 @shared_task(bind=True, max_retries=3, default_retry_delay=10)
 def task_mejorar_cv(self, cv_texto: str, idioma: str = 'es', token: str | None = None):
     try:
-        from .cv import _llamar_groq
+        import json
+        from .cv import mejorar_cv_json
         from .security import sanitizar_prompt
-        import markdown as md
 
-        if idioma == 'en':
-            prompt = f"""You are an expert CV writer. Restructure and improve this CV professionally.
-Rules: Keep ALL real information. Improve wording and structure.
-Use clear sections: Profile, Experience, Projects, Education, Skills, Languages.
-Return ONLY the improved CV, no explanations.
-
-CV:
-{sanitizar_prompt(cv_texto, max_length=20000)}"""
-        else:
-            prompt = f"""Eres un experto redactor de CVs. Restructura y mejora este CV de forma profesional.
-Reglas: Mantén TODA la información real. Mejora la redacción y estructura.
-Secciones: Perfil, Experiencia, Proyectos, Formación, Habilidades, Idiomas.
-Devuelve SOLO el CV mejorado, sin explicaciones.
-
-CV:
-{sanitizar_prompt(cv_texto, max_length=20000)}"""
-
-        texto = _llamar_groq(prompt, max_tokens=2000, token=token)
-        html  = md.markdown(texto, extensions=['nl2br'])
-        return {'status': 'ok', 'texto': texto, 'html': html}
+        datos = mejorar_cv_json(
+            sanitizar_prompt(cv_texto, max_length=20000),
+            idioma,
+            token=token,
+        )
+        texto = json.dumps(datos, ensure_ascii=False, indent=2)
+        # Para el preview en el navegador, generamos HTML legible
+        html = _json_a_html_preview(datos)
+        return {'status': 'ok', 'texto': texto, 'html': html, 'json': datos}
 
     except Exception as exc:
         logger.error(f'task_mejorar_cv error: {exc}')
@@ -124,19 +113,71 @@ CV:
 @shared_task(bind=True, max_retries=3, default_retry_delay=10)
 def task_adaptar_cv(self, oferta_texto: str, cv_texto: str, idioma: str = 'es', token: str | None = None):
     try:
-        from .cv import generar_cv_adaptado
+        import json
+        from .cv import generar_cv_json
         from .security import sanitizar_prompt
-        import markdown as md
 
-        texto = generar_cv_adaptado(
+        datos = generar_cv_json(
             sanitizar_prompt(oferta_texto, max_length=8000),
             sanitizar_prompt(cv_texto,     max_length=20000),
             idioma,
             token=token,
         )
-        html = md.markdown(texto, extensions=['nl2br'])
-        return {'status': 'ok', 'texto': texto, 'html': html}
+        texto = json.dumps(datos, ensure_ascii=False, indent=2)
+        html = _json_a_html_preview(datos)
+        return {'status': 'ok', 'texto': texto, 'html': html, 'json': datos}
 
     except Exception as exc:
         logger.error(f'task_adaptar_cv error: {exc}')
         raise self.retry(exc=exc)
+
+
+def _json_a_html_preview(datos: dict) -> str:
+    """Convierte JSON de CV a HTML legible para la vista previa del navegador."""
+    html = []
+    nombre = datos.get('name', '')
+    titulo = datos.get('title', '')
+    profile = datos.get('profile', '')
+
+    if nombre:
+        html.append(f'<h2 style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:2px;">{nombre}</h2>')
+    if titulo:
+        html.append(f'<p style="font-size:13px;color:#1253A4;font-weight:600;margin-bottom:8px;">{titulo}</p>')
+    if profile:
+        html.append(f'<p style="font-size:13px;color:#374151;line-height:1.7;margin-bottom:12px;">{profile}</p>')
+
+    for seccion in datos.get('sections', []):
+        html.append(f'<h3 style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#1253A4;border-bottom:1px solid #e2e8f0;padding-bottom:3px;margin:12px 0 8px;">{seccion.get("title","")}</h3>')
+
+        tipo = seccion.get('type', '')
+        items = seccion.get('items', [])
+
+        if tipo == 'timeline':
+            for item in items:
+                t = item.get('title', '')
+                s = item.get('subtitle', '')
+                d = item.get('date', '')
+                bullets = item.get('bullets', [])
+                html.append(f'<div style="margin-bottom:8px;">')
+                html.append(f'<div style="display:flex;justify-content:space-between;"><strong style="font-size:12px;">{t}</strong><span style="font-size:11px;color:#64748b;">{d}</span></div>')
+                if s: html.append(f'<p style="font-size:11px;color:#475569;font-style:italic;margin:1px 0 4px;">{s}</p>')
+                if bullets:
+                    html.append('<ul style="padding-left:14px;margin-top:2px;">')
+                    for b in bullets:
+                        html.append(f'<li style="font-size:12px;color:#374151;margin-bottom:2px;">{b}</li>')
+                    html.append('</ul>')
+                html.append('</div>')
+
+        elif tipo == 'chips':
+            html.append('<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:2px;">')
+            for item in items:
+                html.append(f'<span style="background:#EBF3FF;color:#1253A4;border:1px solid #C7DEFF;border-radius:4px;padding:3px 9px;font-size:11px;font-weight:600;">{item}</span>')
+            html.append('</div>')
+
+        elif tipo == 'list':
+            html.append('<ul style="padding-left:14px;">')
+            for item in items:
+                html.append(f'<li style="font-size:12px;color:#374151;margin-bottom:2px;">{item}</li>')
+            html.append('</ul>')
+
+    return ''.join(html)

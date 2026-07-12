@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body>
+
+<!-- CABECERA OSCURA -->
+<div class="cabecera">
+    <table class="cab-tabla" cellpadding="0" cellspacing="0">
+    <tr>
+        <td class="cab-td-texto">
+            {% if foto %}<img src="{{ foto }}" alt="Foto" class="foto">{% endif %}
+            <h1>{{ nombre }}</h1>
+            {% if subtitulo %}<p class="cab-subtitulo">{{ subtitulo }}</p>{% endif %}
+        </td>
+        <td class="cab-td-extra">
+            <div class="cab-badge">DEV</div>
+        </td>
+    </tr>
+    </table>
+</div>
+
+<!-- DOS COLUMNAS via tabla -->
+<table class="layout-tabla" cellpadding="0" cellspacing="0">
+<tr>
+
+    <!-- SIDEBAR IZQUIERDO -->
+    <td class="col-sidebar">
+
+        {% if contacto %}
+        <div class="sb-seccion">
+            <h3>CONTACTO</h3>
+            {% for item in contacto %}
+            <p class="sb-contacto-item">{{ item }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% for seccion in sections %}
+        {% if seccion.type == 'chips' or seccion.type == 'list' %}
+        <div class="sb-seccion">
+            <h3>{{ seccion.title }}</h3>
+            {% if seccion.type == 'chips' %}
+                {% for item in seccion.items %}
+                <span class="sb-chip">{{ item }}</span>
+                {% endfor %}
+            {% else %}
+            <ul class="sb-lista">
+                {% for item in seccion.items %}<li>{{ item }}</li>{% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% endfor %}
+
+    </td>
+
+    <!-- COLUMNA PRINCIPAL -->
+    <td class="col-main">
+
+        {% if profile %}
+        <div class="main-seccion">
+            <h2>PERFIL</h2>
+            <p class="profile-text">{{ profile }}</p>
+        </div>
+        {% endif %}
+
+        {% for seccion in sections %}
+        {% if seccion.type == 'timeline' or seccion.type == 'text' %}
+        <div class="main-seccion">
+            <h2>{{ seccion.title }}</h2>
+
+            {% if seccion.type == 'timeline' %}
+            {% for item in seccion.items %}
+            <div class="timeline-item">
+                <table class="row-tabla" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td class="row-izq">
+                        <span class="tl-title">{{ item.title }}</span>
+                        {% if item.subtitle %}<br><span class="tl-empresa">{{ item.subtitle }}</span>{% endif %}
+                    </td>
+                    <td class="row-der">
+                        <span class="tl-fecha">{{ item.date }}</span>
+                    </td>
+                </tr>
+                </table>
+                {% if item.bullets %}
+                <ul>{% for bullet in item.bullets %}<li>{{ bullet }}</li>{% endfor %}</ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            {% else %}
+            {% for item in seccion.items %}<p class="text-block">{{ item }}</p>{% endfor %}
+            {% endif %}
+
+        </div>
+        {% endif %}
+        {% endfor %}
+
+    </td>
+</tr>
+</table>
+
+</body>
+</html>

@@ -442,7 +442,6 @@ def resumen_ia(request, pk):
         task = task_resumir_oferta.delay(oferta.pk, get_idioma(request), token)
         return JsonResponse({'status': 'pending', 'task_id': task.id})
     except Exception:
-        # Fallback síncrono si Celery no está disponible
         from .cv import resumir_oferta as _resumir
         try:
             resumen_raw = _resumir(
@@ -551,14 +550,16 @@ def generar_cv(request, pk):
         return redirect('analizar_cv', pk=pk)
 
     token = _get_groq_token(request)
-    from .cv import generar_cv_adaptado
+    from .cv import generar_cv_json
+    import json as _json
     try:
-        cv_generado_raw = generar_cv_adaptado(
+        cv_datos = generar_cv_json(
             sanitizar_prompt(oferta.descripcion, max_length=8000),
             sanitizar_prompt(cv_texto, max_length=20000),
             get_idioma(request),
             token=token,
         )
+        cv_generado_raw = _json.dumps(cv_datos, ensure_ascii=False, indent=2)
     except Exception as e:
         return render(request, 'ofertas/analisis.html', {
             'oferta': oferta,
@@ -567,7 +568,12 @@ def generar_cv(request, pk):
             'idioma': get_idioma(request),
         })
 
-    cv_generado_html = render_md(cv_generado_raw)
+    # ── FIX: guardar el JSON estructurado en sesión para que descargar_pdf lo use ──
+    request.session['cv_json'] = cv_generado_raw
+    request.session.modified = True
+
+    from ofertas.tasks import _json_a_html_preview
+    cv_generado_html = _json_a_html_preview(cv_datos)
     return render(request, 'ofertas/cv_generado.html', {
         'oferta': oferta,
         'cv_generado': cv_generado_html,
@@ -595,8 +601,8 @@ def descargar_pdf(request, pk):
         return redirect('generar_cv', pk=pk)
 
     plantilla = request.POST.get('plantilla', 'profesional')
-    if plantilla not in ('neutra', 'profesional', 'moderna'):
-        plantilla = 'profesional'
+    if plantilla not in ('ats', 'executive', 'sidebar', 'minimal', 'compact'):
+        plantilla = 'executive'
 
     modo          = request.POST.get('modo', 'automatico')
     nombre        = sanitizar_texto(request.POST.get('nombre', request.user.username), max_length=100)
@@ -607,9 +613,13 @@ def descargar_pdf(request, pk):
     ubicacion_pdf = sanitizar_texto(request.POST.get('ubicacion', ''), max_length=100)
     opcion_foto   = request.POST.get('opcion_foto', 'ninguna')
 
-    cv_texto = sanitizar_texto(request.POST.get('cv_manual', ''), max_length=50000).strip() if modo == 'manual' else request.session.get('cv_texto', '')
+    # ── FIX: usar el JSON estructurado en modo automático ──
+    if modo == 'manual':
+        cv_contenido = sanitizar_texto(request.POST.get('cv_manual', ''), max_length=50000).strip()
+    else:
+        cv_contenido = request.session.get('cv_json') or request.session.get('cv_texto', '')
 
-    if not cv_texto:
+    if not cv_contenido:
         return redirect('generar_cv', pk=pk)
 
     foto_path = None
@@ -625,7 +635,7 @@ def descargar_pdf(request, pk):
         'email': email, 'telefono': telefono,
         'linkedin': linkedin, 'ubicacion': ubicacion_pdf,
     }
-    buffer = gen_pdf(datos, cv_texto, plantilla=plantilla, foto_path=foto_path)
+    buffer = gen_pdf(datos, cv_contenido, plantilla=plantilla, foto_path=foto_path)
 
     if foto_path:
         try:
@@ -718,8 +728,8 @@ def descargar_pdf_libre(request):
         return redirect('crear_cv')
 
     plantilla = request.POST.get('plantilla', 'neutra')
-    if plantilla not in ('neutra', 'profesional', 'moderna'):
-        plantilla = 'neutra'
+    if plantilla not in ('ats', 'executive', 'sidebar', 'minimal', 'compact'):
+        plantilla = 'executive'
 
     nombre        = sanitizar_texto(request.POST.get('nombre', request.user.username), max_length=100)
     subtitulo     = sanitizar_texto(request.POST.get('subtitulo', ''), max_length=200)

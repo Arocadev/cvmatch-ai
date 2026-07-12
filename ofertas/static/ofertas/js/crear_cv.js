@@ -27,15 +27,10 @@ function crearBtnCV(cv, onClick) {
     return btn;
 }
 
-var listaManual = document.getElementById('lista-cvs-manual');
 var listaIA     = document.getElementById('lista-cvs-ia');
 var listaOferta = document.getElementById('lista-cvs-oferta');
 
 CVS_GUARDADOS.forEach(function(cv) {
-    if (listaManual) listaManual.appendChild(crearBtnCV(cv, function(texto) {
-        document.getElementById('cv-manual-texto').value = texto;
-        actualizarPreviewManual();
-    }));
     if (listaIA) listaIA.appendChild(crearBtnCV(cv, function(texto) {
         document.getElementById('cv-ia-texto').value = texto;
     }));
@@ -43,26 +38,6 @@ CVS_GUARDADOS.forEach(function(cv) {
         document.getElementById('cv-oferta-texto').value = texto;
     }));
 });
-
-// ── Preview manual ───────────────────────────────────────────────────────────
-var textareaManual = document.getElementById('cv-manual-texto');
-if (textareaManual) {
-    textareaManual.addEventListener('input', actualizarPreviewManual);
-}
-
-function actualizarPreviewManual() {
-    var texto = document.getElementById('cv-manual-texto').value;
-    var preview = document.getElementById('cv-preview');
-    if (texto.trim()) {
-        cvActual = texto;
-        preview.classList.remove('vacio');
-        preview.innerHTML = texto.replace(/\n/g, '<br>');
-    } else {
-        cvActual = '';
-        preview.classList.add('vacio');
-        preview.innerHTML = IDIOMA === 'en' ? 'Your CV will appear here...' : 'Tu CV aparecerá aquí...';
-    }
-}
 
 // ── Polling Celery ───────────────────────────────────────────────────────────
 function pollTask(taskId, btn, labelOrig) {
@@ -82,8 +57,11 @@ function pollTask(taskId, btn, labelOrig) {
         .then(function(data) {
             if (data.status === 'ok') {
                 clearInterval(intervalo);
+                // data.texto es el JSON crudo, data.html es el HTML para preview
                 cvActual = data.texto;
+                preview.classList.remove('vacio');
                 preview.innerHTML = data.html;
+                activarDescarga();
                 btn.disabled = false;
                 btn.innerHTML = labelOrig;
             } else if (data.status === 'error') {
@@ -97,14 +75,14 @@ function pollTask(taskId, btn, labelOrig) {
     }, 2000);
 }
 
-// ── Llamada IA genérica ───────────────────────────────────────────────────────
+// ── Llamada IA ────────────────────────────────────────────────────────────────
 function llamarIA(url, body, btn) {
     var preview = document.getElementById('cv-preview');
     var labelOrig = btn.innerHTML;
     btn.disabled = true;
-    btn.innerHTML = '<span class="crear-spinner"></span>' + (IDIOMA === 'en' ? 'Processing...' : 'Procesando...');
+    btn.innerHTML = '<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> ' + (IDIOMA === 'en' ? 'Processing...' : 'Procesando...');
     preview.classList.remove('vacio');
-    preview.innerHTML = '<div class="preview-spinner"></div>';
+    preview.innerHTML = '<div style="padding:40px; text-align:center; color:#94a3b8;"><i class="ti ti-sparkles" style="font-size:32px; display:block; margin-bottom:12px;"></i>' + (IDIOMA === 'en' ? 'AI is working...' : 'La IA está trabajando...') + '</div>';
 
     var csrf = document.querySelector('meta[name="csrf-token"]').content;
     fetch(url, {
@@ -118,7 +96,9 @@ function llamarIA(url, body, btn) {
             pollTask(data.task_id, btn, labelOrig);
         } else if (data.status === 'ok') {
             cvActual = data.texto;
+            preview.classList.remove('vacio');
             preview.innerHTML = data.html;
+            activarDescarga();
             btn.disabled = false;
             btn.innerHTML = labelOrig;
         } else {
@@ -134,7 +114,13 @@ function llamarIA(url, body, btn) {
     });
 }
 
-// ── Botones IA ────────────────────────────────────────────────────────────────
+// ── Activar botón descargar ───────────────────────────────────────────────────
+function activarDescarga() {
+    var btn = document.getElementById('btn-descargar');
+    if (btn) btn.disabled = false;
+}
+
+// ── Botón mejorar IA ──────────────────────────────────────────────────────────
 var btnMejorar = document.getElementById('btn-mejorar');
 if (btnMejorar) {
     btnMejorar.addEventListener('click', function() {
@@ -144,6 +130,7 @@ if (btnMejorar) {
     });
 }
 
+// ── Botón adaptar oferta externa ──────────────────────────────────────────────
 var btnAdaptar = document.getElementById('btn-adaptar');
 if (btnAdaptar) {
     btnAdaptar.addEventListener('click', function() {
@@ -173,7 +160,10 @@ if (btnCopiar) {
 var checkFoto = document.getElementById('check-foto');
 if (checkFoto) {
     checkFoto.addEventListener('change', function() {
-        document.getElementById('opcion-foto-value').value = this.checked ? 'perfil' : 'ninguna';
+        var val = this.checked ? 'perfil' : 'ninguna';
+        document.getElementById('opcion-foto-form').value = val;
+        var label = document.getElementById('foto-label');
+        if (label) label.classList.toggle('activa', this.checked);
     });
 }
 
@@ -186,14 +176,20 @@ document.querySelectorAll('.plantilla-item').forEach(function(el) {
     });
 });
 
-// ── PDF ───────────────────────────────────────────────────────────────────────
+// ── Submit PDF ────────────────────────────────────────────────────────────────
 document.getElementById('form-pdf').addEventListener('submit', function(e) {
     if (!cvActual) {
         e.preventDefault();
-        alert(IDIOMA === 'en' ? 'Write or generate a CV first.' : 'Escribe o genera un CV primero.');
+        alert(IDIOMA === 'en' ? 'Generate a CV first.' : 'Genera un CV primero.');
         return;
     }
     document.getElementById('cv-contenido-hidden').value = cvActual;
+    document.getElementById('plantilla-form').value = document.getElementById('plantilla-value').value;
 });
+
+// ── Animación spinner ─────────────────────────────────────────────────────────
+var style = document.createElement('style');
+style.textContent = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+document.head.appendChild(style);
 
 })();

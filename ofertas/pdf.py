@@ -1,243 +1,115 @@
 import io
 import re
+import base64
+import mimetypes
+from django.template.loader import render_to_string
 from weasyprint import HTML, CSS
 
 
-def sanitizar_para_pdf(texto: str) -> str:
-    """Sustituye caracteres problemáticos para WeasyPrint."""
-    reemplazos = {
-        '\u2019': "'",   # comilla derecha
-        '\u2018': "'",   # comilla izquierda
-        '\u201c': '"',   # comilla doble izquierda
-        '\u201d': '"',   # comilla doble derecha
-        '\u2013': '-',   # guión corto
-        '\u2014': '-',   # guión largo
-        '\u2022': '•',   # bullet (este sí funciona)
-        '\u00b7': '•',   # punto medio
-        '\u2026': '...',  # puntos suspensivos
-        '\u00a0': ' ',   # espacio no separable
-        '\ufb01': 'fi',  # ligadura fi
-        '\ufb02': 'fl',  # ligadura fl
+def _foto_base64(foto_path):
+    """Convierte foto a data URI base64."""
+    if not foto_path:
+        return None
+    try:
+        mime = mimetypes.guess_type(foto_path)[0] or 'image/jpeg'
+        with open(foto_path, 'rb') as f:
+            b64 = base64.b64encode(f.read()).decode()
+        return f'data:{mime};base64,{b64}'
+    except Exception:
+        return None
+
+
+def generar_pdf(datos_personales: dict, cv_contenido, plantilla: str = 'profesional', foto_path: str = None) -> bytes:
+    """
+    Genera un PDF a partir de datos personales y cv_contenido.
+    cv_contenido puede ser:
+      - dict (JSON estructurado de la IA) — flujo principal
+      - str (texto plano) — flujo de compatibilidad
+    """
+    # Si es texto plano, convertir a estructura mínima
+    if isinstance(cv_contenido, str):
+        try:
+            import json
+            cv_contenido = json.loads(cv_contenido)
+        except Exception:
+            cv_contenido = _texto_a_estructura(cv_contenido, datos_personales)
+
+    # Foto como base64
+    foto_data_uri = _foto_base64(foto_path)
+
+    # Fusionar datos del formulario con los del JSON
+    # Los datos del formulario tienen prioridad sobre los del JSON
+    nombre    = datos_personales.get('nombre') or cv_contenido.get('name', '')
+    subtitulo = datos_personales.get('subtitulo') or cv_contenido.get('title', '')
+    email     = datos_personales.get('email') or cv_contenido.get('contact', {}).get('email', '')
+    telefono  = datos_personales.get('telefono') or cv_contenido.get('contact', {}).get('phone', '')
+    linkedin  = datos_personales.get('linkedin') or cv_contenido.get('contact', {}).get('linkedin', '')
+    ubicacion = datos_personales.get('ubicacion') or cv_contenido.get('contact', {}).get('location', '')
+    github    = cv_contenido.get('contact', {}).get('github', '')
+
+    profile  = cv_contenido.get('profile', '')
+    sections = cv_contenido.get('sections', [])
+
+    contacto = []
+    if ubicacion: contacto.append(ubicacion)
+    if telefono:  contacto.append(telefono)
+    if email:     contacto.append(email)
+    if linkedin:  contacto.append(linkedin)
+    if github:    contacto.append(github)
+
+    ctx = {
+        'nombre':    nombre,
+        'subtitulo': subtitulo,
+        'contacto':  contacto,
+        'profile':   profile,
+        'sections':  sections,
+        'foto':      foto_data_uri,
     }
-    for char, reemplazo in reemplazos.items():
-        texto = texto.replace(char, reemplazo)
-    # Eliminar cualquier carácter de control o no imprimible que no sea salto de línea/tab
-    texto = re.sub(r'[^\x09\x0A\x0D\x20-\x7E\x80-\xFF\u00C0-\u024F\u0400-\u04FF•·→←↑↓]', '', texto)
-    return texto
 
+    if plantilla not in ('ats', 'executive', 'sidebar', 'minimal', 'compact'):
+        plantilla = 'executive'
 
-def texto_a_html(texto: str) -> str:
-    """Convierte texto plano con markdown básico a HTML para el PDF."""
-    lines = texto.split('\n')
-    html_lines = []
-    for line in lines:
-        line = line.rstrip()
-        if not line:
-            html_lines.append('<br>')
-            continue
-        # Separadores ---
-        if line.strip() in ('---', '***', '___'):
-            html_lines.append('<hr>')
-            continue
-        # Ignorar líneas de tabla markdown (|----|)
-        if re.match(r'^\|[-| :]+\|$', line.strip()):
-            continue
-        # Convertir filas de tabla a párrafo simple
-        if line.strip().startswith('|') and line.strip().endswith('|'):
-            celdas = [c.strip() for c in line.strip()[1:-1].split('|')]
-            line = ' | '.join(c for c in celdas if c)
-        # Eliminar links markdown [texto](url) -> texto
-        line = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'', line)
-        # Encabezados markdown
-        if line.startswith('### '):
-            html_lines.append(f'<h3>{line[4:]}</h3>')
-        elif line.startswith('## '):
-            html_lines.append(f'<h2>{line[3:]}</h2>')
-        elif line.startswith('# '):
-            html_lines.append(f'<h1>{line[2:]}</h1>')
-        # Negrita **texto**
-        elif line.startswith('**') and line.endswith('**') and len(line) > 4:
-            html_lines.append(f'<p><strong>{line[2:-2]}</strong></p>')
-        # Listas
-        elif line.startswith('- ') or line.startswith('• '):
-            html_lines.append(f'<li>{line[2:]}</li>')
-        elif line.startswith('* '):
-            html_lines.append(f'<li>{line[2:]}</li>')
-        else:
-            # Inline bold
-            line = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', line)
-            html_lines.append(f'<p>{line}</p>')
+    html_str = render_to_string(f'pdf/{plantilla}.html', ctx)
+    css_path = f'ofertas/static/pdf/{plantilla}.css'
 
-    # Agrupar <li> en <ul>
-    result = []
-    in_list = False
-    for h in html_lines:
-        if h.startswith('<li>'):
-            if not in_list:
-                result.append('<ul>')
-                in_list = True
-            result.append(h)
-        else:
-            if in_list:
-                result.append('</ul>')
-                in_list = False
-            result.append(h)
-    if in_list:
-        result.append('</ul>')
-    return '\n'.join(result)
-
-
-def generar_pdf(datos: dict, cv_texto: str, plantilla: str = 'profesional', foto_path: str = None) -> bytes:
-    cv_texto = sanitizar_para_pdf(cv_texto)
-    cv_html  = texto_a_html(cv_texto)
-
-    nombre    = datos.get('nombre', '')
-    subtitulo = datos.get('subtitulo', '')
-    email     = datos.get('email', '')
-    telefono  = datos.get('telefono', '')
-    linkedin  = datos.get('linkedin', '')
-    ubicacion = datos.get('ubicacion', '')
-
-    # Contacto
-    contacto_items = []
-    if ubicacion: contacto_items.append(ubicacion)
-    if telefono:  contacto_items.append(telefono)
-    if email:     contacto_items.append(email)
-    if linkedin:  contacto_items.append(linkedin)
-    contacto_html = ' &bull; '.join(contacto_items)
-
-    # Foto
-    foto_html = ''
-    if foto_path:
-        foto_html = f'<img src="{foto_path}" class="foto-perfil">'
-
-    # Colores por plantilla
-    if plantilla == 'profesional':
-        color_primario  = '#1253A4'
-        color_cabecera  = '#1253A4'
-        texto_cabecera  = '#ffffff'
-        color_seccion   = '#1253A4'
-        borde_seccion   = '#1253A4'
-    elif plantilla == 'moderna':
-        color_primario  = '#16a34a'
-        color_cabecera  = '#16a34a'
-        texto_cabecera  = '#ffffff'
-        color_seccion   = '#16a34a'
-        borde_seccion   = '#16a34a'
-    else:  # neutra
-        color_primario  = '#374151'
-        color_cabecera  = '#f9fafb'
-        texto_cabecera  = '#0f172a'
-        color_seccion   = '#374151'
-        borde_seccion   = '#9ca3af'
-
-    css = f"""
-    @page {{
-        size: A4;
-        margin: 0;
-    }}
-    * {{ box-sizing: border-box; margin: 0; padding: 0; }}
-    body {{
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 10pt;
-        color: #111;
-        background: #fff;
-    }}
-    .cabecera {{
-        background: {color_cabecera};
-        color: {texto_cabecera};
-        padding: 28px 36px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        min-height: 110px;
-    }}
-    .cabecera-texto h1 {{
-        font-size: 22pt;
-        font-weight: bold;
-        margin-bottom: 4px;
-        color: {texto_cabecera};
-    }}
-    .cabecera-texto .subtitulo {{
-        font-size: 10pt;
-        opacity: 0.85;
-        margin-bottom: 8px;
-    }}
-    .cabecera-texto .contacto {{
-        font-size: 8.5pt;
-        opacity: 0.8;
-    }}
-    .foto-perfil {{
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 3px solid rgba(255,255,255,0.4);
-        flex-shrink: 0;
-    }}
-    .contenido {{
-        padding: 24px 36px;
-    }}
-    h1, h2 {{
-        font-size: 10pt;
-        font-weight: bold;
-        color: {color_seccion};
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin-top: 18px;
-        margin-bottom: 6px;
-        padding-bottom: 4px;
-        border-bottom: 1.5px solid {borde_seccion};
-    }}
-    h3 {{
-        font-size: 10pt;
-        font-weight: bold;
-        color: #111;
-        margin-top: 10px;
-        margin-bottom: 3px;
-    }}
-    p {{
-        margin-bottom: 4px;
-        line-height: 1.5;
-        font-size: 9.5pt;
-    }}
-    ul {{
-        padding-left: 16px;
-        margin-bottom: 6px;
-    }}
-    li {{
-        margin-bottom: 3px;
-        font-size: 9.5pt;
-        line-height: 1.4;
-    }}
-    strong {{ font-weight: bold; }}
-    hr {{ border: none; border-top: 1px solid #e2e8f0; margin: 8px 0; }}
-    br {{ display: block; margin-bottom: 4px; }}
-    """
-
-    html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head><meta charset="UTF-8"></head>
-    <body>
-        <div class="cabecera">
-            <div class="cabecera-texto">
-                <h1 style="color:{texto_cabecera}; border:none; text-transform:none; letter-spacing:0; margin:0 0 4px 0; padding:0;">{nombre}</h1>
-                {'<p class="subtitulo">' + subtitulo + '</p>' if subtitulo else ''}
-                {'<p class="contacto">' + contacto_html + '</p>' if contacto_html else ''}
-            </div>
-            {foto_html}
-        </div>
-        <div class="contenido">
-            {cv_html}
-        </div>
-    </body>
-    </html>
-    """
+    try:
+        with open(css_path, 'r') as f:
+            css_str = f.read()
+        css = CSS(string=css_str)
+    except FileNotFoundError:
+        css = CSS(string=_css_base())
 
     buffer = io.BytesIO()
-    HTML(string=html_content).write_pdf(
-        buffer,
-        stylesheets=[CSS(string=css)]
-    )
+    HTML(string=html_str).write_pdf(buffer, stylesheets=[css])
     return buffer.getvalue()
+
+
+def _texto_a_estructura(texto, datos_personales=None):
+    """Convierte texto plano a estructura JSON mínima."""
+    return {
+        'name':    datos_personales.get('nombre', '') if datos_personales else '',
+        'title':   datos_personales.get('subtitulo', '') if datos_personales else '',
+        'profile': '',
+        'contact': {
+            'email':    datos_personales.get('email', '') if datos_personales else '',
+            'phone':    datos_personales.get('telefono', '') if datos_personales else '',
+            'location': datos_personales.get('ubicacion', '') if datos_personales else '',
+            'linkedin': datos_personales.get('linkedin', '') if datos_personales else '',
+            'github':   '',
+        },
+        'sections': [
+            {
+                'title': 'CONTENIDO',
+                'type':  'text',
+                'items': [texto],
+            }
+        ]
+    }
+
+
+def _css_base():
+    return """
+    @page { size: A4; margin: 0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; font-size: 10pt; color: #111; }
+    """

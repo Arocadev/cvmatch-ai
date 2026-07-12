@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body>
+
+<!-- CABECERA EDITORIAL -->
+<div class="cabecera">
+    {% if foto %}
+    <table class="cab-tabla" cellpadding="0" cellspacing="0">
+    <tr>
+        <td class="cab-td-foto">
+            <img src="{{ foto }}" alt="Foto" class="foto">
+        </td>
+        <td class="cab-td-texto">
+            <h1>{{ nombre }}</h1>
+            {% if subtitulo %}<p class="subtitulo">{{ subtitulo }}</p>{% endif %}
+            {% if contacto %}
+            <p class="contacto">
+                {% for item in contacto %}{{ item }}{% if not forloop.last %}&nbsp;&nbsp;&middot;&nbsp;&nbsp;{% endif %}{% endfor %}
+            </p>
+            {% endif %}
+        </td>
+    </tr>
+    </table>
+    {% else %}
+    <h1>{{ nombre }}</h1>
+    {% if subtitulo %}<p class="subtitulo">{{ subtitulo }}</p>{% endif %}
+    {% if contacto %}
+    <p class="contacto">
+        {% for item in contacto %}{{ item }}{% if not forloop.last %}&nbsp;&nbsp;&middot;&nbsp;&nbsp;{% endif %}{% endfor %}
+    </p>
+    {% endif %}
+    {% endif %}
+</div>
+
+<!-- LÍNEA EDITORIAL GRUESA -->
+<div class="linea-editorial"></div>
+
+<!-- PERFIL -->
+{% if profile %}
+<div class="seccion">
+    <div class="seccion-label">Perfil</div>
+    <p class="profile-text">{{ profile }}</p>
+</div>
+{% endif %}
+
+<!-- SECCIONES -->
+{% for seccion in sections %}
+<div class="seccion">
+    <div class="seccion-label">{{ seccion.title }}</div>
+
+    {% if seccion.type == 'timeline' %}
+        {% for item in seccion.items %}
+        <div class="timeline-item">
+            <table class="row-tabla" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="row-izq">
+                    <span class="tl-title">{{ item.title }}</span>
+                    {% if item.subtitle %}<span class="tl-sep"> — </span><span class="tl-empresa">{{ item.subtitle }}</span>{% endif %}
+                </td>
+                <td class="row-der">
+                    <span class="tl-fecha">{{ item.date }}</span>
+                </td>
+            </tr>
+            </table>
+            {% if item.bullets %}
+            <ul>{% for bullet in item.bullets %}<li>{{ bullet }}</li>{% endfor %}</ul>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+    {% elif seccion.type == 'chips' %}
+    <!-- Editorial: skills como texto, sin chips -->
+    <p class="skills-editorial">
+        {% for item in seccion.items %}{{ item }}{% if not forloop.last %},&nbsp;{% endif %}{% endfor %}
+    </p>
+
+    {% elif seccion.type == 'list' %}
+    <p class="skills-editorial">
+        {% for item in seccion.items %}{{ item }}{% if not forloop.last %},&nbsp;{% endif %}{% endfor %}
+    </p>
+
+    {% elif seccion.type == 'text' %}
+    {% for item in seccion.items %}<p class="text-block">{{ item }}</p>{% endfor %}
+    {% endif %}
+
+</div>
+{% endfor %}
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"></head>
+<body>
+
+<div class="cabecera">
+    <h1>{{ nombre }}</h1>
+    {% if subtitulo %}<p class="subtitulo">{{ subtitulo }}</p>{% endif %}
+    {% if contacto %}
+    <p class="contacto">
+        {% for item in contacto %}{{ item }}{% if not forloop.last %} &nbsp;|&nbsp; {% endif %}{% endfor %}
+    </p>
+    {% endif %}
+</div>
+
+{% if profile %}
+<div class="seccion">
+    <h2>PERFIL</h2>
+    <p class="profile-text">{{ profile }}</p>
+</div>
+{% endif %}
+
+{% for seccion in sections %}
+<div class="seccion">
+    <h2>{{ seccion.title }}</h2>
+
+    {% if seccion.type == 'timeline' %}
+        {% for item in seccion.items %}
+        <div class="timeline-item">
+            <table class="row-tabla" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="row-izq"><strong>{{ item.title }}</strong></td>
+                <td class="row-der"><span class="fecha">{{ item.date }}</span></td>
+            </tr>
+            </table>
+            {% if item.subtitle %}<p class="empresa">{{ item.subtitle }}</p>{% endif %}
+            {% if item.bullets %}
+            <ul>{% for bullet in item.bullets %}<li>{{ bullet }}</li>{% endfor %}</ul>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+    {% elif seccion.type == 'chips' %}
+    <p class="skills-texto">
+        {% for item in seccion.items %}{{ item }}{% if not forloop.last %} &nbsp;&mdash;&nbsp; {% endif %}{% endfor %}
+    </p>
+
+    {% elif seccion.type == 'list' %}
+    <p class="skills-texto">
+        {% for item in seccion.items %}{{ item }}{% if not forloop.last %} &nbsp;&mdash;&nbsp; {% endif %}{% endfor %}
+    </p>
+
+    {% elif seccion.type == 'text' %}
+    {% for item in seccion.items %}<p class="text-block">{{ item }}</p>{% endfor %}
+    {% endif %}
+
+</div>
+{% endfor %}
+
+</body>
+</html>

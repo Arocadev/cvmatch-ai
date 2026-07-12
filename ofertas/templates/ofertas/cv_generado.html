@@ -7,188 +7,307 @@
     <title>{% if idioma == 'en' %}Adapted CV{% else %}CV Adaptado{% endif %} — CVMatch AI</title>
     <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <style>
+        .cv-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: stretch;
+        }
+        .col-izq { display: flex; flex-direction: column; }
+        .col-der { display: flex; flex-direction: column; }
+        .col-izq .form-card,
+        .col-der .form-card { flex: 1; display: flex; flex-direction: column; }
+
+        .preview-wrap {
+            height: 560px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        .cv-preview { font-size: 13px; line-height: 1.8; color: #374151; white-space: pre-wrap; }
+        .preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+
+        .col-label {
+            font-size: 11px; font-weight: 700; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            margin-bottom: 12px; display: block;
+        }
+        .separador { border: none; border-top: 1px solid #e2e8f0; margin: 18px 0; }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .page-header h1 {
+            font-size: 28px; font-weight: 800; color: #0f172a;
+            margin: 0 0 10px; letter-spacing: -0.5px;
+        }
+        .oferta-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #f1f5f9; border: 1px solid #e2e8f0;
+            border-radius: 8px; padding: 6px 14px;
+            font-size: 13px; color: #475569; font-weight: 500;
+            margin-bottom: 14px;
+        }
+        .oferta-badge strong { color: #1253A4; font-weight: 700; }
+        .btn-volver {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: #f8fafc; border: 1.5px solid #e2e8f0;
+            border-radius: 8px; padding: 8px 16px;
+            font-size: 13px; color: #475569; font-weight: 600;
+            text-decoration: none; transition: all 0.15s; margin-bottom: 16px;
+        }
+        .btn-volver:hover { border-color: #94a3b8; color: #0f172a; background: #f1f5f9; }
+
+        .plantillas { display: flex; gap: 6px; margin-bottom: 14px; }
+        .plantilla-item {
+            flex: 1; cursor: pointer;
+            border: 2px solid #e2e8f0; background: #fff;
+            border-radius: 8px; padding: 8px 4px; text-align: center;
+            transition: all 0.15s;
+        }
+        .plantilla-item.activa { border-color: #1253A4; background: #EBF3FF; }
+        .plantilla-preview { height: 24px; border-radius: 4px; margin-bottom: 4px; }
+        .plantilla-nombre { font-size: 9px; font-weight: 700; color: #374151; margin: 0; }
+
+        .foto-check-label {
+            display: flex; align-items: center; gap: 10px;
+            background: #f8fafc; border: 1.5px solid #e2e8f0;
+            border-radius: 8px; padding: 10px 14px; cursor: pointer;
+            font-size: 13px; color: #374151; font-weight: 500;
+            transition: all 0.15s; margin-bottom: 14px;
+        }
+        .foto-check-label:has(input:checked) { border-color: #1253A4; background: #EBF3FF; }
+        .foto-check-label input { width: 16px; height: 16px; cursor: pointer; }
+        .foto-thumb { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+
+        .modo-tabs {
+            display: flex; background: #f1f5f9;
+            border-radius: 10px; padding: 4px; margin-bottom: 16px;
+        }
+        .modo-tab {
+            flex: 1; padding: 9px; text-align: center;
+            font-size: 13px; font-weight: 600; color: #64748b;
+            cursor: pointer; border-radius: 7px; border: none;
+            background: none; transition: all 0.15s;
+        }
+        .modo-tab.activo { background: #fff; color: #1253A4; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        .modo-contenido { display: none; }
+        .modo-contenido.activo { display: block; }
+
+        /* Botón descargar centrado abajo */
+        .descarga-wrapper { margin-top: 24px; text-align: center; }
+        .btn-descarga-principal {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: #1253A4; color: #fff; border: none;
+            border-radius: 12px; padding: 16px 48px;
+            font-size: 16px; font-weight: 700; cursor: pointer;
+            transition: all 0.15s; letter-spacing: -0.2px;
+        }
+        .btn-descarga-principal:hover { background: #0e3f82; }
+        .btn-descarga-principal i { font-size: 20px; }
+
+        @media (max-width: 900px) {
+            .cv-layout { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
 <body>
 
 {% include 'ofertas/includes/navbar.html' %}
 
 <div class="page-content">
-<div class="container" style="max-width: 860px; padding-bottom: 48px;">
+<div class="container" style="max-width: 1400px; padding-bottom: 48px;">
 
-    <a href="{% url 'analizar_cv' oferta.pk %}" class="btn btn-outline" style="margin-bottom: 20px; display: inline-flex;">
-        <i class="ti ti-arrow-left"></i> {% if idioma == 'en' %}Back to analysis{% else %}Volver al análisis{% endif %}
-    </a>
-
-    <div style="display: grid; grid-template-columns: 1fr 260px; gap: 20px; align-items: start;">
-
-        <div class="form-card" style="padding: 28px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                <div>
-                    <h1 style="font-size: 20px; font-weight: 700; margin: 0 0 4px; color: #0f172a;">{% if idioma == 'en' %}Adapted CV{% else %}CV Adaptado{% endif %}</h1>
-                    <p style="font-size: 13px; color: #6b7280; margin: 0;">{{ oferta.titulo }} — {{ oferta.empresa }}</p>
-                </div>
-                <button onclick="copiarCV()" class="btn btn-outline"><i class="ti ti-copy"></i> {% if idioma == 'en' %}Copy{% else %}Copiar{% endif %}</button>
-            </div>
-            <div id="cv-contenido" class="markdown-content" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px;">{{ cv_generado|safe }}</div>
-            <textarea id="cv-raw" style="display:none;">{{ cv_generado_raw }}</textarea>
+    <div class="page-header">
+        <a href="{% url 'analizar_cv' oferta.pk %}" class="btn-volver">
+            <i class="ti ti-arrow-left"></i> {% if idioma == 'en' %}Back{% else %}Volver{% endif %}
+        </a>
+        <h1>{% if idioma == 'en' %}Adapted CV{% else %}CV Adaptado{% endif %}</h1>
+        <div class="oferta-badge">
+            <i class="ti ti-briefcase" style="font-size:14px;"></i>
+            <strong>{{ oferta.titulo }}</strong>
+            {% if oferta.empresa %}&nbsp;&mdash;&nbsp;{{ oferta.empresa }}{% endif %}
         </div>
+    </div>
 
-        <div style="position: sticky; top: 88px; display: flex; flex-direction: column; gap: 12px;">
-            <div class="form-card" style="padding: 20px;">
-                <p style="font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">{% if idioma == 'en' %}Actions{% else %}Acciones{% endif %}</p>
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <a href="{% url 'generar_cv' oferta.pk %}" class="btn btn-outline" id="btn-regenerar" style="justify-content: center;">
+    <div class="cv-layout">
+
+        <!-- ── Col izquierda ─────────────────────────────────────────── -->
+        <div class="col-izq">
+        <div class="form-card" style="padding: 24px;">
+
+            <span class="col-label">{% if idioma == 'en' %}CV Content{% else %}Contenido del CV{% endif %}</span>
+            <div class="modo-tabs">
+                <button class="modo-tab activo" onclick="cambiarModo('ia', this)">
+                    <i class="ti ti-sparkles"></i> IA
+                </button>
+                <button class="modo-tab" onclick="cambiarModo('editar', this)">
+                    <i class="ti ti-pencil"></i> {% if idioma == 'en' %}Edit{% else %}Editar{% endif %}
+                </button>
+            </div>
+
+            <div id="modo-ia" class="modo-contenido activo">
+                <div class="markdown-content" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:16px; max-height:320px; overflow-y:auto;">
+                    {{ cv_generado|safe }}
+                </div>
+                <div style="display:flex; gap:8px; margin-top:12px;">
+                    <a href="{% url 'generar_cv' oferta.pk %}" class="btn btn-outline" style="flex:1; justify-content:center; font-size:12px;" id="btn-regenerar">
                         <i class="ti ti-refresh"></i> {% if idioma == 'en' %}Regenerate{% else %}Regenerar{% endif %}
                     </a>
-                    <button onclick="copiarCV()" class="btn btn-outline" style="justify-content: center;">
-                        <i class="ti ti-copy"></i> {% if idioma == 'en' %}Copy text{% else %}Copiar texto{% endif %}
-                    </button>
-                    <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-primary" style="justify-content: center;">
+                    <a href="{{ oferta.url_original }}" target="_blank" class="btn btn-outline" style="flex:1; justify-content:center; font-size:12px;">
                         <i class="ti ti-external-link"></i> {% if idioma == 'en' %}View offer{% else %}Ver oferta{% endif %}
                     </a>
-                    <div style="border-top: 1px solid #f1f5f9; margin: 4px 0;"></div>
-                    <button onclick="abrirCreadorPDF()" class="btn btn-primary" style="justify-content: center; background: linear-gradient(135deg, #16a34a, #15803d); box-shadow: 0 2px 8px rgba(22,163,74,0.35);">
-                        <i class="ti ti-file-type-pdf"></i> {% if idioma == 'en' %}Create PDF{% else %}Crear PDF{% endif %}
-                    </button>
                 </div>
             </div>
+
+            <div id="modo-editar" class="modo-contenido">
+                <p style="font-size:12px; color:#64748b; margin-bottom:10px;">
+                    {% if idioma == 'en' %}Edit the CV before creating the PDF.{% else %}Edita el CV antes de crear el PDF.{% endif %}
+                </p>
+                <textarea id="cv-editable" class="form-control" rows="12"
+                    oninput="actualizarPreview()"
+                    style="resize:vertical; font-size:13px; line-height:1.7;">{{ cv_generado_raw }}</textarea>
+            </div>
+
+            <textarea id="cv-raw" style="display:none;">{{ cv_generado_raw }}</textarea>
+
+            <hr class="separador">
+
+            <span class="col-label">{% if idioma == 'en' %}Template{% else %}Plantilla{% endif %}</span>
+            <input type="hidden" id="plantilla-value" value="ats">
+            <div class="plantillas">
+                <div onclick="seleccionarPlantilla('ats', this)" id="p-ats" class="plantilla-item activa">
+                    <div class="plantilla-preview" style="background:#F9FAFB; border:1px solid #000;"></div>
+                    <p class="plantilla-nombre">ATS</p>
+                </div>
+                <div onclick="seleccionarPlantilla('executive', this)" id="p-executive" class="plantilla-item">
+                    <div class="plantilla-preview" style="background:#183A63;"></div>
+                    <p class="plantilla-nombre" style="color:#183A63;">Executive</p>
+                </div>
+                <div onclick="seleccionarPlantilla('sidebar', this)" id="p-sidebar" class="plantilla-item">
+                    <div class="plantilla-preview" style="background:#202535;"></div>
+                    <p class="plantilla-nombre" style="color:#202535;">Sidebar</p>
+                </div>
+                <div onclick="seleccionarPlantilla('minimal', this)" id="p-minimal" class="plantilla-item">
+                    <div class="plantilla-preview" style="background:#fff; border:1px solid #1a1a1a;"></div>
+                    <p class="plantilla-nombre">Minimal</p>
+                </div>
+                <div onclick="seleccionarPlantilla('compact', this)" id="p-compact" class="plantilla-item">
+                    <div class="plantilla-preview" style="background:#1b4332;"></div>
+                    <p class="plantilla-nombre" style="color:#1b4332;">One Page</p>
+                </div>
+            </div>
+
+            {% if request.user.profile.foto %}
+            <label class="foto-check-label">
+                <input type="checkbox" id="check-foto-gen">
+                <img src="data:{{ request.user.profile.foto_mime }};base64,{{ request.user.profile.foto_base64 }}" class="foto-thumb">
+                <span>{% if idioma == 'en' %}Include photo{% else %}Incluir foto{% endif %}</span>
+            </label>
+            {% endif %}
+
+        </div>
+        </div>
+
+        <!-- ── Col derecha: preview ───────────────────────────────────── -->
+        <div class="col-der">
+        <div class="form-card" style="padding: 24px;">
+            <div class="preview-header">
+                <p class="col-label" style="margin:0">{% if idioma == 'en' %}Preview{% else %}Vista previa{% endif %}</p>
+                <button onclick="copiarCV()" id="btn-copiar" class="btn btn-outline" style="font-size:11px; padding:4px 10px;">
+                    <i class="ti ti-copy"></i> {% if idioma == 'en' %}Copy{% else %}Copiar{% endif %}
+                </button>
+            </div>
+            <div class="preview-wrap">
+                <div id="cv-preview" class="cv-preview markdown-content">{{ cv_generado|safe }}</div>
+            </div>
+        </div>
         </div>
 
     </div>
-</div>
-</div>
 
-<!-- Panel PDF -->
-<div id="panel-pdf-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:500; justify-content:flex-end;">
-    <div id="panel-pdf-inner" style="background:#fff; width:440px; max-width:95vw; height:100vh; overflow-y:auto; box-shadow:-8px 0 32px rgba(0,0,0,0.15); display:flex; flex-direction:column;">
-
-        <div style="background:linear-gradient(135deg,#1253A4,#0A3A78); padding:20px 24px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
-            <div>
-                <p style="font-size:11px; font-weight:700; color:rgba(255,255,255,0.6); text-transform:uppercase; letter-spacing:1px; margin:0 0 2px;">{% if idioma == 'en' %}PDF Creator{% else %}Creador de PDF{% endif %}</p>
-                <p style="font-size:14px; font-weight:700; color:#fff; margin:0;">{{ oferta.titulo }}</p>
-            </div>
-            <button onclick="cerrarPanelPDF()" style="background:rgba(255,255,255,0.15); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:18px; line-height:1; display:flex; align-items:center; justify-content:center;">✕</button>
-        </div>
-
-        <form method="POST" action="{% url 'descargar_pdf' oferta.pk %}" enctype="multipart/form-data" style="flex:1; padding:24px; display:flex; flex-direction:column; gap:20px;">
+    <!-- ── Botón descargar — fuera del grid, centrado abajo ──────────── -->
+    <div class="descarga-wrapper">
+        <form method="POST" action="{% url 'descargar_pdf' oferta.pk %}" id="form-pdf" style="display:inline;">
             {% csrf_token %}
-
-            <div>
-                <p style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">{% if idioma == 'en' %}Personal data{% else %}Datos personales{% endif %}</p>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <div>
-                        <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">{% if idioma == 'en' %}Full name{% else %}Nombre completo{% endif %}</label>
-                        <input type="text" name="nombre" value="{{ request.user.get_full_name|default:request.user.username }}" class="form-control" style="font-size:13px; padding:8px 12px;">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">{% if idioma == 'en' %}Professional title{% else %}Título profesional{% endif %}</label>
-                        <input type="text" name="subtitulo" placeholder="{% if idioma == 'en' %}Backend Developer · DevOps{% else %}Desarrollador Backend · DevOps{% endif %}" class="form-control" style="font-size:13px; padding:8px 12px;">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">Email</label>
-                        <input type="text" name="email" placeholder="email@ejemplo.com" class="form-control" style="font-size:13px; padding:8px 12px;">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">{% if idioma == 'en' %}Phone{% else %}Teléfono{% endif %}</label>
-                        <input type="text" name="telefono" placeholder="+34 600 000 000" class="form-control" style="font-size:13px; padding:8px 12px;">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">LinkedIn</label>
-                        <input type="text" name="linkedin" placeholder="linkedin.com/in/tu-perfil" class="form-control" style="font-size:13px; padding:8px 12px;">
-                    </div>
-                    <div>
-                        <label style="font-size:12px; font-weight:700; color:#374151; display:block; margin-bottom:4px;">{% if idioma == 'en' %}Location{% else %}Ubicación{% endif %}</label>
-                        <input type="text" name="ubicacion" placeholder="Valencia, España" class="form-control" style="font-size:13px; padding:8px 12px;">
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <p style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">{% if idioma == 'en' %}Template{% else %}Plantilla{% endif %}</p>
-                <input type="hidden" name="plantilla" id="plantilla-value" value="neutra">
-                <div style="display:flex; gap:8px;">
-                    <div onclick="seleccionarPlantilla('neutra', this)" id="p-neutra" style="flex:1; cursor:pointer; border:2px solid #1253A4; background:#EBF3FF; border-radius:10px; padding:12px; text-align:center; transition:all 0.15s;">
-                        <div style="width:100%; height:48px; background:#F9FAFB; border:1px solid #e2e8f0; border-radius:6px; margin-bottom:6px; display:flex; align-items:center; justify-content:center;">
-                            <div style="width:60%; height:3px; background:#6B7280; border-radius:2px;"></div>
-                        </div>
-                        <p style="font-size:11px; font-weight:700; color:#374151; margin:0;">{% if idioma == 'en' %}Neutral{% else %}Neutra{% endif %}</p>
-                    </div>
-                    <div onclick="seleccionarPlantilla('profesional', this)" id="p-profesional" style="flex:1; cursor:pointer; border:2px solid #e2e8f0; background:#fff; border-radius:10px; padding:12px; text-align:center; transition:all 0.15s;">
-                        <div style="width:100%; height:48px; background:#1253A4; border-radius:6px; margin-bottom:6px; display:flex; align-items:center; justify-content:center;">
-                            <div style="width:60%; height:3px; background:rgba(255,255,255,0.5); border-radius:2px;"></div>
-                        </div>
-                        <p style="font-size:11px; font-weight:700; color:#1253A4; margin:0;">{% if idioma == 'en' %}Professional{% else %}Profesional{% endif %}</p>
-                    </div>
-                    <div onclick="seleccionarPlantilla('moderna', this)" id="p-moderna" style="flex:1; cursor:pointer; border:2px solid #e2e8f0; background:#fff; border-radius:10px; padding:12px; text-align:center; transition:all 0.15s;">
-                        <div style="width:100%; height:48px; background:#16a34a; border-radius:6px; margin-bottom:6px; display:flex; align-items:center; justify-content:center;">
-                            <div style="width:60%; height:3px; background:rgba(255,255,255,0.5); border-radius:2px;"></div>
-                        </div>
-                        <p style="font-size:11px; font-weight:700; color:#16a34a; margin:0;">{% if idioma == 'en' %}Modern{% else %}Moderna{% endif %}</p>
-                    </div>
-                </div>
-            </div>
-
-            <div>
-                <p style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px;">{% if idioma == 'en' %}Photo{% else %}Foto{% endif %}</p>
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                    <label style="display:flex; align-items:center; gap:10px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:8px; padding:10px 12px; cursor:pointer;">
-                        <input type="radio" name="opcion_foto" value="ninguna" checked style="width:15px; height:15px;">
-                        <span style="font-size:13px; color:#374151; font-weight:500;">{% if idioma == 'en' %}No photo{% else %}Sin foto{% endif %}</span>
-                    </label>
-                    {% if request.user.profile.foto %}
-                    <label style="display:flex; align-items:center; gap:10px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:8px; padding:10px 12px; cursor:pointer;">
-                        <input type="radio" name="opcion_foto" value="perfil" style="width:15px; height:15px;">
-                        <img src="data:{{ request.user.profile.foto_mime }};base64,{{ request.user.profile.foto_base64 }}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
-                        <span style="font-size:13px; color:#374151; font-weight:500;">{% if idioma == 'en' %}Use profile photo{% else %}Usar foto del perfil{% endif %}</span>
-                    </label>
-                    {% else %}
-                    <div style="background:#FFF7ED; border:1px solid #FED7AA; border-radius:8px; padding:10px 12px; font-size:12px; color:#c2410c;">
-                        <i class="ti ti-info-circle"></i>
-                        {% if idioma == 'en' %}Add a photo in your{% else %}Añade una foto en tu{% endif %}
-                        <a href="{% url 'perfil' %}" style="color:#c2410c; font-weight:700;">{% if idioma == 'en' %}profile{% else %}perfil{% endif %}</a>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary" style="width:100%; padding:13px; font-size:14px; font-weight:700; justify-content:center;">
-                <i class="ti ti-download"></i> {% if idioma == 'en' %}Download PDF{% else %}Descargar PDF{% endif %}
+            <input type="hidden" name="plantilla" id="plantilla-form" value="ats">
+            <input type="hidden" name="opcion_foto" id="opcion-foto-form" value="ninguna">
+            <input type="hidden" name="cv_manual" id="cv-para-pdf">
+            <input type="hidden" name="modo" id="modo-pdf" value="automatico">
+            <button type="submit" class="btn-descarga-principal">
+                <i class="ti ti-download"></i>
+                {% if idioma == 'en' %}Download PDF{% else %}Descargar PDF{% endif %}
             </button>
         </form>
     </div>
+
+</div>
 </div>
 
 {% include 'ofertas/includes/footer.html' %}
 
 <script>
+const idioma = '{{ idioma }}';
+let modoActual = 'ia';
+
+function cambiarModo(modo, btn) {
+    document.querySelectorAll('.modo-tab').forEach(t => t.classList.remove('activo'));
+    document.querySelectorAll('.modo-contenido').forEach(c => c.classList.remove('activo'));
+    btn.classList.add('activo');
+    document.getElementById('modo-' + modo).classList.add('activo');
+    modoActual = modo;
+    if (modo === 'editar') document.getElementById('cv-editable').dispatchEvent(new Event('input'));
+}
+
+function actualizarPreview() {
+    const texto = document.getElementById('cv-editable').value;
+    document.getElementById('cv-preview').innerHTML = texto.replace(/\n/g, '<br>');
+    document.getElementById('cv-raw').value = texto;
+}
+
 function copiarCV() {
     const texto = document.getElementById('cv-raw').value;
     navigator.clipboard.writeText(texto).then(() => {
-        const btn = event.target.closest('button');
-        const original = btn.innerHTML;
-        btn.innerHTML = '<i class="ti ti-check"></i> {% if idioma == "en" %}Copied!{% else %}¡Copiado!{% endif %}';
-        setTimeout(() => btn.innerHTML = original, 2000);
+        const btn = document.getElementById('btn-copiar');
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="ti ti-check"></i> ' + (idioma === 'en' ? 'Copied!' : '¡Copiado!');
+        setTimeout(() => btn.innerHTML = orig, 2000);
     });
 }
-function abrirCreadorPDF() { document.getElementById('panel-pdf-overlay').style.display = 'flex'; }
-function cerrarPanelPDF() { document.getElementById('panel-pdf-overlay').style.display = 'none'; }
+
 function seleccionarPlantilla(valor, el) {
-    ['neutra', 'profesional', 'moderna'].forEach(function(p) {
-        const div = document.getElementById('p-' + p);
-        div.style.borderColor = '#e2e8f0';
-        div.style.background = '#fff';
-    });
-    el.style.borderColor = '#1253A4';
-    el.style.background = '#EBF3FF';
+    document.querySelectorAll('.plantilla-item').forEach(p => p.classList.remove('activa'));
+    el.classList.add('activa');
     document.getElementById('plantilla-value').value = valor;
+    document.getElementById('plantilla-form').value = valor;
 }
-document.getElementById('panel-pdf-overlay').addEventListener('click', function(e) {
-    if (e.target === this) cerrarPanelPDF();
+
+const checkFoto = document.getElementById('check-foto-gen');
+if (checkFoto) {
+    checkFoto.addEventListener('change', function() {
+        document.getElementById('opcion-foto-form').value = this.checked ? 'perfil' : 'ninguna';
+    });
+}
+
+document.getElementById('form-pdf').addEventListener('submit', function() {
+    if (modoActual === 'editar') {
+        document.getElementById('cv-para-pdf').value = document.getElementById('cv-editable').value;
+        document.getElementById('modo-pdf').value = 'manual';
+    } else {
+        document.getElementById('modo-pdf').value = 'automatico';
+    }
+    document.getElementById('plantilla-form').value = document.getElementById('plantilla-value').value;
 });
+
 document.addEventListener('DOMContentLoaded', function() {
     const btn = document.getElementById('btn-regenerar');
     if (btn) btn.addEventListener('click', function() {
-        this.innerHTML = '<i class="ti ti-loader"></i> {% if idioma == "en" %}Generating...{% else %}Generando...{% endif %}';
+        this.innerHTML = '<i class="ti ti-loader"></i> ' + (idioma === 'en' ? 'Generating...' : 'Generando...');
     });
 });
 </script>
