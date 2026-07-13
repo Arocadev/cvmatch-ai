@@ -1,152 +1,41 @@
-@page {
-    size: A4;
-    margin: 0;
-}
+@page { size: A4; margin: 16mm 0 20mm 0; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 8.5pt;
-    color: #1a1a1a;
-    background: #fff;
-    line-height: 1.38;
-}
+body { font-family: Arial, Helvetica, sans-serif; font-size: 8.5pt; color: #1a1a1a; background: #fff; line-height: 1.4; }
 
-/* ── CABECERA ─────────────────────────────────────── */
-.cabecera {
-    background: #1b4332;
-    color: #fff;
-    padding: 18px 20px;
-}
-.cab-tabla { width: 100%; }
-.cab-td-izq {
-    vertical-align: middle;
-}
-.cab-td-der {
-    vertical-align: middle;
-    text-align: right;
-    width: 160px;
-}
-.foto {
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #52b788;
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 12px;
-}
-.cab-nombre-bloque {
-    display: inline-block;
-    vertical-align: middle;
-}
-.cabecera h1 {
-    font-size: 17pt;
-    font-weight: 700;
-    color: #fff;
-    line-height: 1.1;
-    margin-bottom: 3px;
-    word-wrap: break-word;
-    max-width: 280px;
-}
-.cab-subtitulo {
-    font-size: 8.5pt;
-    color: #52b788;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-}
-.cab-contacto-item {
-    font-size: 7pt;
-    color: rgba(255,255,255,0.65);
-    line-height: 1.55;
-    word-break: break-all;
-}
+.cabecera { background: #1a3d2b; color: #fff; padding: 18px 22px; }
+.cab-tabla { width: 100%; border-collapse: collapse; }
+.cab-td-izq { vertical-align: middle; }
+.cab-td-der { vertical-align: middle; text-align: right; width: 150px; }
+.foto { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #52b788; display: inline-block; vertical-align: middle; margin-right: 11px; }
+.cab-nombre-bloque { display: inline-block; vertical-align: middle; }
+.cabecera h1 { font-size: 16pt; font-weight: 700; color: #fff; line-height: 1.1; margin-bottom: 2px; word-wrap: break-word; max-width: 260px; }
+.cab-subtitulo { font-size: 7.5pt; color: #52b788; font-weight: 600; }
+.cab-contacto-item { font-size: 6.5pt; color: rgba(255,255,255,0.62); line-height: 1.55; word-break: break-all; }
 
-/* ── LAYOUT ───────────────────────────────────────── */
-.layout-tabla {
-    width: 100%;
-    border-collapse: collapse;
-}
-.col-izq {
-    width: 155px;
-    vertical-align: top;
-    background: #f8fafb;
-    border-right: 2px solid #e0ede6;
-    padding: 14px 12px;
-}
-.col-der {
-    vertical-align: top;
-    padding: 14px 18px;
-    background: #fff;
-}
+.layout-tabla { width: 100%; border-collapse: collapse; }
+/* Col izquierda más ancha para que chips no rompan */
+.col-izq { width: 185px; vertical-align: top; background: #f5f8f5; border-right: 1.5px solid #c8e0d0; padding: 14px 14px; }
+.col-der { vertical-align: top; padding: 14px 18px; background: #fff; }
 
-/* ── BLOQUES ──────────────────────────────────────── */
-.bloque {
-    margin-bottom: 13px;
-}
-
-/* Títulos col izquierda */
-h3 {
-    font-size: 6.5pt;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: #1b4332;
-    border-bottom: 1.5px solid #52b788;
-    padding-bottom: 3px;
-    margin-bottom: 7px;
-}
-.op-profile {
-    font-size: 7.5pt;
-    line-height: 1.55;
-    color: #333;
-}
-
-/* Chips en cuadrícula — inline-block sin flex */
-.chips-grid {
-    line-height: 1;
-}
-.chip {
-    display: inline-block;
-    background: #d8f3dc;
-    color: #1b4332;
-    border: 1px solid #b7dfc0;
-    border-radius: 3px;
-    padding: 2px 6px;
-    font-size: 6.5pt;
-    font-weight: 700;
-    margin: 0 2px 3px 0;
-}
+.bloque { margin-bottom: 14px; page-break-inside: avoid; break-inside: avoid; }
+h3 { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #1a3d2b; border-bottom: 1.5px solid #52b788; padding-bottom: 3px; margin-bottom: 7px; }
+.op-profile { font-size: 7.5pt; line-height: 1.6; color: #333; }
+.chips-grid { line-height: 1.75; }
+/* Chips más pequeños */
+.chip { display: inline-block; background: #d0edd8; color: #1a3d2b; border: 1px solid #a8d4b4; border-radius: 3px; padding: 1px 5px; font-size: 6.5pt; font-weight: 700; margin: 0 2px 3px 0; }
 .op-lista { padding-left: 10px; }
 .op-lista li { font-size: 7.5pt; color: #333; margin-bottom: 2px; }
 
-/* Títulos col derecha */
-h2 {
-    font-size: 7.5pt;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: #1b4332;
-    border-bottom: 1.5px solid #1b4332;
-    padding-bottom: 3px;
-    margin-bottom: 8px;
-}
+h2 { font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #1a3d2b; border-bottom: 1.5px solid #1a3d2b; padding-bottom: 3px; margin-bottom: 9px; }
 
-/* ── TIMELINE ─────────────────────────────────────── */
-.tl-item {
-    margin-bottom: 8px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid #eef2ee;
-    page-break-inside: avoid;
-}
+.tl-item { margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8f0e8; page-break-inside: avoid; break-inside: avoid; }
 .tl-item:last-child { border-bottom: none; padding-bottom: 0; }
-.row-tabla { width: 100%; margin-bottom: 2px; }
+.row-tabla { width: 100%; border-collapse: collapse; margin-bottom: 2px; }
 .row-izq { vertical-align: top; }
 .row-der { vertical-align: top; text-align: right; width: 82px; }
 .tl-title { font-size: 8.5pt; font-weight: 700; color: #111; }
-.tl-empresa { font-size: 7.5pt; color: #52b788; font-style: italic; }
+.tl-empresa { font-size: 7.5pt; color: #2d7a4f; font-style: italic; }
 .tl-fecha { font-size: 7pt; color: #888; white-space: nowrap; }
 ul { padding-left: 11px; margin-top: 2px; }
-li { font-size: 7.5pt; margin-bottom: 1px; line-height: 1.35; color: #2a2a2a; }
-
-.text-block { font-size: 7.5pt; line-height: 1.5; white-space: pre-wrap; color: #333; }
+li { font-size: 7.5pt; margin-bottom: 2px; line-height: 1.4; color: #2a2a2a; }
+.text-block { font-size: 7.5pt; line-height: 1.55; white-space: pre-wrap; color: #333; }

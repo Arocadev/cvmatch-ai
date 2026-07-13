@@ -19,6 +19,17 @@ def _foto_base64(foto_path):
         return None
 
 
+
+def _limpiar_url(url):
+    """Quita https://, http:// y www. para que las URLs queden limpias en el PDF."""
+    if not url:
+        return url
+    url = url.strip()
+    for prefix in ('https://', 'http://', 'www.'):
+        if url.startswith(prefix):
+            url = url[len(prefix):]
+    return url.rstrip('/')
+
 def generar_pdf(datos_personales: dict, cv_contenido, plantilla: str = 'profesional', foto_path: str = None) -> bytes:
     """
     Genera un PDF a partir de datos personales y cv_contenido.
@@ -38,24 +49,25 @@ def generar_pdf(datos_personales: dict, cv_contenido, plantilla: str = 'profesio
     foto_data_uri = _foto_base64(foto_path)
 
     # Fusionar datos del formulario con los del JSON
-    # Los datos del formulario tienen prioridad sobre los del JSON
     nombre    = datos_personales.get('nombre') or cv_contenido.get('name', '')
     subtitulo = datos_personales.get('subtitulo') or cv_contenido.get('title', '')
     email     = datos_personales.get('email') or cv_contenido.get('contact', {}).get('email', '')
     telefono  = datos_personales.get('telefono') or cv_contenido.get('contact', {}).get('phone', '')
-    linkedin  = datos_personales.get('linkedin') or cv_contenido.get('contact', {}).get('linkedin', '')
+    linkedin  = _limpiar_url(datos_personales.get('linkedin') or cv_contenido.get('contact', {}).get('linkedin', ''))
     ubicacion = datos_personales.get('ubicacion') or cv_contenido.get('contact', {}).get('location', '')
-    github    = cv_contenido.get('contact', {}).get('github', '')
+    github    = _limpiar_url(cv_contenido.get('contact', {}).get('github', ''))
 
     profile  = cv_contenido.get('profile', '')
     sections = cv_contenido.get('sections', [])
 
+    # Fila 1: ubicación • teléfono • email — siempre en una sola línea
+    fila1_parts = [x for x in [ubicacion, telefono, email] if x]
+    # Fila 2: linkedin · github — siempre en una sola línea
+    fila2_parts = [x for x in [linkedin, github] if x]
+
     contacto = []
-    if ubicacion: contacto.append(ubicacion)
-    if telefono:  contacto.append(telefono)
-    if email:     contacto.append(email)
-    if linkedin:  contacto.append(linkedin)
-    if github:    contacto.append(github)
+    if fila1_parts: contacto.append('  •  '.join(fila1_parts))
+    if fila2_parts: contacto.append('  ·  '.join(fila2_parts))
 
     ctx = {
         'nombre':    nombre,
@@ -66,7 +78,7 @@ def generar_pdf(datos_personales: dict, cv_contenido, plantilla: str = 'profesio
         'foto':      foto_data_uri,
     }
 
-    if plantilla not in ('ats', 'executive', 'sidebar', 'minimal', 'compact'):
+    if plantilla not in ('classic', 'executive', 'modern', 'editorial', 'compact'):
         plantilla = 'executive'
 
     html_str = render_to_string(f'pdf/{plantilla}.html', ctx)

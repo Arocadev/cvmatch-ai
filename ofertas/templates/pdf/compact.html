@@ -27,12 +27,11 @@
 <table class="layout-tabla" cellpadding="0" cellspacing="0">
 <tr>
 
-    <!-- COLUMNA IZQUIERDA: skills, idiomas, extras -->
     <td class="col-izq">
 
         {% if profile %}
         <div class="bloque">
-            <h3>PERFIL</h3>
+            <h3>Perfil</h3>
             <p class="op-profile">{{ profile }}</p>
         </div>
         {% endif %}
@@ -56,7 +55,6 @@
 
     </td>
 
-    <!-- COLUMNA DERECHA: experiencia, formación, proyectos -->
     <td class="col-der">
 
         {% for seccion in sections %}

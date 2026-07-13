@@ -204,9 +204,14 @@ Rewrite the CV adapted to this offer and return ONLY a valid JSON object with th
       ]
     }},
     {{
-      "title": "SKILLS",
+      "title": "TECHNOLOGIES",
       "type": "chips",
-      "items": ["skill1", "skill2", "skill3"]
+      "items": ["Java", "Spring Boot", "Python", "Docker"]
+    }},
+    {{
+      "title": "SOFT SKILLS",
+      "type": "chips",
+      "items": ["Teamwork", "Technical communication", "Problem solving"]
     }},
     {{
       "title": "LANGUAGES",
@@ -218,7 +223,8 @@ Rewrite the CV adapted to this offer and return ONLY a valid JSON object with th
 
 Rules:
 - Keep ALL real information, do not invent anything
-- Order sections by relevance to the offer
+- Order sections based on the candidate profile and the offer: if the candidate has little work experience, put EDUCATION, TECHNOLOGIES, SOFT SKILLS and LANGUAGES before EXPERIENCE and PROJECTS; if they have relevant experience for the offer, put EXPERIENCE first. Adapt the order to maximize CV impact.
+- ALWAYS separate technical skills (languages, frameworks, tools, databases, DevOps, technical methodologies) in TECHNOLOGIES, and soft skills (communication, teamwork, problem solving, adaptability, etc.) in SOFT SKILLS separately. Never mix them.
 - Prioritize keywords from the offer
 - Return ONLY the JSON, no explanations, no markdown, no ```json```
 
@@ -280,9 +286,14 @@ Reescribe el CV adaptado a la oferta y devuelve SOLO un objeto JSON válido con 
       ]
     }},
     {{
+      "title": "TECNOLOGÍAS",
+      "type": "chips",
+      "items": ["Java", "Spring Boot", "Python", "Docker"]
+    }},
+    {{
       "title": "HABILIDADES",
       "type": "chips",
-      "items": ["habilidad1", "habilidad2", "habilidad3"]
+      "items": ["Trabajo en equipo", "Comunicación técnica", "Resolución de problemas"]
     }},
     {{
       "title": "IDIOMAS",
@@ -294,7 +305,8 @@ Reescribe el CV adaptado a la oferta y devuelve SOLO un objeto JSON válido con 
 
 Reglas:
 - Mantén TODA la información real, no inventes nada
-- Ordena las secciones por relevancia para la oferta
+- Ordena las secciones según el perfil del candidato y la oferta: si tiene poca experiencia laboral, pon FORMACIÓN, TECNOLOGÍAS, HABILIDADES e IDIOMAS antes que EXPERIENCIA y PROYECTOS; si tiene experiencia relevante para la oferta, pon EXPERIENCIA primero. Adapta el orden para maximizar el impacto del CV.
+- Separa SIEMPRE las habilidades técnicas (lenguajes, frameworks, herramientas, bases de datos, DevOps, metodologías técnicas) en TECNOLOGÍAS, y las habilidades blandas (comunicación, trabajo en equipo, resolución de problemas, adaptabilidad, etc.) en HABILIDADES por separado. Nunca las mezcles.
 - Prioriza las palabras clave de la oferta
 - Devuelve SOLO el JSON, sin explicaciones, sin markdown, sin ```json```
 
@@ -314,7 +326,6 @@ CV del candidato:
     try:
         return json.loads(texto)
     except json.JSONDecodeError:
-        # Intentar extraer JSON del texto
         match = re.search(r'\{[\s\S]+\}', texto)
         if match:
             return json.loads(match.group())
@@ -340,14 +351,15 @@ Return ONLY a valid JSON object with this exact structure:
     "email": "", "phone": "", "location": "", "linkedin": "", "github": ""
   }},
   "sections": [
-    {{"title": "EXPERIENCE", "type": "timeline", "items": [{{"title": "", "subtitle": "", "date": "", "bullets": []}}]}},
-    {{"title": "PROJECTS", "type": "timeline", "items": [{{"title": "", "subtitle": "", "date": "", "bullets": []}}]}},
     {{"title": "EDUCATION", "type": "timeline", "items": [{{"title": "", "subtitle": "", "date": "", "bullets": []}}]}},
-    {{"title": "SKILLS", "type": "chips", "items": []}},
-    {{"title": "LANGUAGES", "type": "list", "items": []}}
+    {{"title": "TECHNOLOGIES", "type": "chips", "items": []}},
+    {{"title": "SOFT SKILLS", "type": "chips", "items": []}},
+    {{"title": "LANGUAGES", "type": "list", "items": []}},
+    {{"title": "EXPERIENCE", "type": "timeline", "items": [{{"title": "", "subtitle": "", "date": "", "bullets": []}}]}},
+    {{"title": "PROJECTS", "type": "timeline", "items": [{{"title": "", "subtitle": "", "date": "", "bullets": []}}]}}
   ]
 }}
-Rules: Keep ALL real info. No inventions. Return ONLY JSON.
+Rules: Keep ALL real info. No inventions. Always separate technical skills in TECHNOLOGIES and soft skills in SOFT SKILLS. Return ONLY JSON.
 
 CV:
 {cv_texto}"""
@@ -362,14 +374,15 @@ Devuelve SOLO un objeto JSON válido con esta estructura exacta:
     "email": "", "phone": "", "location": "", "linkedin": "", "github": ""
   }},
   "sections": [
-    {{"title": "EXPERIENCIA", "type": "timeline", "items": [{{"title": "", "subtitle": "", "date": "", "bullets": []}}]}},
-    {{"title": "PROYECTOS", "type": "timeline", "items": [{{"title": "", "subtitle": "", "date": "", "bullets": []}}]}},
     {{"title": "FORMACIÓN", "type": "timeline", "items": [{{"title": "", "subtitle": "", "date": "", "bullets": []}}]}},
+    {{"title": "TECNOLOGÍAS", "type": "chips", "items": []}},
     {{"title": "HABILIDADES", "type": "chips", "items": []}},
-    {{"title": "IDIOMAS", "type": "list", "items": []}}
+    {{"title": "IDIOMAS", "type": "list", "items": []}},
+    {{"title": "EXPERIENCIA", "type": "timeline", "items": [{{"title": "", "subtitle": "", "date": "", "bullets": []}}]}},
+    {{"title": "PROYECTOS", "type": "timeline", "items": [{{"title": "", "subtitle": "", "date": "", "bullets": []}}]}}
   ]
 }}
-Reglas: Mantén TODA la información real. No inventes nada. Devuelve SOLO el JSON.
+Reglas: Mantén TODA la información real. No inventes nada. Separa habilidades técnicas en TECNOLOGÍAS y blandas en HABILIDADES. Devuelve SOLO el JSON.
 
 CV:
 {cv_texto}"""

@@ -3,7 +3,6 @@
 <head><meta charset="UTF-8"></head>
 <body>
 
-<!-- CABECERA EDITORIAL -->
 <div class="cabecera">
     {% if foto %}
     <table class="cab-tabla" cellpadding="0" cellspacing="0">
@@ -33,10 +32,8 @@
     {% endif %}
 </div>
 
-<!-- LÍNEA EDITORIAL GRUESA -->
 <div class="linea-editorial"></div>
 
-<!-- PERFIL -->
 {% if profile %}
 <div class="seccion">
     <div class="seccion-label">Perfil</div>
@@ -44,7 +41,6 @@
 </div>
 {% endif %}
 
-<!-- SECCIONES -->
 {% for seccion in sections %}
 <div class="seccion">
     <div class="seccion-label">{{ seccion.title }}</div>
@@ -70,7 +66,6 @@
         {% endfor %}
 
     {% elif seccion.type == 'chips' %}
-    <!-- Editorial: skills como texto, sin chips -->
     <p class="skills-editorial">
         {% for item in seccion.items %}{{ item }}{% if not forloop.last %},&nbsp;{% endif %}{% endfor %}
     </p>

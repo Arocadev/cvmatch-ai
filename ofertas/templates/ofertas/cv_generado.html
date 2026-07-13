@@ -8,112 +8,41 @@
     <link rel="stylesheet" href="{% static 'ofertas/style.css' %}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
     <style>
-        .cv-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            align-items: stretch;
-        }
+        .cv-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: stretch; }
         .col-izq { display: flex; flex-direction: column; }
         .col-der { display: flex; flex-direction: column; }
-        .col-izq .form-card,
-        .col-der .form-card { flex: 1; display: flex; flex-direction: column; }
-
-        .preview-wrap {
-            height: 560px;
-            overflow-y: auto;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 16px;
-        }
+        .col-izq .form-card, .col-der .form-card { flex: 1; display: flex; flex-direction: column; }
+        .preview-wrap { height: 560px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; }
         .cv-preview { font-size: 13px; line-height: 1.8; color: #374151; white-space: pre-wrap; }
         .preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-
-        .col-label {
-            font-size: 11px; font-weight: 700; color: #94a3b8;
-            text-transform: uppercase; letter-spacing: 0.5px;
-            margin-bottom: 12px; display: block;
-        }
+        .col-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; display: block; }
         .separador { border: none; border-top: 1px solid #e2e8f0; margin: 18px 0; }
-
-        .page-header {
-            text-align: center;
-            margin-bottom: 32px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .page-header h1 {
-            font-size: 28px; font-weight: 800; color: #0f172a;
-            margin: 0 0 10px; letter-spacing: -0.5px;
-        }
-        .oferta-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: #f1f5f9; border: 1px solid #e2e8f0;
-            border-radius: 8px; padding: 6px 14px;
-            font-size: 13px; color: #475569; font-weight: 500;
-            margin-bottom: 14px;
-        }
+        .page-header { text-align: center; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #e2e8f0; }
+        .page-header h1 { font-size: 28px; font-weight: 800; color: #0f172a; margin: 0 0 10px; letter-spacing: -0.5px; }
+        .oferta-badge { display: inline-flex; align-items: center; gap: 6px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 14px; font-size: 13px; color: #475569; font-weight: 500; margin-bottom: 14px; }
         .oferta-badge strong { color: #1253A4; font-weight: 700; }
-        .btn-volver {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: #f8fafc; border: 1.5px solid #e2e8f0;
-            border-radius: 8px; padding: 8px 16px;
-            font-size: 13px; color: #475569; font-weight: 600;
-            text-decoration: none; transition: all 0.15s; margin-bottom: 16px;
-        }
+        .btn-volver { display: inline-flex; align-items: center; gap: 6px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 8px 16px; font-size: 13px; color: #475569; font-weight: 600; text-decoration: none; transition: all 0.15s; margin-bottom: 16px; }
         .btn-volver:hover { border-color: #94a3b8; color: #0f172a; background: #f1f5f9; }
-
-        .plantillas { display: flex; gap: 6px; margin-bottom: 14px; }
-        .plantilla-item {
-            flex: 1; cursor: pointer;
-            border: 2px solid #e2e8f0; background: #fff;
-            border-radius: 8px; padding: 8px 4px; text-align: center;
-            transition: all 0.15s;
-        }
+        .plantillas { display: flex; gap: 6px; margin-bottom: 8px; }
+        .plantilla-item { flex: 1; cursor: pointer; border: 2px solid #e2e8f0; background: #fff; border-radius: 8px; padding: 8px 4px; text-align: center; transition: all 0.15s; }
         .plantilla-item.activa { border-color: #1253A4; background: #EBF3FF; }
         .plantilla-preview { height: 24px; border-radius: 4px; margin-bottom: 4px; }
         .plantilla-nombre { font-size: 9px; font-weight: 700; color: #374151; margin: 0; }
-
-        .foto-check-label {
-            display: flex; align-items: center; gap: 10px;
-            background: #f8fafc; border: 1.5px solid #e2e8f0;
-            border-radius: 8px; padding: 10px 14px; cursor: pointer;
-            font-size: 13px; color: #374151; font-weight: 500;
-            transition: all 0.15s; margin-bottom: 14px;
-        }
+        .ats-badge { font-size: 11px; color: #94a3b8; margin-bottom: 14px; text-align: center; display: block; }
+        .foto-check-label { display: flex; align-items: center; gap: 10px; background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; cursor: pointer; font-size: 13px; color: #374151; font-weight: 500; transition: all 0.15s; margin-bottom: 14px; }
         .foto-check-label:has(input:checked) { border-color: #1253A4; background: #EBF3FF; }
         .foto-check-label input { width: 16px; height: 16px; cursor: pointer; }
         .foto-thumb { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
-
-        .modo-tabs {
-            display: flex; background: #f1f5f9;
-            border-radius: 10px; padding: 4px; margin-bottom: 16px;
-        }
-        .modo-tab {
-            flex: 1; padding: 9px; text-align: center;
-            font-size: 13px; font-weight: 600; color: #64748b;
-            cursor: pointer; border-radius: 7px; border: none;
-            background: none; transition: all 0.15s;
-        }
+        .modo-tabs { display: flex; background: #f1f5f9; border-radius: 10px; padding: 4px; margin-bottom: 16px; }
+        .modo-tab { flex: 1; padding: 9px; text-align: center; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; border-radius: 7px; border: none; background: none; transition: all 0.15s; }
         .modo-tab.activo { background: #fff; color: #1253A4; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
         .modo-contenido { display: none; }
         .modo-contenido.activo { display: block; }
-
-        /* Botón descargar centrado abajo */
         .descarga-wrapper { margin-top: 24px; text-align: center; }
-        .btn-descarga-principal {
-            display: inline-flex; align-items: center; gap: 10px;
-            background: #1253A4; color: #fff; border: none;
-            border-radius: 12px; padding: 16px 48px;
-            font-size: 16px; font-weight: 700; cursor: pointer;
-            transition: all 0.15s; letter-spacing: -0.2px;
-        }
+        .btn-descarga-principal { display: inline-flex; align-items: center; gap: 10px; background: #1253A4; color: #fff; border: none; border-radius: 12px; padding: 16px 48px; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.15s; letter-spacing: -0.2px; }
         .btn-descarga-principal:hover { background: #0e3f82; }
         .btn-descarga-principal i { font-size: 20px; }
-
-        @media (max-width: 900px) {
-            .cv-layout { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 900px) { .cv-layout { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -137,7 +66,6 @@
 
     <div class="cv-layout">
 
-        <!-- ── Col izquierda ─────────────────────────────────────────── -->
         <div class="col-izq">
         <div class="form-card" style="padding: 24px;">
 
@@ -179,23 +107,23 @@
             <hr class="separador">
 
             <span class="col-label">{% if idioma == 'en' %}Template{% else %}Plantilla{% endif %}</span>
-            <input type="hidden" id="plantilla-value" value="ats">
+            <input type="hidden" id="plantilla-value" value="classic">
             <div class="plantillas">
-                <div onclick="seleccionarPlantilla('ats', this)" id="p-ats" class="plantilla-item activa">
+                <div onclick="seleccionarPlantilla('classic', this)" id="p-classic" class="plantilla-item activa">
                     <div class="plantilla-preview" style="background:#F9FAFB; border:1px solid #000;"></div>
-                    <p class="plantilla-nombre">ATS</p>
+                    <p class="plantilla-nombre">Classic</p>
                 </div>
                 <div onclick="seleccionarPlantilla('executive', this)" id="p-executive" class="plantilla-item">
                     <div class="plantilla-preview" style="background:#183A63;"></div>
                     <p class="plantilla-nombre" style="color:#183A63;">Executive</p>
                 </div>
-                <div onclick="seleccionarPlantilla('sidebar', this)" id="p-sidebar" class="plantilla-item">
+                <div onclick="seleccionarPlantilla('modern', this)" id="p-modern" class="plantilla-item">
                     <div class="plantilla-preview" style="background:#202535;"></div>
-                    <p class="plantilla-nombre" style="color:#202535;">Sidebar</p>
+                    <p class="plantilla-nombre" style="color:#202535;">Modern</p>
                 </div>
-                <div onclick="seleccionarPlantilla('minimal', this)" id="p-minimal" class="plantilla-item">
+                <div onclick="seleccionarPlantilla('editorial', this)" id="p-editorial" class="plantilla-item">
                     <div class="plantilla-preview" style="background:#fff; border:1px solid #1a1a1a;"></div>
-                    <p class="plantilla-nombre">Minimal</p>
+                    <p class="plantilla-nombre">Editorial</p>
                 </div>
                 <div onclick="seleccionarPlantilla('compact', this)" id="p-compact" class="plantilla-item">
                     <div class="plantilla-preview" style="background:#1b4332;"></div>
@@ -214,7 +142,6 @@
         </div>
         </div>
 
-        <!-- ── Col derecha: preview ───────────────────────────────────── -->
         <div class="col-der">
         <div class="form-card" style="padding: 24px;">
             <div class="preview-header">
@@ -231,11 +158,10 @@
 
     </div>
 
-    <!-- ── Botón descargar — fuera del grid, centrado abajo ──────────── -->
     <div class="descarga-wrapper">
         <form method="POST" action="{% url 'descargar_pdf' oferta.pk %}" id="form-pdf" style="display:inline;">
             {% csrf_token %}
-            <input type="hidden" name="plantilla" id="plantilla-form" value="ats">
+            <input type="hidden" name="plantilla" id="plantilla-form" value="classic">
             <input type="hidden" name="opcion_foto" id="opcion-foto-form" value="ninguna">
             <input type="hidden" name="cv_manual" id="cv-para-pdf">
             <input type="hidden" name="modo" id="modo-pdf" value="automatico">

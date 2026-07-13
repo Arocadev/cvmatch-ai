@@ -3,19 +3,17 @@
 <head><meta charset="UTF-8"></head>
 <body>
 
-<!-- CABECERA PREMIUM -->
 <div class="cabecera">
     <table class="cabecera-tabla" cellpadding="0" cellspacing="0">
     <tr>
         <td class="cab-td-info">
-            <p class="cab-label">CURRICULUM VITAE</p>
-            <h1>{{ nombre }}</h1>
+<h1>{{ nombre }}</h1>
             {% if subtitulo %}<p class="cab-subtitulo">{{ subtitulo }}</p>{% endif %}
             <div class="cab-divider"></div>
             {% if contacto %}
-            <p class="cab-contacto">
-                {% for item in contacto %}{{ item }}{% if not forloop.last %}&nbsp;&nbsp;&bull;&nbsp;&nbsp;{% endif %}{% endfor %}
-            </p>
+            {% for item in contacto %}
+            <p class="cab-contacto">{{ item }}</p>
+            {% endfor %}
             {% endif %}
         </td>
         {% if foto %}
@@ -27,7 +25,6 @@
     </table>
 </div>
 
-<!-- PERFIL -->
 {% if profile %}
 <div class="seccion">
     <div class="seccion-head">
@@ -38,7 +35,6 @@
 </div>
 {% endif %}
 
-<!-- SECCIONES -->
 {% for seccion in sections %}
 <div class="seccion">
     <div class="seccion-head">

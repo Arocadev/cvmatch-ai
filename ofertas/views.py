@@ -12,13 +12,12 @@ from .security import (rate_limit, validar_pdf, validar_imagen,
 from datetime import datetime
 import logging
 import os
+import json as _json
 import tempfile
 import markdown as md
 
 logger = logging.getLogger('seguridad')
 
-
-# ─── Helpers ─────────────────────────────────────────────────────────────────
 
 def get_idioma(request):
     return request.session.get('idioma', 'es')
@@ -38,13 +37,31 @@ def get_contadores(user):
 def render_md(texto):
     return md.markdown(texto, extensions=['nl2br'])
 
-def _get_groq_token(request) -> str | None:
-    """Devuelve el token Groq del usuario o None (usa el global del .env)."""
+def _get_groq_token(request):
     profile = get_or_create_profile(request.user)
     return profile.get_groq_token()
 
-def _texto_es_en(es: str, en: str, idioma: str) -> str:
+def _texto_es_en(es, en, idioma):
     return es if idioma == 'es' else en
+
+def _nombre_desde_sesion(request):
+    """Extrae el nombre real del JSON guardado en sesión, nunca el username."""
+    cv_json = request.session.get('cv_json', '')
+    if cv_json:
+        try:
+            return _json.loads(cv_json).get('name', '')
+        except Exception:
+            pass
+    return ''
+
+def _nombre_desde_json_str(cv_contenido_str):
+    """Extrae el nombre del JSON enviado como string en el formulario."""
+    if not cv_contenido_str:
+        return ''
+    try:
+        return _json.loads(cv_contenido_str).get('name', '')
+    except Exception:
+        return ''
 
 
 # ─── Auth ─────────────────────────────────────────────────────────────────────
@@ -66,11 +83,7 @@ def login_view(request):
                 return redirect(request.GET.get('next', 'inicio'))
             else:
                 logger.warning(f'Login fallido — usuario: {username} — IP: {request.META.get("REMOTE_ADDR")}')
-                error = _texto_es_en(
-                    'Usuario o contraseña incorrectos.',
-                    'Invalid username or password.',
-                    get_idioma(request)
-                )
+                error = _texto_es_en('Usuario o contraseña incorrectos.', 'Invalid username or password.', get_idioma(request))
     return render(request, 'ofertas/login.html', {'error': error, 'idioma': get_idioma(request)})
 
 
@@ -132,11 +145,7 @@ def perfil(request):
         elif accion == 'groq_token':
             token = request.POST.get('groq_token', '').strip()
             if token and not token.startswith('gsk_'):
-                error = _texto_es_en(
-                    'El token de Groq debe empezar por gsk_.',
-                    'Groq token must start with gsk_.',
-                    get_idioma(request)
-                )
+                error = _texto_es_en('El token de Groq debe empezar por gsk_.', 'Groq token must start with gsk_.', get_idioma(request))
             else:
                 profile.set_groq_token(token)
                 profile.save()
@@ -147,12 +156,8 @@ def perfil(request):
                 )
 
     return render(request, 'ofertas/perfil.html', {
-        'profile': profile,
-        'cvs': cvs,
-        'puede_añadir_cv': puede_añadir_cv,
-        'mensaje': mensaje,
-        'error': error,
-        'idioma': get_idioma(request),
+        'profile': profile, 'cvs': cvs, 'puede_añadir_cv': puede_añadir_cv,
+        'mensaje': mensaje, 'error': error, 'idioma': get_idioma(request),
     })
 
 
@@ -194,10 +199,8 @@ def subir_cv(request):
                 cvs = CVUsuario.objects.filter(usuario=request.user)
                 return render(request, 'ofertas/perfil.html', {
                     'profile': get_or_create_profile(request.user),
-                    'cvs': cvs,
-                    'puede_añadir_cv': cvs.count() < 3,
-                    'error': error_msg,
-                    'idioma': get_idioma(request),
+                    'cvs': cvs, 'puede_añadir_cv': cvs.count() < 3,
+                    'error': error_msg, 'idioma': get_idioma(request),
                 })
             pdf_bytes = archivo.read()
             from .cv import extraer_texto_pdf
@@ -249,8 +252,6 @@ def lista_ofertas(request):
         keywords    = request.session.get('keywords', 'devops')
         ubicacion   = request.session.get('ubicacion', 'Valencia')
         fuente      = request.session.get('fuente', 'adzuna_es')
-        modalidad   = request.session.get('modalidad', '')
-        experiencia = request.session.get('experiencia', '')
         salario_min = request.session.get('salario_min', '')
         resultados  = buscar_ofertas(
             keywords=keywords, ubicacion=ubicacion, fuente=fuente,
@@ -299,7 +300,9 @@ def lista_ofertas(request):
                 else:
                     continue
 
-                desc_lower = descripcion.lower()
+                modalidad   = request.session.get('modalidad', '')
+                experiencia = request.session.get('experiencia', '')
+                desc_lower  = descripcion.lower()
                 if modalidad == 'remoto' and 'remoto' not in desc_lower and 'remote' not in desc_lower:
                     continue
                 if modalidad == 'hibrido' and not any(x in desc_lower for x in ['híbrido', 'hibrido', 'hybrid']):
@@ -405,38 +408,30 @@ def detalle_oferta(request, pk):
 
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return JsonResponse({
-            'id':               oferta.pk,
-            'titulo':           oferta.titulo,
-            'empresa':          oferta.empresa,
-            'ubicacion':        oferta.ubicacion,
-            'descripcion':      oferta.descripcion,
-            'url_original':     oferta.url_original,
+            'id': oferta.pk, 'titulo': oferta.titulo, 'empresa': oferta.empresa,
+            'ubicacion': oferta.ubicacion, 'descripcion': oferta.descripcion,
+            'url_original': oferta.url_original,
             'fecha_publicacion': oferta.fecha_publicacion.isoformat() if oferta.fecha_publicacion else '',
-            'estado':           oferta.estado,
-            'fuente':           oferta.fuente,
-            'resumen_ia':       oferta.resumen_ia or '',
+            'estado': oferta.estado, 'fuente': oferta.fuente,
+            'resumen_ia': oferta.resumen_ia or '',
         })
 
     return render(request, 'ofertas/detalle.html', {
-        'oferta': oferta,
-        'idioma': get_idioma(request),
+        'oferta': oferta, 'idioma': get_idioma(request),
         'contadores': get_contadores(request.user),
     })
 
 
-# ─── Resumen IA manual ────────────────────────────────────────────────────────
+# ─── Resumen IA ───────────────────────────────────────────────────────────────
 
 @login_required
 @require_POST
 @rate_limit('resumen_ia', limite=20, periodo=3600)
 def resumen_ia(request, pk):
     oferta = get_object_or_404(Oferta, pk=pk, usuario=request.user)
-
     if oferta.resumen_ia:
         return JsonResponse({'status': 'cached', 'html': oferta.resumen_ia})
-
     token = _get_groq_token(request)
-
     try:
         from .tasks import task_resumir_oferta
         task = task_resumir_oferta.delay(oferta.pk, get_idioma(request), token)
@@ -444,11 +439,7 @@ def resumen_ia(request, pk):
     except Exception:
         from .cv import resumir_oferta as _resumir
         try:
-            resumen_raw = _resumir(
-                sanitizar_prompt(oferta.descripcion, max_length=8000),
-                get_idioma(request),
-                token=token,
-            )
+            resumen_raw = _resumir(sanitizar_prompt(oferta.descripcion, max_length=8000), get_idioma(request), token=token)
             html = render_md(resumen_raw)
             oferta.resumen_ia = html
             oferta.save(update_fields=['resumen_ia'])
@@ -493,19 +484,14 @@ def analizar_cv(request, pk):
                     'oferta': oferta, 'cvs_usuario': cvs_usuario,
                     'error': error_msg, 'idioma': get_idioma(request),
                 })
-            pdf_bytes = archivo.read()
             from .cv import extraer_texto_pdf
-            cv_texto = extraer_texto_pdf(pdf_bytes)
+            cv_texto = extraer_texto_pdf(archivo.read())
         if not cv_texto:
             cv_texto = sanitizar_texto(request.POST.get('cv_texto_manual', ''), max_length=50000).strip()
         if not cv_texto:
             return render(request, 'ofertas/analisis.html', {
                 'oferta': oferta, 'cvs_usuario': cvs_usuario,
-                'error': _texto_es_en(
-                    'Selecciona o introduce tu CV primero.',
-                    'Select or enter your CV first.',
-                    get_idioma(request)
-                ),
+                'error': _texto_es_en('Selecciona o introduce tu CV primero.', 'Select or enter your CV first.', get_idioma(request)),
                 'idioma': get_idioma(request),
             })
 
@@ -515,8 +501,7 @@ def analizar_cv(request, pk):
             analisis = render_md(analizar_oferta_para_cv(
                 sanitizar_prompt(oferta.descripcion, max_length=8000),
                 sanitizar_prompt(cv_texto, max_length=20000),
-                get_idioma(request),
-                token=token,
+                get_idioma(request), token=token,
             ))
         except Exception as e:
             return render(request, 'ofertas/analisis.html', {
@@ -551,24 +536,20 @@ def generar_cv(request, pk):
 
     token = _get_groq_token(request)
     from .cv import generar_cv_json
-    import json as _json
     try:
         cv_datos = generar_cv_json(
             sanitizar_prompt(oferta.descripcion, max_length=8000),
             sanitizar_prompt(cv_texto, max_length=20000),
-            get_idioma(request),
-            token=token,
+            get_idioma(request), token=token,
         )
         cv_generado_raw = _json.dumps(cv_datos, ensure_ascii=False, indent=2)
     except Exception as e:
         return render(request, 'ofertas/analisis.html', {
             'oferta': oferta,
             'cvs_usuario': CVUsuario.objects.filter(usuario=request.user),
-            'error': str(e),
-            'idioma': get_idioma(request),
+            'error': str(e), 'idioma': get_idioma(request),
         })
 
-    # ── FIX: guardar el JSON estructurado en sesión para que descargar_pdf lo use ──
     request.session['cv_json'] = cv_generado_raw
     request.session.modified = True
 
@@ -583,6 +564,7 @@ def generar_cv(request, pk):
 
 
 # ─── PDF ──────────────────────────────────────────────────────────────────────
+
 
 @login_required
 def panel_pdf(request, pk):
@@ -600,20 +582,24 @@ def descargar_pdf(request, pk):
     if request.method != 'POST':
         return redirect('generar_cv', pk=pk)
 
-    plantilla = request.POST.get('plantilla', 'profesional')
-    if plantilla not in ('ats', 'executive', 'sidebar', 'minimal', 'compact'):
+    plantilla = request.POST.get('plantilla', 'executive')
+    if plantilla not in ('classic', 'executive', 'modern', 'editorial', 'compact'):
         plantilla = 'executive'
 
-    modo          = request.POST.get('modo', 'automatico')
-    nombre        = sanitizar_texto(request.POST.get('nombre', request.user.username), max_length=100)
-    subtitulo     = sanitizar_texto(request.POST.get('subtitulo', ''), max_length=200)
-    email         = sanitizar_texto(request.POST.get('email', ''), max_length=100)
-    telefono      = sanitizar_texto(request.POST.get('telefono', ''), max_length=30)
-    linkedin      = sanitizar_texto(request.POST.get('linkedin', ''), max_length=150)
-    ubicacion_pdf = sanitizar_texto(request.POST.get('ubicacion', ''), max_length=100)
-    opcion_foto   = request.POST.get('opcion_foto', 'ninguna')
+    modo      = request.POST.get('modo', 'automatico')
+    subtitulo = sanitizar_texto(request.POST.get('subtitulo', ''), max_length=200)
+    email     = sanitizar_texto(request.POST.get('email', ''), max_length=100)
+    telefono  = sanitizar_texto(request.POST.get('telefono', ''), max_length=30)
+    linkedin  = sanitizar_texto(request.POST.get('linkedin', ''), max_length=150)
+    ubicacion = sanitizar_texto(request.POST.get('ubicacion', ''), max_length=100)
+    opcion_foto = request.POST.get('opcion_foto', 'ninguna')
 
-    # ── FIX: usar el JSON estructurado en modo automático ──
+    # Nombre: del JSON de la IA, nunca del username
+    nombre_json = _nombre_desde_sesion(request)
+    nombre_form = sanitizar_texto(request.POST.get('nombre', ''), max_length=100).strip()
+    nombre = nombre_form or nombre_json or ''
+
+    # Contenido
     if modo == 'manual':
         cv_contenido = sanitizar_texto(request.POST.get('cv_manual', ''), max_length=50000).strip()
     else:
@@ -633,7 +619,7 @@ def descargar_pdf(request, pk):
     datos = {
         'nombre': nombre, 'subtitulo': subtitulo,
         'email': email, 'telefono': telefono,
-        'linkedin': linkedin, 'ubicacion': ubicacion_pdf,
+        'linkedin': linkedin, 'ubicacion': ubicacion,
     }
     buffer = gen_pdf(datos, cv_contenido, plantilla=plantilla, foto_path=foto_path)
 
@@ -644,6 +630,59 @@ def descargar_pdf(request, pk):
             pass
 
     nombre_archivo = f"CV_{nombre.replace(' ', '_')}_{oferta.titulo.replace(' ', '_')[:20]}.pdf"
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
+    return response
+
+
+@login_required
+def descargar_pdf_libre(request):
+    if request.method != 'POST':
+        return redirect('crear_cv')
+
+    profile = get_or_create_profile(request.user)
+    cv_contenido = sanitizar_texto(request.POST.get('cv_contenido', ''), max_length=50000).strip()
+    if not cv_contenido:
+        return redirect('crear_cv')
+
+    plantilla = request.POST.get('plantilla', 'executive')
+    if plantilla not in ('classic', 'executive', 'modern', 'editorial', 'compact'):
+        plantilla = 'executive'
+
+    subtitulo   = sanitizar_texto(request.POST.get('subtitulo', ''), max_length=200)
+    email       = sanitizar_texto(request.POST.get('email', ''), max_length=100)
+    telefono    = sanitizar_texto(request.POST.get('telefono', ''), max_length=30)
+    linkedin    = sanitizar_texto(request.POST.get('linkedin', ''), max_length=150)
+    ubicacion   = sanitizar_texto(request.POST.get('ubicacion', ''), max_length=100)
+    opcion_foto = request.POST.get('opcion_foto', 'ninguna')
+
+    # Nombre: del JSON del contenido enviado, nunca del username
+    nombre_json = _nombre_desde_json_str(cv_contenido)
+    nombre_form = sanitizar_texto(request.POST.get('nombre', ''), max_length=100).strip()
+    nombre = nombre_form or nombre_json or ''
+
+    foto_path = None
+    if opcion_foto == 'perfil' and profile.foto:
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
+        tmp.write(bytes(profile.foto))
+        tmp.close()
+        foto_path = tmp.name
+
+    from .pdf import generar_pdf as gen_pdf
+    datos = {
+        'nombre': nombre, 'subtitulo': subtitulo,
+        'email': email, 'telefono': telefono,
+        'linkedin': linkedin, 'ubicacion': ubicacion,
+    }
+    buffer = gen_pdf(datos, cv_contenido, plantilla=plantilla, foto_path=foto_path)
+
+    if foto_path:
+        try:
+            os.unlink(foto_path)
+        except Exception:
+            pass
+
+    nombre_archivo = f"CV_{nombre.replace(' ', '_')}.pdf"
     response = HttpResponse(buffer, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
     return response
@@ -669,7 +708,7 @@ def faq(request):
     return render(request, 'ofertas/faq.html', {'idioma': get_idioma(request)})
 
 
-# ─── Crear CV independiente ───────────────────────────────────────────────────
+# ─── Crear CV ─────────────────────────────────────────────────────────────────
 
 @login_required
 def task_cv_status(request, task_id):
@@ -678,17 +717,16 @@ def task_cv_status(request, task_id):
     if result.ready():
         data = result.get(timeout=1)
         if data and data.get('status') == 'ok':
-            return JsonResponse({'status': 'ok', 'texto': data.get('texto',''), 'html': data.get('html','')})
+            return JsonResponse({'status': 'ok', 'texto': data.get('texto', ''), 'html': data.get('html', '')})
         return JsonResponse({'status': 'error', 'mensaje': 'Error en la tarea'})
     return JsonResponse({'status': 'pending'})
 
 
 @login_required
 def crear_cv(request):
-    import json
     profile = get_or_create_profile(request.user)
     cvs_usuario = CVUsuario.objects.filter(usuario=request.user)
-    cvs_json = json.dumps([
+    cvs_json = _json.dumps([
         {'id': cv.pk, 'nombre': cv.nombre, 'texto': cv.texto}
         for cv in cvs_usuario
     ], ensure_ascii=False)
@@ -715,55 +753,6 @@ def mejorar_cv_ia(request):
         return JsonResponse({'status': 'pending', 'task_id': task.id})
     except Exception as e:
         return JsonResponse({'status': 'error', 'mensaje': str(e)}, status=500)
-
-
-@login_required
-def descargar_pdf_libre(request):
-    if request.method != 'POST':
-        return redirect('crear_cv')
-
-    profile = get_or_create_profile(request.user)
-    cv_contenido = sanitizar_texto(request.POST.get('cv_contenido', ''), max_length=50000).strip()
-    if not cv_contenido:
-        return redirect('crear_cv')
-
-    plantilla = request.POST.get('plantilla', 'neutra')
-    if plantilla not in ('ats', 'executive', 'sidebar', 'minimal', 'compact'):
-        plantilla = 'executive'
-
-    nombre        = sanitizar_texto(request.POST.get('nombre', request.user.username), max_length=100)
-    subtitulo     = sanitizar_texto(request.POST.get('subtitulo', ''), max_length=200)
-    email         = sanitizar_texto(request.POST.get('email', ''), max_length=100)
-    telefono      = sanitizar_texto(request.POST.get('telefono', ''), max_length=30)
-    linkedin      = sanitizar_texto(request.POST.get('linkedin', ''), max_length=150)
-    ubicacion_pdf = sanitizar_texto(request.POST.get('ubicacion', ''), max_length=100)
-    opcion_foto   = request.POST.get('opcion_foto', 'ninguna')
-
-    foto_path = None
-    if opcion_foto == 'perfil' and profile.foto:
-        tmp = tempfile.NamedTemporaryFile(delete=False, suffix='.jpg')
-        tmp.write(bytes(profile.foto))
-        tmp.close()
-        foto_path = tmp.name
-
-    from .pdf import generar_pdf as gen_pdf
-    datos = {
-        'nombre': nombre, 'subtitulo': subtitulo,
-        'email': email, 'telefono': telefono,
-        'linkedin': linkedin, 'ubicacion': ubicacion_pdf,
-    }
-    buffer = gen_pdf(datos, cv_contenido, plantilla=plantilla, foto_path=foto_path)
-
-    if foto_path:
-        try:
-            os.unlink(foto_path)
-        except Exception:
-            pass
-
-    nombre_archivo = f"CV_{nombre.replace(' ', '_')}.pdf"
-    response = HttpResponse(buffer, content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="{nombre_archivo}"'
-    return response
 
 
 @login_required

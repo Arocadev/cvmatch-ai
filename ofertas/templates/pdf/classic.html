@@ -42,12 +42,12 @@
 
     {% elif seccion.type == 'chips' %}
     <p class="skills-texto">
-        {% for item in seccion.items %}{{ item }}{% if not forloop.last %} &nbsp;&mdash;&nbsp; {% endif %}{% endfor %}
+        {% for item in seccion.items %}{{ item }}{% if not forloop.last %} &middot; {% endif %}{% endfor %}
     </p>
 
     {% elif seccion.type == 'list' %}
     <p class="skills-texto">
-        {% for item in seccion.items %}{{ item }}{% if not forloop.last %} &nbsp;&mdash;&nbsp; {% endif %}{% endfor %}
+        {% for item in seccion.items %}{{ item }}{% if not forloop.last %} &middot; {% endif %}{% endfor %}
     </p>
 
     {% elif seccion.type == 'text' %}

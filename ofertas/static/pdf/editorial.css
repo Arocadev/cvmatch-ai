@@ -1,0 +1,38 @@
+@page { size: A4; margin: 26mm 28mm 26mm 28mm; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, Helvetica, sans-serif; font-size: 10pt; color: #222; background: #fff; line-height: 1.6; }
+
+.cabecera { margin-bottom: 12px; }
+.cab-tabla { width: 100%; border-collapse: collapse; }
+.cab-td-foto { vertical-align: middle; width: 82px; padding-right: 18px; }
+/* Foto más pequeña — no compite con el nombre */
+.foto { width: 68px; height: 68px; border-radius: 4px; object-fit: cover; border: 1px solid #ccc; display: block; }
+.cab-td-texto { vertical-align: middle; }
+.cabecera h1 { font-family: Georgia, 'Times New Roman', serif; font-size: 20pt; font-weight: 700; color: #111; letter-spacing: -0.8px; line-height: 1.1; margin-bottom: 6px; word-wrap: break-word; }
+.subtitulo { font-size: 9.5pt; color: #555; letter-spacing: 0.3px; margin-bottom: 6px; }
+.contacto { font-size: 8pt; color: #888; line-height: 1.8; }
+
+.linea-editorial { border: none; border-top: 2px solid #444; margin: 14px 0 0 0; }
+
+.seccion { margin-top: 24px; page-break-inside: avoid; break-inside: avoid; }
+/* Labels con más aire */
+.seccion-label {
+    font-size: 7pt; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 2.5px; color: #888;
+    margin-bottom: 13px; padding-bottom: 7px; border-bottom: 1px solid #ddd;
+}
+.profile-text { font-size: 10pt; line-height: 1.7; color: #333; font-style: italic; text-align: justify; }
+
+.timeline-item { margin-bottom: 18px; page-break-inside: avoid; break-inside: avoid; }
+.row-tabla { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
+.row-izq { vertical-align: baseline; }
+/* Fecha con margen derecho para que respire */
+.row-der { vertical-align: baseline; text-align: right; width: 115px; padding-right: 2px; }
+.tl-title { font-family: Georgia, 'Times New Roman', serif; font-size: 10.5pt; font-weight: 700; color: #111; }
+.tl-sep { color: #bbb; }
+.tl-empresa { font-family: Georgia, 'Times New Roman', serif; font-size: 9.5pt; color: #555; font-style: italic; }
+.tl-fecha { font-size: 8pt; color: #bbb; white-space: nowrap; }
+ul { padding-left: 16px; margin-top: 5px; }
+li { font-size: 9.5pt; margin-bottom: 4px; line-height: 1.55; color: #333; }
+.skills-editorial { font-size: 9pt; color: #555; line-height: 2; }
+.text-block { font-size: 10pt; line-height: 1.65; white-space: pre-wrap; color: #333; }
