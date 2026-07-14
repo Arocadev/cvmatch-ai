@@ -59,7 +59,7 @@
 
         {% for seccion in sections %}
         {% if seccion.type == 'timeline' or seccion.type == 'text' %}
-        <div class="bloque">
+        <div class="main-seccion">
             <h2>{{ seccion.title }}</h2>
 
             {% if seccion.type == 'timeline' %}

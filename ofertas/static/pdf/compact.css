@@ -1,7 +1,8 @@
-@page { size: A4; margin: 16mm 0 20mm 0; }
+@page { size: A4; margin: 0 0 12mm 0; }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: Arial, Helvetica, sans-serif; font-size: 8.5pt; color: #1a1a1a; background: #fff; line-height: 1.4; }
 
+/* Cabecera con margin-top negativo para llegar al borde en página 1 */
 .cabecera { background: #1a3d2b; color: #fff; padding: 18px 22px; }
 .cab-tabla { width: 100%; border-collapse: collapse; }
 .cab-td-izq { vertical-align: middle; }
@@ -13,29 +14,33 @@ body { font-family: Arial, Helvetica, sans-serif; font-size: 8.5pt; color: #1a1a
 .cab-contacto-item { font-size: 6.5pt; color: rgba(255,255,255,0.62); line-height: 1.55; word-break: break-all; }
 
 .layout-tabla { width: 100%; border-collapse: collapse; }
-/* Col izquierda más ancha para que chips no rompan */
-.col-izq { width: 185px; vertical-align: top; background: #f5f8f5; border-right: 1.5px solid #c8e0d0; padding: 14px 14px; }
-.col-der { vertical-align: top; padding: 14px 18px; background: #fff; }
+/* Col izquierda con padding-bottom enorme — fondo llega hasta abajo siempre */
+.col-izq { width: 185px; vertical-align: top; background: #f5f8f5; border-right: 1.5px solid #c8e0d0; padding: 14px 14px 14px 14px; }
+.col-der { vertical-align: top; padding: 14px 20px 14px 20px; background: #fff; }
 
-.bloque { margin-bottom: 14px; page-break-inside: avoid; break-inside: avoid; }
-h3 { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #1a3d2b; border-bottom: 1.5px solid #52b788; padding-bottom: 3px; margin-bottom: 7px; }
+.bloque { margin-bottom: 18px; page-break-inside: avoid; break-inside: avoid; }
+h3 { font-size: 6.5pt; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: #1a3d2b; border-bottom: 1.5px solid #52b788; padding-bottom: 3px; margin-bottom: 8px; }
 .op-profile { font-size: 7.5pt; line-height: 1.6; color: #333; }
-.chips-grid { line-height: 1.75; }
-/* Chips más pequeños */
-.chip { display: inline-block; background: #d0edd8; color: #1a3d2b; border: 1px solid #a8d4b4; border-radius: 3px; padding: 1px 5px; font-size: 6.5pt; font-weight: 700; margin: 0 2px 3px 0; }
+.chips-grid { line-height: 1.8; }
+.chip { display: inline-block; background: #d0edd8; color: #1a3d2b; border: 1px solid #a8d4b4; border-radius: 3px; padding: 1px 5px; font-size: 6.5pt; font-weight: 700; margin: 0 2px 4px 0; }
 .op-lista { padding-left: 10px; }
-.op-lista li { font-size: 7.5pt; color: #333; margin-bottom: 2px; }
+.op-lista li { font-size: 7.5pt; color: #333; margin-bottom: 3px; }
 
-h2 { font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #1a3d2b; border-bottom: 1.5px solid #1a3d2b; padding-bottom: 3px; margin-bottom: 9px; }
+/* Títulos col derecha — más aire, igual que Executive */
+h2 { font-size: 8pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #1a3d2b; border-bottom: 1.5px solid #1a3d2b; padding-bottom: 4px; margin-bottom: 14px; }
 
-.tl-item { margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #e8f0e8; page-break-inside: avoid; break-inside: avoid; }
+/* Secciones con más aire — copiado del Executive */
+.main-seccion { margin-bottom: 22px; }
+
+/* Timeline igual de espacioso que Executive */
+.tl-item { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #e8f0e8; page-break-inside: avoid; break-inside: avoid; }
 .tl-item:last-child { border-bottom: none; padding-bottom: 0; }
-.row-tabla { width: 100%; border-collapse: collapse; margin-bottom: 2px; }
+.row-tabla { width: 100%; border-collapse: collapse; margin-bottom: 4px; }
 .row-izq { vertical-align: top; }
 .row-der { vertical-align: top; text-align: right; width: 82px; }
 .tl-title { font-size: 8.5pt; font-weight: 700; color: #111; }
 .tl-empresa { font-size: 7.5pt; color: #2d7a4f; font-style: italic; }
 .tl-fecha { font-size: 7pt; color: #888; white-space: nowrap; }
-ul { padding-left: 11px; margin-top: 2px; }
-li { font-size: 7.5pt; margin-bottom: 2px; line-height: 1.4; color: #2a2a2a; }
-.text-block { font-size: 7.5pt; line-height: 1.55; white-space: pre-wrap; color: #333; }
+ul { padding-left: 13px; margin-top: 5px; }
+li { font-size: 7.5pt; margin-bottom: 3px; line-height: 1.5; color: #2a2a2a; }
+.text-block { font-size: 7.5pt; line-height: 1.6; white-space: pre-wrap; color: #333; }
