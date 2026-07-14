@@ -1,222 +1,226 @@
+<div align="center">
+
 # CVMatch AI
 
-> Herramienta personal de búsqueda de empleo con IA | Personal AI-powered job search tool
+**Herramienta de búsqueda de empleo potenciada por IA**  
+*AI-powered job search tool*
+
+[![Python](https://img.shields.io/badge/Python-3.12-blue?logo=python)](https://python.org)
+[![Django](https://img.shields.io/badge/Django-6.0-green?logo=django)](https://djangoproject.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue?logo=postgresql)](https://postgresql.org)
+[![Groq](https://img.shields.io/badge/AI-Groq-orange)](https://console.groq.com)
+[![Docker](https://img.shields.io/badge/Docker-ready-blue?logo=docker)](https://docker.com)
+
+</div>
 
 ---
 
-## 🇪🇸 Español
+## ¿Qué es CVMatch AI?
 
-**CVMatch AI** te ayuda a buscar, organizar y analizar ofertas de empleo usando inteligencia artificial. Sube tu CV, obtén un porcentaje de compatibilidad con cada oferta, descubre qué palabras clave faltan y genera el texto de tu CV adaptado para cada puesto.
-
----
-
-### ✨ Funcionalidades
-
-- 🔍 **Búsqueda multi-fuente** — Adzuna (España, UK, USA), Jooble (Internacional), Arbeitnow (Europa)
-- 📋 **Resumen de oferta con IA** — stack, modalidad, experiencia y salario extraídos automáticamente
-- 📊 **Análisis de CV** — porcentaje de compatibilidad + palabras clave que faltan + mejoras concretas
-- 📝 **Generador de CV adaptado** — reescribe el texto de tu CV para cada oferta específica
-- 🗂️ **Gestión de ofertas** — estados Nueva / Vista / Guardada / Descartada
-- 🌍 **Interfaz bilingüe** — Español / Inglés
-- 🔒 **Acceso protegido** — control de acceso con contraseña
+CVMatch AI es una aplicación web que combina búsqueda de empleo multi-fuente con inteligencia artificial para ayudarte a candidar de forma más efectiva. Busca ofertas en tiempo real, analiza la compatibilidad con tu CV, genera resúmenes automáticos y produce un CV adaptado a cada oferta en formato PDF profesional.
 
 ---
 
-### 🛠️ Stack tecnológico
+## ✨ Funcionalidades principales
+
+### 🔍 Búsqueda de empleo multi-fuente
+Busca simultáneamente en **Adzuna** (España, UK, USA), **Jooble** (Internacional) y **Arbeitnow** (Europa). Filtra por modalidad, experiencia y salario desde una sola pantalla.
+
+### 📋 Resumen de oferta con IA
+Analiza cualquier oferta y extrae automáticamente el stack tecnológico, modalidad de trabajo, años de experiencia requeridos y rango salarial.
+
+### 📊 Análisis de compatibilidad CV ↔ Oferta
+Sube tu CV y obtén un **porcentaje de compatibilidad**, las palabras clave que faltan y sugerencias de mejora concretas adaptadas a cada oferta.
+
+### 📝 Generador de CV adaptado con IA
+La IA reescribe tu CV completo en formato JSON estructurado, adaptando el lenguaje y priorizando las tecnologías más relevantes para cada oferta. El orden de secciones se ajusta automáticamente al perfil del candidato.
+
+### 🎨 Generador de PDF — 5 plantillas profesionales
+
+| Plantilla | Identidad | Ideal para |
+|-----------|-----------|------------|
+| **Classic** | Blanco y negro, sin decoración | Pasar filtros ATS |
+| **Executive** | Azul marino + dorado, foto circular | Perfiles senior, consultoras |
+| **Modern** | Sidebar oscuro + azul eléctrico | Desarrolladores, perfiles tech |
+| **Editorial** | Serif, mucho espacio, minimalista | Perfiles senior, arquitectura |
+| **One Page** | Verde oscuro, dos columnas compactas | Todo en una página |
+
+Todas las plantillas generan PDFs con **WeasyPrint**, separando automáticamente TECNOLOGÍAS de HABILIDADES blandas, y adaptando el orden de secciones según el perfil.
+
+### 🗂️ Gestión de ofertas
+Panel lateral con estados **Nueva / Vista / Guardada / Descartada**. Preview de oferta sin navegar. Paginación y búsqueda activa guardada en sesión.
+
+### 🔒 Seguridad
+- Tokens Groq por usuario cifrados con **Fernet AES-256**
+- Rate limiting en todas las rutas sensibles
+- Sanitización de inputs y headers de seguridad
+- 48 tests unitarios
+
+### 🌍 Interfaz bilingüe
+Español / Inglés con cambio de idioma persistente en sesión.
+
+---
+
+## 🛠️ Stack tecnológico
 
 | Capa | Tecnología |
 |------|-----------|
-| Backend | Django 6 + Python 3.14 |
+| Backend | Django 6 + Python 3.12 |
 | Base de datos | PostgreSQL 16 |
-| IA | Groq (llama-3.3-70b-versatile) |
+| Cache / Cola | Redis 7 + Celery |
+| IA | Groq API (`openai/gpt-oss-120b`) |
+| PDF | WeasyPrint + 5 plantillas HTML/CSS |
 | APIs de empleo | Adzuna, Jooble, Arbeitnow |
 | Lectura de PDF | PyMuPDF (fitz) |
-| Frontend | Django Templates + CSS |
+| Servidor | Gunicorn |
+| Contenedores | Docker + Docker Compose |
+| Frontend | Django Templates + CSS custom |
 
 ---
 
-### 📁 Estructura del proyecto
+## 📁 Estructura del proyecto
 
 ```
 cvmatch-ai/
 ├── jobtracker/
 │   ├── settings.py
 │   ├── urls.py
-│   └── wsgi.py
+│   └── celery.py
 ├── ofertas/
-│   ├── api.py
-│   ├── cv.py
-│   ├── middleware.py
+│   ├── api.py          # Integración Adzuna, Jooble, Arbeitnow
+│   ├── cv.py           # Prompts IA: análisis, generación y mejora de CV
+│   ├── pdf.py          # Generador PDF con WeasyPrint
+│   ├── tasks.py        # Tareas Celery asíncronas
+│   ├── security.py     # Rate limiting, sanitización, cifrado
 │   ├── models.py
 │   ├── views.py
 │   ├── urls.py
 │   ├── static/
 │   │   └── ofertas/
-│   │       └── style.css
+│   │       ├── style.css
+│   │       ├── js/
+│   │       │   └── crear_cv.js
+│   │       └── pdf/
+│   │           ├── classic.css
+│   │           ├── executive.css
+│   │           ├── modern.css
+│   │           ├── editorial.css
+│   │           └── compact.css
 │   └── templates/
 │       └── ofertas/
-│           ├── acceso.html
-│           ├── analisis.html
-│           ├── buscador.html
+│           ├── pdf/
+│           │   ├── classic.html
+│           │   ├── executive.html
+│           │   ├── modern.html
+│           │   ├── editorial.html
+│           │   └── compact.html
 │           ├── cv_generado.html
-│           ├── detalle.html
-│           ├── inicio.html
-│           └── lista.html
+│           ├── crear_cv.html
+│           ├── analisis.html
+│           ├── lista.html
+│           └── ...
+├── docker-compose.yml
+├── Dockerfile
 ├── .env.example
-├── requirements.txt
-└── manage.py
+└── requirements.txt
 ```
 
 ---
 
-### 🚀 Instalación
+## 🚀 Instalación con Docker (recomendado)
 
 ```bash
 git clone https://github.com/Arocadev/cvmatch-ai.git
 cd cvmatch-ai
-
-python -m venv venv
-venv\Scripts\activate        # Windows
-source venv/bin/activate     # Mac/Linux
-
-pip install -r requirements.txt
-
 cp .env.example .env
-# Edita .env con tus API keys y credenciales
-
-python manage.py migrate
-python manage.py runserver
+# Edita .env con tus credenciales
+docker-compose up --build -d
+docker-compose exec web python manage.py migrate
+docker-compose exec web python manage.py createsuperuser
 ```
 
----
-
-### 🔑 Variables de entorno
-
-```env
-ADZUNA_APP_ID=        # https://developer.adzuna.com
-ADZUNA_APP_KEY=       # https://developer.adzuna.com
-JOOBLE_API_KEY=       # https://jooble.org/api/about
-GROQ_API_KEY=         # https://console.groq.com
-APP_PASSWORD=         # Contraseña de acceso a la app
-DB_NAME=              # Nombre de la base de datos PostgreSQL
-DB_USER=              # Usuario PostgreSQL
-DB_PASSWORD=          # Contraseña PostgreSQL
-DB_HOST=localhost
-DB_PORT=5432
-```
+Accede en `http://localhost:8000`
 
 ---
 
-## 🌐 English
-
-**CVMatch AI** helps you search, organize and analyze job offers using AI. Upload your CV and get a compatibility score, keyword suggestions and an adapted CV text for each offer — all in one place.
-
----
-
-### ✨ Features
-
-- 🔍 **Multi-source job search** — Adzuna (Spain, UK, US), Jooble (International), Arbeitnow (Europe)
-- 📋 **AI-generated offer summary** — stack, modality, experience, salary extracted automatically
-- 📊 **CV compatibility analysis** — percentage match + missing keywords + concrete improvements
-- 📝 **Adapted CV generator** — rewrite your CV text for each specific offer
-- 🗂️ **Offer management** — New / Viewed / Saved / Discarded states
-- 🌍 **Bilingual interface** — Spanish / English
-- 🔒 **Password protected** — simple access control
-
----
-
-### 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Backend | Django 6 + Python 3.14 |
-| Database | PostgreSQL 16 |
-| AI | Groq (llama-3.3-70b-versatile) |
-| Job APIs | Adzuna, Jooble, Arbeitnow |
-| PDF parsing | PyMuPDF (fitz) |
-| Frontend | Django Templates + CSS |
-
----
-
-### 📁 Project Structure
-
-```
-cvmatch-ai/
-├── jobtracker/
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-├── ofertas/
-│   ├── api.py
-│   ├── cv.py
-│   ├── middleware.py
-│   ├── models.py
-│   ├── views.py
-│   ├── urls.py
-│   ├── static/
-│   │   └── ofertas/
-│   │       └── style.css
-│   └── templates/
-│       └── ofertas/
-│           ├── acceso.html
-│           ├── analisis.html
-│           ├── buscador.html
-│           ├── cv_generado.html
-│           ├── detalle.html
-│           ├── inicio.html
-│           └── lista.html
-├── .env.example
-├── requirements.txt
-└── manage.py
-```
-
----
-
-### 🚀 Installation
+## 🚀 Instalación local
 
 ```bash
 git clone https://github.com/Arocadev/cvmatch-ai.git
 cd cvmatch-ai
-
 python -m venv venv
-venv\Scripts\activate        # Windows
-source venv/bin/activate     # Mac/Linux
-
+source venv/bin/activate      # Mac/Linux
+venv\Scripts\activate         # Windows
 pip install -r requirements.txt
-
 cp .env.example .env
-# Edit .env with your API keys and database credentials
-
+# Edita .env con tus credenciales
 python manage.py migrate
 python manage.py runserver
 ```
 
----
-
-### 🔑 Environment Variables
-
-```env
-ADZUNA_APP_ID=        # https://developer.adzuna.com
-ADZUNA_APP_KEY=       # https://developer.adzuna.com
-JOOBLE_API_KEY=       # https://jooble.org/api/about
-GROQ_API_KEY=         # https://console.groq.com
-APP_PASSWORD=         # Access password for the app
-DB_NAME=              # PostgreSQL database name
-DB_USER=              # PostgreSQL user
-DB_PASSWORD=          # PostgreSQL password
-DB_HOST=localhost
-DB_PORT=5432
+Para las tareas asíncronas necesitas Redis y Celery corriendo:
+```bash
+celery -A jobtracker worker --loglevel=info
 ```
 
 ---
 
-## 👤 Autor / Author
+## 🔑 Variables de entorno
 
-**Alejandro Rodríguez Calabuig** — [github.com/Arocadev](https://github.com/Arocadev) · [LinkedIn](https://www.linkedin.com/in/alejandro-rodriguez-calabuig-a871a1230)
+```env
+# Base de datos
+DB_NAME=jobtracker
+DB_USER=postgres
+DB_PASSWORD=
+DB_HOST=db          # 'db' en Docker, 'localhost' en local
+DB_PORT=5432
+
+# IA
+GROQ_API_KEY=       # https://console.groq.com
+GROQ_MODEL=openai/gpt-oss-120b
+
+# APIs de empleo
+ADZUNA_APP_ID=      # https://developer.adzuna.com
+ADZUNA_APP_KEY=     # https://developer.adzuna.com
+JOOBLE_API_KEY=     # https://jooble.org/api/about
+
+# Seguridad
+SECRET_KEY=
+FERNET_KEY=         # Generado con Fernet.generate_key()
+DEBUG=False
+
+# Redis / Celery
+REDIS_URL=redis://redis:6379/0
+```
 
 ---
 
-## 📄 Licencia / License
+## 🧪 Tests
 
-Proyecto personal — no licenciado para uso comercial.  
-Personal project — not licensed for commercial use.
+```bash
+python manage.py test ofertas --verbosity=2
+```
+
+48 tests unitarios usando SQLite para evitar dependencia de PostgreSQL en CI.
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Despliegue en Railway con dominio aroca.dev
+- [ ] READMEs individuales por plantilla PDF
+- [ ] Demo en vídeo
+- [ ] Capturas de pantalla en README
+
+---
+
+## 👤 Autor
+
+**Alejandro Rodríguez Calabuig**  
+[github.com/ArocaDev](https://github.com/ArocaDev) · [LinkedIn](https://www.linkedin.com/in/alejandro-rodriguez-calabuig-a871a1230)
+
+---
+
+## 📄 Licencia
+
+Proyecto personal — no licenciado para uso comercial.
