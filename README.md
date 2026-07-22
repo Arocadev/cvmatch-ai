@@ -45,8 +45,6 @@ La IA reescribe tu CV completo en formato JSON estructurado, adaptando el lengua
 | **Editorial** | Serif, mucho espacio, minimalista | Perfiles senior, arquitectura |
 | **One Page** | Verde oscuro, dos columnas compactas | Todo en una página |
 
-Todas las plantillas generan PDFs con **WeasyPrint**, separando automáticamente TECNOLOGÍAS de HABILIDADES blandas, y adaptando el orden de secciones según el perfil.
-
 ### 🗂️ Gestión de ofertas
 Panel lateral con estados **Nueva / Vista / Guardada / Descartada**. Preview de oferta sin navegar. Paginación y búsqueda activa guardada en sesión.
 
@@ -58,6 +56,62 @@ Panel lateral con estados **Nueva / Vista / Guardada / Descartada**. Preview de 
 
 ### 🌍 Interfaz bilingüe
 Español / Inglés con cambio de idioma persistente en sesión.
+
+---
+
+## 📸 Capturas
+
+<div align="center">
+
+| Login | Registro | Pantalla principal | Buscador |
+|:-:|:-:|:-:|:-:|
+| ![Login](assets/login.png) | ![Registro](assets/registro.png) | ![Main](assets/main.png) | ![Buscador](assets/buscador.png) |
+
+| Lista de ofertas | Selección de CV | Análisis IA | Detalle con resumen IA |
+|:-:|:-:|:-:|:-:|
+| ![Ofertas](assets/ofertas.png) | ![Analizar](assets/ofertas-analizar.png) | ![Análisis](assets/ofertas-analisis.png) | ![IA](assets/ofertas-ia.png) |
+
+| Perfil | Generar CV | Crear CV |
+|:-:|:-:|:-:|
+| ![Perfil](assets/perfil.png) | ![Generar CV](assets/generar-cv.png) | ![Crear CV](assets/crear-cv.png) |
+
+</div>
+
+---
+
+## 🎨 Plantillas PDF
+
+<div align="center">
+
+| Classic | Executive | Modern | Editorial | One Page |
+|:-:|:-:|:-:|:-:|:-:|
+| ![Classic](assets/cv-classic.png) | ![Executive](assets/cv-executive.png) | ![Modern](assets/cv-modern.png) | ![Editorial](assets/cv-editorial.png) | ![One Page](assets/cv-onepage.png) |
+
+</div>
+
+---
+
+## 🎬 Demo
+
+**Buscador de ofertas**
+
+<img src="assets/buscador.gif" width="600" />
+
+**Buscador con resumen IA**
+
+<img src="assets/buscador-ia.gif" width="600" />
+
+**Análisis de compatibilidad**
+
+<img src="assets/compatibilidad.gif" width="600" />
+
+**Generar CV adaptado**
+
+<img src="assets/generar-cv.gif" width="600" />
+
+**Crear CV desde cero**
+
+<img src="assets/crear-cv.gif" width="600" />
 
 ---
 
@@ -117,8 +171,9 @@ cvmatch-ai/
 │           ├── cv_generado.html
 │           ├── crear_cv.html
 │           ├── analisis.html
-│           ├── lista.html
-│           └── ...
+│           └── lista.html
+├── assets/
+│   └── .gitkeep
 ├── docker-compose.yml
 ├── Dockerfile
 ├── .env.example
@@ -207,10 +262,16 @@ python manage.py test ofertas --verbosity=2
 
 ## 🗺️ Roadmap
 
+- [x] Búsqueda multi-fuente (Adzuna, Jooble, Arbeitnow)
+- [x] Análisis de compatibilidad CV ↔ oferta con IA
+- [x] Generador de CV adaptado en PDF
+- [x] 5 plantillas PDF profesionales
+- [x] Cifrado de tokens Groq con Fernet AES-256
+- [x] Rate limiting y seguridad
+- [x] 48 tests unitarios
+- [x] Docker Compose
 - [ ] Despliegue en Railway con dominio aroca.dev
-- [ ] READMEs individuales por plantilla PDF
 - [ ] Demo en vídeo
-- [ ] Capturas de pantalla en README
 
 ---
 
